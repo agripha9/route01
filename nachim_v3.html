@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route01 — AI Startup Advisory</title>
+<meta name="description" content="스타트업을 위한 AI 자문 서비스. Finding your Route from Zero to One.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="./vendor/auth0-spa-js.production.js"></script>
+<link rel="stylesheet" href="./nachim_v3.css">
+</head>
+<body>
+
+<!-- ── AUTH (LOGIN REQUIRED) ───────────────── -->
+<div id="auth" role="dialog" aria-modal="true" aria-labelledby="auth-heading">
+  <div class="auth-shell">
+    <div class="auth-card auth-left">
+      <div class="auth-hero" style="display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;gap:6px;padding-top:8px;">
+        <img src="./logo.png" style="height:80px;width:auto;display:block;margin:0 auto;" alt="Route01"/>
+        <p class="auth-kicker" id="auth-sub" style="font-size:15px;color:#86868b;font-weight:500;letter-spacing:0.5px;text-align:center;width:100%;display:block;margin:0 0 16px 0;white-space:nowrap;">AI Startup Advisory</p>
+        <h1 class="auth-title" id="auth-heading" style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;font-size:clamp(28px,8vw,34px);font-weight:800;color:#1d1d1f;line-height:1.1;letter-spacing:-1px;text-align:center;width:100%;padding:0;margin:0;display:block;white-space:normal;">Finding your Route<br>from Zero to One</h1>
+      </div>
+      <div class="auth-bullets" aria-label="지원 영역">
+        <span class="auth-pill">사업전략</span>
+        <span class="auth-pill">IR 피드백</span>
+        <span class="auth-pill">시장·경쟁 분석</span>
+        <span class="auth-pill">KPI 설계</span>
+        <span class="auth-pill">투자·펀딩 전략</span>
+        <span class="auth-pill">···</span>
+      </div>
+
+      <div class="auth-actions">
+        <button type="button" class="auth-btn primary" onclick="loginProvider('google-oauth2')">Google로 로그인</button>
+        <button type="button" class="auth-btn" onclick="loginProvider('apple')">Apple로 로그인</button>
+        <button type="button" class="auth-btn" onclick="loginProvider('naver')">네이버로 로그인</button>
+        <button type="button" class="auth-btn" onclick="loginProvider('kakao')">카카오로 로그인</button>
+        <button type="button" class="auth-btn secondary" onclick="demoLogin()">데모 로그인 · OAuth 없이 체험</button>
+        <button type="button" class="auth-btn secondary" onclick="openAuth0Settings()">Auth0 연동 설정</button>
+      </div>
+      <p class="auth-note">
+        로그인한 뒤에만 서비스를 이용할 수 있습니다. 소셜 로그인은 Auth0에서 연결(Connections)을 설정해야 합니다.
+      </p>
+      <p class="auth-footer">© 2026 Route01</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── ONBOARDING ────────────────────────── -->
+<div id="onboarding">
+<div class="ob-card" style="position:relative">
+  <button class="modal-close" id="ob-close-btn" onclick="cancelOnboardingEdit()" style="position:sticky;top:10px;float:right;z-index:2" title="닫기">×</button>
+  <div class="ob-logo">
+    <img class="brand-logo brand-logo--onboard" src="./logo.png" width="200" height="80" alt="Route01"/>
+    <div class="ob-logo-text">
+      <span class="ob-logo-slogan-main">AI Startup Advisory</span>
+      <span class="ob-logo-slogan-sub">Finding your Route from Zero to One</span>
+    </div>
+  </div>
+  <div class="ob-steps">
+    <div class="ob-step done" id="s1"></div>
+    <div class="ob-step" id="s2"></div>
+    <div class="ob-step" id="s3"></div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="ob-section active" id="sec1">
+    <div class="ob-title">어떤 스타트업인가요?</div>
+    <div class="ob-sub">맞춤형 멘토링을 위해 기본 정보를 알려주세요.</div>
+    <label class="ob-label">업종 / 서비스 소개 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 자유롭게 적어주세요</span></label>
+    <input class="ob-input" id="industry-in" placeholder="예: 중소기업 대상 HR 자동화 SaaS, 반려동물 커머스, AI 기반 법률 리서치 툴 등" oninput="onIndustryInput(this.value)" style="margin-bottom:10px"/>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem" id="industry-tags">
+      <span class="ind-tag" onclick="setIndustry('B2B SaaS')">B2B SaaS</span>
+      <span class="ind-tag" onclick="setIndustry('B2C 앱/플랫폼')">B2C 앱</span>
+      <span class="ind-tag" onclick="setIndustry('커머스/리테일')">커머스</span>
+      <span class="ind-tag" onclick="setIndustry('핀테크/금융')">핀테크</span>
+      <span class="ind-tag" onclick="setIndustry('헬스케어/바이오')">헬스케어</span>
+      <span class="ind-tag" onclick="setIndustry('에듀테크')">에듀테크</span>
+      <span class="ind-tag" onclick="setIndustry('AI/데이터')">AI/데이터</span>
+      <span class="ind-tag" onclick="setIndustry('푸드테크/외식')">푸드테크</span>
+      <span class="ind-tag" onclick="setIndustry('물류/모빌리티')">물류/모빌리티</span>
+      <span class="ind-tag" onclick="setIndustry('부동산/건설')">부동산</span>
+      <span class="ind-tag" onclick="setIndustry('HR/채용')">HR/채용</span>
+      <span class="ind-tag" onclick="setIndustry('마케팅/광고테크')">마케팅/광고</span>
+      <span class="ind-tag" onclick="setIndustry('보안/인증')">보안</span>
+      <span class="ind-tag" onclick="setIndustry('클린테크/ESG')">클린테크</span>
+      <span class="ind-tag" onclick="setIndustry('콘텐츠/미디어')">콘텐츠</span>
+      <span class="ind-tag" onclick="setIndustry('게임/엔터')">게임/엔터</span>
+      <span class="ind-tag" onclick="setIndustry('제조/하드웨어')">제조/HW</span>
+      <span class="ind-tag" onclick="setIndustry('법률/리걸테크')">리걸테크</span>
+    </div>
+    <label class="ob-label">현재 단계</label>
+    <div class="ob-grid-3" id="stage-grid">
+      <div class="ob-chip" data-val="아이디어" onclick="pickChip('stage',this)">아이디어</div>
+      <div class="ob-chip" data-val="MVP 개발중" onclick="pickChip('stage',this)">MVP</div>
+      <div class="ob-chip" data-val="초기 매출" onclick="pickChip('stage',this)">초기 매출</div>
+      <div class="ob-chip" data-val="시드 준비" onclick="pickChip('stage',this)">시드 준비</div>
+      <div class="ob-chip" data-val="시드 완료" onclick="pickChip('stage',this)">시드 완료</div>
+      <div class="ob-chip" data-val="시리즈A+" onclick="pickChip('stage',this)">시리즈A+</div>
+    </div>
+    <div class="ob-btn-row">
+      <button class="ob-btn pri" id="btn1" onclick="goStep(2)" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="ob-section" id="sec2">
+    <div class="ob-title">팀과 현황을 알려주세요</div>
+    <div class="ob-sub">정확하지 않아도 괜찮아요. 대략적인 정보면 충분합니다.</div>
+    <label class="ob-label">팀 규모</label>
+    <div class="ob-grid" id="team-grid">
+      <div class="ob-chip" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
+      <div class="ob-chip" data-val="2~3명" onclick="pickChip('team',this)">2~3명</div>
+      <div class="ob-chip" data-val="4~10명" onclick="pickChip('team',this)">4~10명</div>
+      <div class="ob-chip" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
+    </div>
+    <label class="ob-label">월 매출 (없으면 비워두세요)</label>
+    <input class="ob-input" id="mrr-in" type="text" placeholder="예: 월 300만원 / 아직 없음" />
+    <div class="ob-btn-row">
+      <button class="ob-btn sec" onclick="goStep(1)">← 이전</button>
+      <button class="ob-btn pri" id="btn2" onclick="goStep(3)" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="ob-section" id="sec3">
+    <div class="ob-title">지금 가장 큰 고민은요?</div>
+    <div class="ob-sub">AI 멘토가 이 맥락을 바탕으로 맞춤형 자문을 드립니다.</div>
+    <label class="ob-label">스타트업 이름 (선택)</label>
+    <input class="ob-input" id="name-in" type="text" placeholder="예: 모두의스튜디오" />
+    <label class="ob-label">가장 큰 고민 또는 목표</label>
+    <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶은데 IR 준비를 어떻게 시작할지 모르겠어요."></textarea>
+    <label class="ob-label" style="margin-top:.25rem">멘토링 스타일</label>
+    <div class="ob-grid" id="style-grid">
+      <div class="ob-chip sel" data-val="YC 파트너식 직설" onclick="pickChip('style',this)">
+        <span class="em">⚡</span>YC 파트너식 직설
+      </div>
+      <div class="ob-chip" data-val="소크라테스식 질문" onclick="pickChip('style',this)">
+        <span class="em">🔍</span>소크라테스식 질문
+      </div>
+      <div class="ob-chip" data-val="데이터 중심 분석" onclick="pickChip('style',this)">
+        <span class="em">📈</span>데이터 중심 분석
+      </div>
+      <div class="ob-chip" data-val="국내 시장 특화" onclick="pickChip('style',this)">
+        <span class="em">🇰🇷</span>국내 시장 특화
+      </div>
+    </div>
+    <label class="ob-label" style="margin-top:.5rem">관련 자료 업로드 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 선택사항</span></label>
+    <div class="upload-zone" id="ob-drop-zone" onclick="document.getElementById('ob-file-input').click()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
+      <div class="upload-zone-icon">📎</div>
+      <div class="upload-zone-text">파일을 끌어다 놓거나 클릭하여 업로드</div>
+      <div class="upload-zone-sub">회사소개서 · IR 자료 · 재무제표 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> 업로드 가능 · 파일당 최대 20MB</div>
+    </div>
+    <input type="file" id="ob-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="obFileSelect(this.files)"/>
+    <div class="file-list" id="ob-file-list"></div>
+    <div class="ob-btn-row">
+      <button class="ob-btn sec" onclick="goStep(2)">← 이전</button>
+      <button class="ob-btn pri" onclick="finishOnboarding()">시작하기 →</button>
+    </div>
+    <div class="ob-skip" onclick="skipOnboarding()">지금은 건너뛰기</div>
+  </div>
+</div>
+</div>
+
+<!-- ── APP ──────────────────────────────── -->
+<div id="app">
+  <header>
+    <div class="logo">
+      <img src="./logo.png" style="height:32px;width:auto;display:block;" alt="Route01"/>
+      <span class="brand-name">Route01</span>
+      <span class="logo-tagline"><span style="color:rgba(255,255,255,0.6);">AI Startup Advisory</span> · <span style="color:#8B1A1A;font-style:italic;font-weight:600;font-size:14px;">Finding your Route from Zero to One</span></span>
+    </div>
+    <div class="header-center" onclick="openModal()" title="프로필 보기">
+      <span id="pname" class="header-profile-name">프로필 미설정</span>
+    </div>
+    <div class="header-actions">
+      <button class="style-btn" id="style-btn" onclick="openStyleModal()" title="멘토 스타일 선택">
+        <span id="style-btn-text">멘토 스타일</span>
+        <span class="chev">▾</span>
+      </button>
+      <button class="style-btn danger" id="logout-btn" onclick="logout()" title="로그아웃">
+        로그아웃
+      </button>
+      <button class="key-btn" id="key-btn" onclick="openKeyModal()" title="API 키 설정">
+        <span id="key-status-dot" class="key-dot key-dot-off"></span>
+        <span id="key-status-text">API 키 설정</span>
+      </button>
+    </div>
+  </header>
+  <div class="app-body">
+    <aside>
+      <div class="aside-tabs">
+        <button class="aside-tab active" id="tab-domain" onclick="switchTab('domain')">도메인</button>
+        <button class="aside-tab" id="tab-history" onclick="switchTab('history')">내 질문</button>
+      </div>
+
+      <!-- 도메인 탭 -->
+      <div class="aside-panel" id="panel-domain">
+        <div class="s-top">
+          <button type="button" class="d-btn active" data-domain-key="strategy" onclick="selectDomain(this,'strategy')"><div class="d-ico" aria-hidden="true"></div>경영전략</button>
+          <button type="button" class="d-btn" data-domain-key="investment" onclick="selectDomain(this,'investment')"><div class="d-ico" aria-hidden="true"></div>투자 / IR</button>
+          <button type="button" class="d-btn" data-domain-key="finance" onclick="selectDomain(this,'finance')"><div class="d-ico" aria-hidden="true"></div>재무 / 회계</button>
+          <button type="button" class="d-btn" data-domain-key="marketing" onclick="selectDomain(this,'marketing')"><div class="d-ico" aria-hidden="true"></div>마케팅 / 홍보</button>
+          <button type="button" class="d-btn" data-domain-key="sales" onclick="selectDomain(this,'sales')"><div class="d-ico" aria-hidden="true"></div>영업 / 제휴</button>
+          <button type="button" class="d-btn" data-domain-key="hr" onclick="selectDomain(this,'hr')"><div class="d-ico" aria-hidden="true"></div>인사 / 노무</button>
+          <button type="button" class="d-btn" data-domain-key="legal" onclick="selectDomain(this,'legal')"><div class="d-ico" aria-hidden="true"></div>법률 / 특허</button>
+          <button type="button" class="d-btn d-btn-grant" data-domain-key="grant" onclick="openGrantModal(event)"><div class="d-ico" aria-hidden="true"></div><span style="text-align:left">지원 사업 도우미<span class="d-sub">공고·양식·회사소개로 계획서 초안</span></span></button>
+        </div>
+      </div>
+
+      <!-- 내 질문 기록 탭 -->
+      <div class="aside-panel" id="panel-history" style="display:none">
+        <div class="s-top">
+          <div class="hist-domain-bar" id="hist-domain-bar" aria-live="polite">
+            <span class="hdb-ico" id="hist-domain-ico" aria-hidden="true"></span>
+            <div class="hdb-main">
+              <div class="hdb-title" id="hist-domain-title">경영전략 자문</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span class="s-label" style="margin-bottom:0">내 질문 기록</span>
+            <button onclick="clearHistory()" style="font-size:10px;color:var(--ink3);background:none;border:none;cursor:pointer;text-decoration:underline">현재 도메인 기록 삭제</button>
+          </div>
+          <div id="history-list"><div class="pop-empty">아직 질문 기록이 없어요.</div></div>
+        </div>
+      </div>
+
+    </aside>
+
+    <main>
+      <div class="d-bar" style="position:relative">
+        <div class="d-bar-icon" id="d-ico" aria-hidden="true"></div>
+        <div class="d-bar-info"><h2 id="d-title">경영전략 자문</h2><p id="d-desc">비즈니스 모델 · 경쟁분석 · PMF · 성장전략</p></div>
+        <div class="d-bar-badges">
+          <div class="p-badge p-badge-stage">
+            <div class="pb-label">기업 단계</div>
+            <div class="pb-info" id="pb-info">미설정</div>
+          </div>
+          <div class="p-badge p-badge-style">
+            <div class="pb-label">멘토 스타일</div>
+            <div class="pb-info" id="pb-style">YC 파트너식 직설</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div id="chat-res" data-for-export="" hidden aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"></div>
+      <div class="input-area">
+        <div class="domain-banner" id="domain-banner" style="display:none"></div>
+        <div class="chat-files-preview" id="chat-files-preview"></div>
+        <div class="input-row">
+          <button class="chat-file-btn" title="PDF 첨부 (파일당 최대 20MB)" onclick="document.getElementById('chat-file-input').click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <input type="file" id="chat-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
+          <textarea class="chat-in" id="input" rows="1" placeholder="자문이 필요한 내용을 입력하세요..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+          <button class="send" id="send-btn" onclick="send()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+        <div class="hint">
+          <span>Enter 전송 · Shift+Enter 줄바꿈</span>
+          <span>📎 파일 첨부 — PDF만 · 파일당 최대 20MB</span>
+          <span style="margin-left:auto">자문 가능한 분야: BM 고도화 · IR 피드백 · 시장 분석 · 경쟁사 분석 · KPI 설계 · 투자 전략</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API 키 설정 모달 -->
+<div class="modal-bg" id="key-modal">
+  <div class="modal" style="width:460px">
+    <button class="modal-close" onclick="closeKeyModal()">×</button>
+    <div class="modal-title">API 키 설정</div>
+    <div class="modal-sub">Anthropic API 키를 입력하면 바로 테스트할 수 있어요. 키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</div>
+
+    <div class="modal-field-wrap" style="margin-bottom:1rem">
+      <label class="apple-field-label" for="key-input">Anthropic API 키</label>
+      <div class="key-input-wrap">
+        <input id="key-input" class="apple-field-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off"/>
+        <button type="button" class="key-vis-toggle" onclick="toggleKeyVis()" id="key-vis-btn" aria-label="키 표시 전환">👁</button>
+      </div>
+      <div id="key-status-msg" class="key-status-msg">키를 입력하고 저장하세요.</div>
+    </div>
+
+    <div class="apple-callout">
+      <div class="apple-callout-title">키 발급 방법</div>
+      <ol>
+        <li><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> 접속 → 로그인</li>
+        <li>왼쪽 메뉴 <strong>API Keys</strong> → <strong>Create Key</strong> 클릭</li>
+        <li>키 복사 후 위 입력란에 붙여넣기</li>
+      </ol>
+    </div>
+
+    <div class="modal-btn-row">
+      <button type="button" class="modal-btn" onclick="closeKeyModal()">취소</button>
+      <button type="button" class="modal-btn modal-btn--danger" onclick="deleteKey()">키 삭제</button>
+      <button type="button" class="modal-btn pri" onclick="saveKey()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 멘토 스타일 선택 모달 -->
+<div class="modal-bg" id="style-modal">
+  <div class="modal" style="width:520px">
+    <button class="modal-close" onclick="closeStyleModal()">×</button>
+    <div class="modal-title">멘토 스타일 선택</div>
+    <div class="modal-sub">원하는 피드백 톤을 선택하면, 이후 답변에 바로 적용됩니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="style-modal-grid"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeStyleModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth0 설정 모달 -->
+<div class="modal-bg" id="auth0-modal">
+  <div class="modal" style="width:520px">
+    <button class="modal-close" onclick="closeAuth0Settings()">×</button>
+    <div class="modal-title">Auth0 연동</div>
+    <div class="modal-sub">소셜 로그인을 쓰려면 테넌트 도메인과 애플리케이션의 클라이언트 ID가 필요합니다.</div>
+    <div style="margin-bottom:16px">
+      <label class="auth0-field-label" for="auth0-domain">도메인</label>
+      <input id="auth0-domain" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: 내테넌트.us.auth0.com" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="auth0-field-label" for="auth0-clientid">클라이언트 ID</label>
+      <input id="auth0-clientid" class="auth0-flat-input" type="text" autocomplete="off" placeholder="Auth0 대시보드에서 복사한 클라이언트 ID" />
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="auth0-field-label" for="auth0-audience">API 대상 · audience (선택)</label>
+      <input id="auth0-audience" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: https://api.example.com (API 식별자가 있을 때만)" />
+    </div>
+    <p class="auth0-hint">Auth0 앱 설정의 「허용된 콜백 URL」에 아래 주소를 그대로 추가하세요.<br><strong id="auth0-redirect-url"></strong></p>
+    <div class="modal-btn-row">
+      <button type="button" class="modal-btn" onclick="closeAuth0Settings()">취소</button>
+      <button type="button" class="modal-btn pri" onclick="saveAuth0Settings()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 지원 사업 도우미 -->
+<div class="modal-bg" id="grant-modal">
+  <div class="modal modal-wide" style="max-width:560px">
+    <button type="button" class="modal-close" onclick="closeGrantModal()">×</button>
+    <div class="modal-title">지원 사업 도우미</div>
+    <div class="modal-sub">지원사업 공고문과 회사 소개를 반영해, 첨부해 주신 <strong>사업계획서 양식</strong> 구조에 맞춰 초안을 작성합니다. (<strong>PDF만</strong> 업로드 · 파일당 최대 20MB)</div>
+    <div class="grant-field">
+      <span class="grant-field-label">① 지원사업 공고문 <span style="color:#b91c1c;font-weight:600">*</span></span>
+      <p class="grant-field-hint">공고문은 <strong>PDF</strong>로만 첨부해 주세요. (파일당 최대 20MB)</p>
+      <input type="file" id="grant-file-ann" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('ann',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-ann').click()">+ 공고문 PDF 추가</button>
+      <div class="grant-list" id="grant-list-ann"></div>
+    </div>
+    <div class="grant-field">
+      <span class="grant-field-label">② 사업계획서 양식 <span style="color:#b91c1c;font-weight:600">*</span></span>
+      <p class="grant-field-hint">제출해야 하는 목차·양식을 <strong>PDF</strong>로 변환하여 첨부해 주세요. (파일당 최대 20MB)</p>
+      <input type="file" id="grant-file-tpl" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('tpl',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-tpl').click()">+ 양식 파일 추가</button>
+      <div class="grant-list" id="grant-list-tpl"></div>
+    </div>
+    <div class="grant-field">
+      <span class="grant-field-label">③ 회사소개 자료</span>
+      <p class="grant-field-hint">회사소개서·IR·브로슈어 등을 <strong>PDF</strong>로 첨부하거나, 아래에 직접 입력하세요.</p>
+      <input type="file" id="grant-file-co" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('co',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-co').click()">+ 회사소개 파일 추가</button>
+      <div class="grant-list" id="grant-list-co"></div>
+      <textarea id="grant-text-co" class="ob-input ob-textarea" style="min-height:100px;margin-bottom:0" placeholder="회사 소개, 사업 내용, 조직, 실적 등 (자료가 있으면 보완용으로 입력)"></textarea>
+    </div>
+    <div class="modal-btn-row" style="margin-top:1.25rem">
+      <button type="button" class="modal-btn" onclick="closeGrantModal()">취소</button>
+      <button type="button" class="modal-btn pri" id="grant-submit-btn" onclick="submitGrantHelper()">확인 · 계획서 초안 작성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 인기질문 확인 모달 -->
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal" style="width:360px">
+    <div class="modal-title">질문 확인</div>
+    <div class="confirm-q-box" id="confirm-q-text"></div>
+    <p class="confirm-q-hint">이 질문을 Route01 AI에게 전송할까요?</p>
+    <div class="modal-btn-row">
+      <button class="modal-btn" id="confirm-cancel-btn">취소</button>
+      <button class="modal-btn pri" id="confirm-ok-btn">질문하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 다운로드 모달(기존 상단 다운로드 버튼 제거로 더 이상 사용하지 않음) -->
+
+<!-- 질문 기록 상세 모달 -->
+<div class="modal-bg" id="hist-modal">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeHistModal()">×</button>
+    <div class="modal-title" id="hist-modal-domain"></div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:1rem" id="hist-modal-time"></div>
+    <div class="hist-block hist-block--q">
+      <div class="hist-block-label">질문</div>
+      <div class="hist-block-body" id="hist-modal-q"></div>
+    </div>
+    <div class="hist-block hist-block--a">
+      <div class="hist-block-label">Route01 AI 자문</div>
+      <div class="hist-block-body hist-block-body--answer" id="hist-modal-a"></div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeHistModal()">닫기</button>
+      <button class="modal-btn pri" onclick="followUpFromHist()">추가 질문하기 →</button>
+    </div>
+  </div>
+</div>
+<!-- 프로필 모달 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">내 스타트업 프로필</div>
+    <div class="modal-sub">이 정보로 맞춤형 멘토링이 제공됩니다.</div>
+    <div id="modal-body"></div>
+    <button class="modal-edit" onclick="editProfile()">프로필 다시 설정하기</button>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<script src="./nachim_v3.js" defer></script>
+</body>
+</html>
