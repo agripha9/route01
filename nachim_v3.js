@@ -102,6 +102,28 @@ function isAuthed(){
 }
 function setAuthed(user){
   localStorage.setItem('nachim_auth', JSON.stringify({user, ts:Date.now()}));
+
+  // 소셜 로그인 계정 → r01_accs에 method 포함 저장 (중복 가입 감지용)
+  try {
+    if(user && user.email && user.sub) {
+      const sub = user.sub || '';
+      let method = null;
+      if(sub.startsWith('google'))      method = 'google-oauth2';
+      else if(sub.startsWith('apple'))  method = 'apple';
+      else if(sub.startsWith('naver'))  method = 'naver';
+      else if(sub.startsWith('kakao'))  method = 'kakao';
+
+      if(method) {
+        const raw = localStorage.getItem('r01_accs');
+        const accs = raw ? JSON.parse(raw) : [];
+        // 같은 이메일이 없을 때만 추가
+        if(!accs.find(a => a.email === user.email)) {
+          accs.push({ email: user.email, method: method, ts: Date.now() });
+          localStorage.setItem('r01_accs', JSON.stringify(accs));
+        }
+      }
+    }
+  } catch(e) {}
 }
 function clearAuthed(){
   localStorage.removeItem('nachim_auth');
@@ -250,6 +272,31 @@ async function logout(){
 
 function startAfterLogin(){
   document.getElementById('auth').classList.add('hidden');
+
+  // 소셜 로그인 이력 저장 (method 기록으로 중복 가입 감지에 활용)
+  try{
+    const authRaw = localStorage.getItem('nachim_auth');
+    if(authRaw){
+      const authData = JSON.parse(authRaw);
+      const u = authData?.user;
+      if(u && u.email && u.sub){
+        const sub = u.sub||'';
+        let method = null;
+        if(sub.startsWith('google')) method = 'google-oauth2';
+        else if(sub.startsWith('apple')) method = 'apple';
+        else if(sub.startsWith('naver')) method = 'naver';
+        else if(sub.startsWith('kakao')) method = 'kakao';
+        if(method){
+          const accs = _r01Accounts();
+          if(!accs.find(a => a.email === u.email)){
+            accs.push({email:u.email, method, ts:Date.now()});
+            localStorage.setItem('r01_accs', JSON.stringify(accs));
+          }
+        }
+      }
+    }
+  }catch(e){}
+
   /* if profile exists, go straight to app; otherwise onboarding */
   try{
     const saved = localStorage.getItem('vd_profile');
@@ -691,7 +738,7 @@ let profile = {};
 let domain = 'strategy';
 let messages = [];
 let busy = false;
-let ob = {industry:'',stage:'',team:'',mrr:'',name:'',concern:'',style:'YC 파트너식 직설'};
+let ob = {industry:'',sector:[],sectorOther:'',stage:'',target:'',team:'',mrr:'',invest:'',name:'',concern:'',style:'YC 파트너식 직설'};
 let step = 1;
 
 /* ─── 온보딩 ────────────────────────── */
@@ -701,9 +748,34 @@ function onIndustryInput(val){
   validate();
 }
 function setIndustry(val){
-  ob.industry=val;
-  document.getElementById('industry-in').value=val;
-  document.querySelectorAll('.ind-tag').forEach(t=>t.classList.toggle('sel',t.textContent.trim()===val||t.onclick.toString().includes(`'${val}'`)));
+  /* 하위 호환 유지 — 새 로직은 toggleSector 사용 */
+  ob.industry = ob.industry || val;
+  validate();
+}
+function toggleSector(el) {
+  const val = el.dataset.sector;
+  if(val === '기타') {
+    const isOn = el.classList.toggle('sel');
+    const otherIn = document.getElementById('sector-other-in');
+    if(otherIn) otherIn.style.display = isOn ? 'block' : 'none';
+    if(!isOn) { ob.sectorOther = ''; if(otherIn) otherIn.value = ''; }
+  } else {
+    el.classList.toggle('sel');
+  }
+  // 선택된 sector 배열 업데이트
+  ob.sector = [...document.querySelectorAll('.ind-tag.sel')]
+    .map(t => t.dataset.sector)
+    .filter(s => s && s !== '기타');
+  if(ob.sectorOther) ob.sector.push(ob.sectorOther);
+  validate();
+}
+function onSectorOtherInput(val) {
+  ob.sectorOther = val.trim();
+  // ob.sector 재계산
+  ob.sector = [...document.querySelectorAll('.ind-tag.sel')]
+    .map(t => t.dataset.sector)
+    .filter(s => s && s !== '기타');
+  if(ob.sectorOther) ob.sector.push(ob.sectorOther);
   validate();
 }
 function pickChip(type, el) {
@@ -713,29 +785,45 @@ function pickChip(type, el) {
   validate();
 }
 function validate() {
-  if (step===1) document.getElementById('btn1').disabled=!(ob.industry&&ob.stage);
-  if (step===2) document.getElementById('btn2').disabled=!ob.team;
+  if (step===1) document.getElementById('btn1').disabled=!(ob.industry&&ob.stage&&ob.concern);
+  // Step2는 모두 선택사항이므로 항상 활성화
+  const btn2 = document.getElementById('btn2');
+  if (btn2) btn2.disabled = false;
 }
 /* oninput 바인딩은 DOMContentLoaded에서 처리 */
 function goStep(n) {
   document.getElementById('sec'+step).classList.remove('active');
   step=n;
   document.getElementById('sec'+n).classList.add('active');
-  for(let i=1;i<=3;i++) document.getElementById('s'+i).classList.toggle('done',i<=n);
+  for(let i=1;i<=3;i++){
+    const dot=document.getElementById('s'+i);
+    if(dot) dot.classList.toggle('done',i<=n);
+  }
   validate();
 }
 function finishOnboarding() {
   profile={...ob};
+  // sector 최종 계산
+  const selTags = [...document.querySelectorAll('#industry-tags .ind-tag.sel')]
+    .map(t=>t.dataset.sector).filter(s=>s&&s!=='기타');
+  const otherVal = (document.getElementById('sector-other-in')?.value||'').trim();
+  if(otherVal) selTags.push(otherVal);
+  profile.sector = selTags;
+  profile.sectorOther = otherVal;
   localStorage.setItem('vd_profile',JSON.stringify(profile));
   launch();
 }
 function skipOnboarding(){profile={};launch();}
 function editProfile(){
   closeModal();
-  ob={...profile};step=1;
+  ob={...profile}; step=1;
   document.getElementById('onboarding').classList.remove('hidden');
   document.getElementById('app').style.display='none';
-  ['sec1','sec2','sec3'].forEach((s,i)=>document.getElementById(s).classList.toggle('active',i===0));
+  ['sec1','sec2'].forEach((s,i)=>document.getElementById(s).classList.toggle('active',i===0));
+  for(let i=1;i<=3;i++){
+    const dot=document.getElementById('s'+i);
+    if(dot) dot.classList.toggle('done',i<=1);
+  }
   hydrateOnboardingFromOb();
 }
 
@@ -760,6 +848,24 @@ function hydrateOnboardingFromOb(){
   /* inputs */
   const ind=document.getElementById('industry-in');
   if(ind){ ind.value=ob.industry||''; onIndustryInput(ind.value||''); }
+  // sector 태그 복원
+  document.querySelectorAll('#industry-tags .ind-tag').forEach(t=>{
+    const s = t.dataset.sector;
+    const on = ob.sector && ob.sector.includes(s);
+    t.classList.toggle('sel', !!on);
+    if(s==='기타' && on) {
+      const otherIn = document.getElementById('sector-other-in');
+      if(otherIn) { otherIn.style.display='block'; otherIn.value=ob.sectorOther||''; }
+    }
+  });
+  // target 복원
+  document.querySelectorAll('#target-grid .ob-chip').forEach(c=>{
+    c.classList.toggle('sel', c.dataset.val===ob.target);
+  });
+  // invest 복원
+  document.querySelectorAll('#invest-grid .ob-chip').forEach(c=>{
+    c.classList.toggle('sel', c.dataset.val===ob.invest);
+  });
   const mrr=document.getElementById('mrr-in');
   if(mrr){ mrr.value=ob.mrr||''; }
   const name=document.getElementById('name-in');
@@ -791,6 +897,7 @@ function launch(){
   const app=document.getElementById('app');
   app.style.display='flex';
   applyProfile();
+  syncUnifiedBadges();
   renderHistory();
   updateHistoryDomainContext();
   updateKeyStatus();
@@ -848,7 +955,8 @@ function hideDomainBanner(){
 }
 
 function showDomainBanner(question, mismatch){
-  pendingMismatchQuestion=question;
+  /* 도메인 통합 — 배너 비활성화 */
+  return;
   const b=document.getElementById('domain-banner');
   if(!b) return;
   const cur=DOMAINS[mismatch.current]?.title||mismatch.current;
@@ -919,14 +1027,8 @@ function classifyDomain(text){
 }
 
 function detectDomainMismatch(text, current){
-  const r=classifyDomain(text);
-  if(r.topScore<=0) return null;
-  const top=r.top;
-  if(top===current) return null;
-  /* require clear signal */
-  if(r.topScore<2 && r.topScore-r.secondScore<1) return null;
-  const suggestions=[top, ...Object.entries(r.scores).filter(([k,v])=>k!==top && v===r.topScore-1 && v>0).map(([k])=>k)];
-  return {current, top, suggestions};
+  /* 도메인 통합 — 미스매치 감지 비활성화 */
+  return null;
 }
 
 /* ─── 확인 모달 ─────────────────────── */
@@ -973,13 +1075,12 @@ function renderHistory(){
     if(!el)return;
     if(!raw){el.innerHTML='<div class="pop-empty">아직 질문 기록이 없어요.</div>';return;}
     const all=JSON.parse(raw);
-    historyLog=all.filter(h=>h.domainKey===domain);
-    if(!historyLog.length){el.innerHTML=`<div class="pop-empty">${DOMAINS[domain].title}의<br>질문 기록이 아직 없어요.</div>`;return;}
+    historyLog=all;
+    if(!historyLog.length){el.innerHTML='<div class="pop-empty">아직 질문 기록이 없어요.</div>';return;}
     el.innerHTML=historyLog.map((h,i)=>{
       const d=new Date(h.ts);
       const ts=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
       return `<div class="hist-item" data-hidx="${i}">
-        <div class="hist-domain">${esc(h.domain||'')}</div>
         <div class="hist-q">${esc(h.q)}</div>
         <div class="hist-time">${ts}</div>
       </div>`;
@@ -993,20 +1094,26 @@ function renderHistory(){
 function openHistConversation(h){
   if(!h) return;
   currentHistItem=h;
-  /* move back to the original chat screen */
-  switchTab('domain');
+  // 웰컴화면 숨기고 채팅 화면으로 전환
+  rmWelcome();
   const chat=document.getElementById('chat');
   if(chat) chat.innerHTML='';
 
-  /* restore messages state (so follow-up continues naturally) */
+  // 메시지 상태 복원
   messages=[];
   docsSentOnce=false;
 
   addMsg('user', h.q, []);
-  messages.push({role:'user',content:h.q});
+  messages.push({role:'user', content:h.q});
 
   addMsg('ai', h.a || '');
-  messages.push({role:'assistant',content:h.a || ''});
+  messages.push({role:'assistant', content:h.a || ''});
+
+  // 스크롤 하단으로
+  setTimeout(()=>{
+    if(chat) chat.scrollTop = chat.scrollHeight;
+    document.getElementById('input')?.focus();
+  }, 80);
 }
 
 function openHistModal(h){
@@ -1070,33 +1177,64 @@ function selectDomain(btn,d){
   messages=[];
   docsSentOnce=false;
   document.getElementById('chat').innerHTML='';
-  /* popular-questions rendering removed */
-  renderHistory(); // 도메인 변경 시 내 질문도 갱신
+  renderHistory();
   updateHistoryDomainContext();
-  showWelcome();
+  showWelcome(); // 기존 호환 유지
+
+  // unified-area: 도메인에 맞는 추천 질문 업데이트
+  const domainToSug = {
+    strategy:'strategy', investment:'investment', finance:'finance',
+    marketing:'marketing', sales:'hr', hr:'hr', legal:'legal'
+  };
+  const sugKey = domainToSug[d] || 'all';
+  if(typeof renderSugChips === 'function') {
+    renderSugChips(sugKey);
+    document.querySelectorAll('.sug-dc').forEach(c => {
+      c.classList.toggle('active', c.textContent.trim()==='전체' && sugKey==='all');
+    });
+    const ua = document.getElementById('unified-area');
+    if(ua) ua.style.display = 'block';
+    const welcomeEl = document.getElementById('welcome-el');
+    if(welcomeEl) welcomeEl.remove();
+  }
 }
 
 /* ─── 채팅 UI ──────────────────────── */
 function showWelcome(){
-  const cfg=DOMAINS[domain];
-  const name=profile.name||profile.industry;
-  const chat=document.getElementById('chat');
-  const el=document.createElement('div');
-  el.className='welcome';el.id='welcome-el';
-  el.innerHTML=`
-    <div class="w-title">${name?`안녕하세요, <em>${esc(name)}</em> 팀!`:`<span class="w-title-row"><span class="w-title-ico">${domainIconHtml(domain)}</span><span>${esc(cfg.title)}</span></span>`}</div>
-    <div class="w-sub">${esc(profile.concern||'무엇이든 물어보세요. 전문 자문을 즉시 받아볼 수 있어요.')}</div>
-    <div class="p-grid">
-      ${Array.from({length:10}).map((_,i)=>`
-        <button class="p-card" data-pidx="${i}">
-          <div class="p-tag">${esc(cfg.title.split(' ')[0])}</div>
-          <div class="p-text" style="opacity:.7">추천 질문 생성 중…</div>
-        </button>`).join('')}
-    </div>`;
-  chat.appendChild(el); /* 먼저 DOM에 추가 */
-  hydrateWelcomePrompts(el);
+  // 웰컴 화면 표시
+  const ws = document.getElementById('welcome-screen');
+  const chat = document.getElementById('chat');
+  const inputArea = document.querySelector('.input-area');
+
+  if(ws) { ws.classList.remove('hidden'); }
+  if(chat) { chat.classList.remove('active'); chat.innerHTML = ''; }
+  if(inputArea) { inputArea.classList.remove('active'); }
+
+  // 웰컴 타이틀 업데이트 (회사명 이탤릭+색상)
+  const name = profile.name || profile.industry;
+  const wsTitle = document.getElementById('ws-title');
+  if(wsTitle) {
+    if(name) {
+      wsTitle.innerHTML = '안녕하세요, <em class="ws-company">' + esc(name) + '</em> 팀!';
+    } else {
+      wsTitle.textContent = '무엇이든 질문하세요';
+    }
+  }
+
+  // ws-input 포커스
+  setTimeout(()=>{ document.getElementById('ws-input')?.focus(); }, 100);
 }
-function rmWelcome(){const w=document.getElementById('welcome-el');if(w)w.remove();}
+
+function rmWelcome(){
+  // 웰컴 화면 숨기고 chat + input-area 활성화
+  const ws = document.getElementById('welcome-screen');
+  const chat = document.getElementById('chat');
+  const inputArea = document.querySelector('.input-area');
+
+  if(ws) ws.classList.add('hidden');
+  if(chat) chat.classList.add('active');
+  if(inputArea) inputArea.classList.add('active');
+}
 
 async function hydrateWelcomePrompts(rootEl){
   const cfg=DOMAINS[domain];
@@ -1294,10 +1432,11 @@ function addMsg(role,text,files,aiLabel){
       cr.setAttribute('data-for-export',id);
       cr.innerHTML=renderMD(safe);
     }
-    el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI · ${esc(aiHead)}</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
+    el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
   } else {
     const fileHtml=(files&&files.length)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${files.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid #d2d2d7;border-radius:20px;padding:2px 9px;font-size:11px;color:#1d1d1f;font-weight:500">${getIcon(f.name)} ${f.name}</span>`).join('')}</div>`:'';
-    el.innerHTML=`<div class="m-av user">${uname.slice(0,2).toUpperCase()}</div><div class="m-body"><div class="m-name" style="text-align:right">${uname}</div><div class="m-bubble u">${fileHtml}${esc(text)}</div></div>`;
+    el.className = 'message user-msg';
+    el.innerHTML=`<div class="m-av user">${uname.slice(0,2).toUpperCase()}</div><div class="m-body user-body"><div class="m-bubble u">${fileHtml}${esc(text)}</div></div>`;
   }
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
@@ -1306,7 +1445,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI · 분석 중</div><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div>`;
+  el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI</div><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div>`;
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
 }
@@ -1326,10 +1465,8 @@ function buildSys(){
   const cfg=DOMAINS[domKey];
   const persona=DOMAIN_EXPERT_PERSONAS[domKey]||DOMAIN_EXPERT_PERSONAS.strategy;
   const styleGuide = MENTOR_STYLES[profile.style] || MENTOR_STYLES['YC 파트너식 직설'];
-  const scopeTable=buildDomainScopeLines();
-
   let sys=`당신은 한국·실리콘밸리 스타트업 생태계를 깊이 아는 **Route01 Expert Mode** 자문 엔진이다.
-현재 세션에서 사용자가 선택한 자문 도메인 키는 **${domKey}**이며, 표시명은 「${cfg.title}」이다.
+사용자의 질문 주제와 관계없이 스타트업 자문 관점에서 최선의 답변을 제공하라.
 
 ${persona}
 
@@ -1339,15 +1476,15 @@ ${cfg.sys}
 [멘토링 스타일: ${profile.style||'YC 파트너식 직설'}]
 ${styleGuide}
 
-[도메인 맵 — 적합성 판단용]
-아래는 앱 내 자문 모드 목록이다. 질문이 다른 모드에 훨씬 잘 맞는지 판단할 때만 사용한다.
-${scopeTable}
 `;
   if(profile.industry){
     sys+=`
 [상담 스타트업 프로필]
-- 업종/서비스: ${profile.industry}
+- 사업 한 줄 소개: ${profile.industry}
+- 업종: ${(profile.sector&&profile.sector.length)?profile.sector.join(', '):'미입력'}
 - 단계: ${profile.stage}
+- 타겟 고객: ${profile.target||'미입력'}
+- 투자 상황: ${profile.invest||'미입력'}
 - 팀: ${profile.team}
 ${profile.mrr?`- 월 매출: ${profile.mrr}`:''}
 ${profile.name?`- 이름: ${profile.name}`:''}
@@ -1367,17 +1504,6 @@ ${profile.concern?`- 핵심 고민: ${profile.concern}`:''}
 "죄송하지만 저는 스타트업 자문에 특화된 AI입니다. 관련 고민을 말씀해 주시면 최선을 다해 돕겠습니다."
 - 거절 후에는 사용자가 바로 이어서 질문할 수 있도록, 자문 가능한 분야 예시 3~6개를 짧게 제시하라. (예: BM 고도화, IR 피드백, 시장 분석, 경쟁사 분석, KPI 설계, 투자 전략)
 
-[도메인 적합성 — 내부 절차]
-- 응답을 쓰기 **전에** 질문의 핵심 의도가 현재 모드 「${cfg.title}」에 부합하는지 **내부적으로만** 판단하라.
-- 판단 과정, 추론 단계, 체크리스트, JSON, "먼저 판단했다" 같은 메타 표현은 **절대 사용자에게 출력하지 마라.**
-- 아래 조건을 **모두** 만족할 때에만, 답변 **본문의 맨 앞 첫 문단**에 안내 문장을 넣는다:
-  (1) 질문의 주제가 [도메인 맵]상 **다른 단일 모드**에 명확히 더 가깝고,
-  (2) 현재 모드로 답하면 전문성·정확도가 뚜렷이 떨어질 것이며,
-  (3) 단순히 배경 지식이 겹치는 수준이 아니다.
-- 그 첫 문단에는 반드시 아래 한 문장만 사용한다(따옴표 없이 그대로 출력). **[OO]** 자리에는 [도메인 맵]에서 고른 모드의 **표시명 전체**(예: 투자 / IR 자문)를 넣는다.
-해당 질문은 [OO] 도메인에 더 적합해 보입니다. 더 전문적인 자문을 위해 도메인 전환을 추천드리며, 현재 모드에서의 관점으로 답변해 드립니다.
-- 위 안내 문단 다음에는 **빈 줄 한 줄**을 넣은 뒤, 아래 [답변 구조]를 따른 본론을 시작한다.
-- 현재 모드로도 충분히 전문적으로 답할 수 있거나, 복합 주제·경계선 주제면 위 안내 문단은 **생략**한다.
 
 [답변 구조 — 필수]
 - 마크다운으로 아래 **섹션 제목을 정확히** 사용한다(짧은 답변이라도 헤더는 유지).
@@ -1405,12 +1531,7 @@ async function send(){
   const el=document.getElementById('input');
   const t=el.value.trim();
   if(!t)return;
-  const mismatch=detectDomainMismatch(t, domain);
-  if(mismatch){
-    showDomainBanner(t, mismatch);
-    return;
-  }
-  hideDomainBanner();
+  /* 도메인 통합 — 미스매치 체크 비활성화 */
   el.value='';resize(el);
   await doSend(t);
 }
@@ -1834,7 +1955,7 @@ blockquote p{margin:0 0 8px;color:#424245}
 blockquote p:last-child{margin-bottom:0}
 table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:14px 0;border-radius:12px;overflow:hidden}
 th,td{border:1px solid #e8e8ed;padding:5px 9px;vertical-align:top;line-height:1.4}
-thead th{background:#000;color:#fff;font-size:12px;font-weight:650;text-align:center;white-space:nowrap}
+thead th{background:#8B1A1A !important;color:#fff !important;font-size:12px;font-weight:700;text-align:center;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 tbody td{border-bottom:1px solid #e8e8ed}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:nth-child(even) td{background:#f5f5f7}
@@ -2007,7 +2128,8 @@ function buildWordDocHtml(title, meta, bodyHtml, cssText){
     'table.nachim-export-callout{border-collapse:collapse;width:100%;margin:10pt 0;}',
     'th,td{border:1px solid #d2d2d7;padding:4pt 7pt;vertical-align:top;line-height:1.35;}',
     'caption{caption-side:top;text-align:center;font-weight:800;color:#1d1d1f;margin:0 0 10pt 0;}',
-    'th{background:#000000;color:#ffffff;font-weight:800;text-align:center;}',
+    'th{background:#8B1A1A !important;color:#ffffff !important;font-weight:700;text-align:center;-webkit-print-color-adjust:exact;}',
+    'tbody tr:nth-child(even) td{background:#fdf5f5;}',
     'code{font-family:Consolas,Menlo,monospace;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
     'pre{font-family:Consolas,Menlo,monospace;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 15pt 0;border:1px solid #d2d2d7;}',
     'pre code{background:transparent;border:none;padding:0;color:inherit;}',
@@ -2380,9 +2502,14 @@ async function exportAnswer(type, id /*, btn */){
     return;
   }
 
-  const cfg=DOMAINS[domain]||{title:'자문'};
-  let title=`Route01 AI 자문 — ${cfg.title}`;
-  title=title.replace(/\s*—\s*$/,'').trim()||'Route01 AI 자문';
+  // 마지막 질문 텍스트 추출 (최대 60자)
+  const lastUserMsg = [...messages].reverse().find(m=>m.role==='user');
+  const qText = lastUserMsg
+    ? (lastUserMsg.content.length > 60
+        ? lastUserMsg.content.slice(0,60)+'…'
+        : lastUserMsg.content)
+    : '';
+  const title = qText ? `Route01 AI 자문 — ${qText}` : 'Route01 AI 자문';
   const meta=buildExportMetaLine();
 
   const now=new Date();
@@ -2443,10 +2570,10 @@ async function exportAnswer(type, id /*, btn */){
       'h3{font-size:12pt;margin:14pt 0 8pt 0;}',
       'strong{font-weight:800;color:#1d1d1f;}',
       'ul,ol{padding-left:30pt;margin:8pt 0 12pt 0;}',
-      'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:12pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th,td{padding:4pt 8pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'td{line-height:1.4;}',
-      'th{background:#1d1d1f;color:#ffffff;text-align:center !important;font-weight:800;}',
+      'table{border-collapse:collapse;width:100%;border:1px solid #c8ccd4;margin:10pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 9pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
+      'td{padding:4pt 9pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;line-height:1.35;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
+      'tbody tr:nth-child(even) td{background:#f7f8fb;}',
       'code{font-family:Consolas,Menlo,monospace;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
       'pre{font-family:Consolas,Menlo,monospace;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 12pt 0;border:1px solid #d2d2d7;}',
       'pre code{background:transparent;border:none;padding:0;color:inherit;}',
@@ -2482,18 +2609,47 @@ async function exportAnswer(type, id /*, btn */){
         tbl.style.marginBottom = '15pt';
       });
       doc.querySelectorAll('th').forEach(th => {
-        th.style.backgroundColor = '#1d1d1f';
-        th.style.color = '#ffffff';
-        th.style.padding = '4pt 8pt';
-        th.style.border = '1px solid #d2d2d7';
+        th.style.setProperty('background-color', '#8B1A1A', 'important');
+        th.style.setProperty('color', '#ffffff', 'important');
+        th.style.padding = '5pt 9pt';
+        th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
+        th.style.fontWeight = '700';
+        th.style.fontSize = '10.5pt';
+        th.style.lineHeight = '1.3';
+        th.style.verticalAlign = 'middle';
+        // Word 색상 출력 강제
+        th.setAttribute('bgcolor', '#8B1A1A');
       });
       doc.querySelectorAll('td').forEach(td => {
-        td.style.padding = '3pt 6pt';
+        td.style.padding = '4pt 9pt';
         td.style.border = '1px solid #d2d2d7';
-        // Word의 강제 여백을 없애기 위해 p 태그를 br로 치환
-        td.innerHTML = td.innerHTML.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '<br>');
-        if(td.innerHTML.endsWith('<br>')) td.innerHTML = td.innerHTML.slice(0, -4);
+        td.style.verticalAlign = 'top';
+        td.style.lineHeight = '1.3';
+        td.style.fontSize = '10.5pt';
+        td.style.height = 'auto';
+        td.style.minHeight = '0';
+        // Word 행 높이 팽창 원인: <p> 태그의 기본 margin
+        // 완전히 제거하고 <br>로만 구분
+        let inner = td.innerHTML
+          .replace(/<p[^>]*>\s*/gi, '')       // <p> 열기 제거
+          .replace(/\s*<\/p>/gi, '<br>')      // </p> → <br>
+          .replace(/(<br\s*\/?>\s*)+$/gi, '') // 끝 <br> 제거
+          .trim();
+        td.innerHTML = inner || '&nbsp;';
+        // 모든 자식 요소의 margin/padding 제거
+        td.querySelectorAll('*').forEach(child => {
+          child.style.margin = '0';
+          child.style.padding = '0';
+        });
+      });
+      // tr 높이 명시 (Word 자동 팽창 방지)
+      doc.querySelectorAll('tr').forEach(tr => {
+        tr.style.height = 'auto';
+      });
+      // 짝수 행 연한 배경
+      doc.querySelectorAll('tbody tr:nth-child(even) td').forEach(td => {
+        td.style.backgroundColor = '#fdf5f5';
       });
 
       // 3. 인용구(회색 상자) 완벽 제어
@@ -2639,3 +2795,891 @@ window.closeKeyModal = closeKeyModal;
 window.saveKey = saveKey;
 window.exportAnswer = exportAnswer;
 window.refreshAllReportBubbleMarkdown = refreshAllReportBubbleMarkdown;
+
+
+/* ══════════════════════════════════════
+   신규 기능 — 이메일 로그인, 약관, 추천질문, 배너
+   기존 launch()/send() 오버라이드 없이 DOMContentLoaded에서 후킹
+══════════════════════════════════════ */
+
+/* ── 이메일 인증 ── */
+/* ── 탭 전환 ── */
+function switchAuthTab(tab) {
+  ['login','signup'].forEach(t => {
+    document.getElementById('atab-'+t)?.classList.toggle('active', t===tab);
+    const f = document.getElementById('aform-'+t);
+    if(f) f.style.display = t===tab ? 'flex' : 'none';
+  });
+  // 인증/비밀번호찾기 화면도 숨김
+  ['aform-verify','aform-forgot','aform-code'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  ['aerr-login','aerr-signup','aerr-forgot','aerr-email-dup'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent='';
+  });
+}
+
+function togglePwEye(id, btn) {
+  const inp = document.getElementById(id); if(!inp) return;
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+
+function showForgotPw() {
+  const fl = document.getElementById('aform-login'); if(fl) fl.style.display='none';
+  const ff = document.getElementById('aform-forgot'); if(ff) ff.style.display='flex';
+}
+
+/* ── 계정 저장소 ── */
+function _r01Accounts() {
+  try{return JSON.parse(localStorage.getItem('r01_accs')||'[]');}catch(e){return[];}
+}
+function _saveR01Accounts(arr) { localStorage.setItem('r01_accs', JSON.stringify(arr)); }
+
+/* 소셜 로그인으로 가입된 이메일인지 확인 (Auth0 캐시) */
+function _isSocialEmail(email) {
+  try {
+    const raw = localStorage.getItem('nachim_auth');
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    const u = data?.user;
+    if(!u) return false;
+    // Auth0 소셜 유저는 email 필드가 있고 sub가 google-oauth2|, apple|, naver| 등으로 시작
+    const sub = u.sub||'';
+    const uEmail = (u.email||'').toLowerCase();
+    return uEmail === email.toLowerCase() && (
+      sub.startsWith('google') || sub.startsWith('apple') ||
+      sub.startsWith('naver') || sub.startsWith('kakao')
+    );
+  } catch(e){ return false; }
+}
+
+/* ── 이메일 로그인 ── */
+function emailLogin() {
+  const email = (document.getElementById('alogin-email')?.value||'').trim();
+  const pw    = (document.getElementById('alogin-pw')?.value||'');
+  const err   = document.getElementById('aerr-login');
+  err.textContent = '';
+  if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
+  if(!pw) { err.textContent='비밀번호를 입력해주세요.'; return; }
+
+  const accounts = _r01Accounts();
+  const found = accounts.find(a=>a.email===email);
+  if(!found) {
+    err.textContent='가입되지 않은 이메일입니다. 회원가입을 해주세요.';
+    return;
+  }
+  if(found.pw !== btoa(pw)) { err.textContent='비밀번호가 맞지 않습니다.'; return; }
+
+  // 로그인 성공 — 기존 프로필 유지 (이메일 가입자의 프로필은 유지)
+  setAuthed({email, name:found.nickname||email.split('@')[0], method:'email'});
+  startAfterLogin();
+}
+
+/* ── 이메일 회원가입 ── */
+function emailSignup() {
+  const email = (document.getElementById('asignup-email')?.value||'').trim();
+  const pw    = (document.getElementById('asignup-pw')?.value||'');
+  const pw2   = (document.getElementById('asignup-pw2')?.value||'');
+  const err   = document.getElementById('aerr-signup');
+  err.textContent = '';
+  // 이메일 바로 아래 중복 안내도 초기화
+  const dupEl = document.getElementById('aerr-email-dup');
+  if(dupEl) dupEl.textContent = '';
+
+  if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
+  if(pw.length<8) { err.textContent='비밀번호는 8자 이상이어야 합니다.'; return; }
+  if(pw!==pw2) { err.textContent='비밀번호가 일치하지 않습니다.'; return; }
+  if(!document.getElementById('agree-terms')?.checked) { err.textContent='이용약관에 동의해주세요.'; return; }
+  if(!document.getElementById('agree-privacy')?.checked) { err.textContent='개인정보처리방침에 동의해주세요.'; return; }
+
+  const accounts = _r01Accounts();
+
+  // ① 이메일 가입 중복 체크
+  if(accounts.find(a=>a.email===email)) {
+    err.innerHTML='이미 이메일로 가입된 계정입니다.<br><button type="button" onclick="switchAuthTab(\'login\')" style="color:var(--link-blue);background:none;border:none;cursor:pointer;font-size:13px;text-decoration:underline;padding:0">로그인하기 →</button>';
+    return;
+  }
+
+  // ② 소셜 계정 중복 체크 (같은 이메일로 구글/애플 등 로그인 이력 있는 경우)
+  // localStorage에서 Auth0 소셜 사용자 이메일 목록 확인
+  const socialUsed = _checkSocialUsedEmail(email);
+  if(socialUsed) {
+    err.innerHTML=`이 이메일은 이미 <strong>${socialUsed}</strong> 로그인으로 가입되어 있습니다.<br>해당 방법으로 로그인해 주세요.`;
+    return;
+  }
+
+  // ③ 인증 코드 생성 및 인증 화면 전환
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  window._r01PendingSignup = { email, pw: btoa(pw), code, ts: Date.now() };
+
+  // 인증 화면 표시
+  const addrEl = document.getElementById('averify-addr'); if(addrEl) addrEl.textContent=email;
+  const codeEl = document.getElementById('averify-demo-code');
+  if(codeEl) {
+    codeEl.textContent = code;
+    codeEl.closest('.averify-demo-box').style.display='block';
+  }
+  const fs = document.getElementById('aform-signup'); if(fs) fs.style.display='none';
+  const fv = document.getElementById('aform-verify'); if(fv) fv.style.display='flex';
+  const ci = document.getElementById('averify-code-input'); if(ci) { ci.value=''; ci.focus(); }
+  document.getElementById('averr-verify') && (document.getElementById('averr-verify').textContent='');
+}
+
+/* 소셜 이메일 사용 여부 확인 */
+function _clearDupMsg() {
+  var el = document.getElementById('aerr-email-dup');
+  if(el) el.textContent = '';
+}
+
+function _showDupMsg(dupEl, msg, linkText) {
+  // 기존 내용 초기화
+  dupEl.innerHTML = '';
+
+  // 메시지 줄
+  var msgLine = document.createElement('div');
+  msgLine.style.cssText = 'display:flex;align-items:center;gap:5px;margin-bottom:4px';
+  msgLine.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' + msg;
+  dupEl.appendChild(msgLine);
+
+  // 로그인 버튼 줄
+  var btnLine = document.createElement('div');
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = linkText;
+  btn.style.cssText = 'color:var(--link-blue);background:none;border:none;cursor:pointer;font-size:12px;text-decoration:underline;padding:0;font-family:inherit';
+  btn.addEventListener('click', function() { switchAuthTab('login'); });
+  btnLine.appendChild(btn);
+  dupEl.appendChild(btnLine);
+}
+
+function _checkSocialUsedEmail(email) {
+  try {
+    // r01_accs에서 소셜 method 확인 (setAuthed에서 저장됨)
+    const accs = _r01Accounts();
+    const found = accs.find(a => a.email && a.email.toLowerCase() === email.toLowerCase());
+    if(found && found.method && found.method !== 'email') {
+      const names = {
+        'google-oauth2': 'Google',
+        'apple': 'Apple',
+        'naver': '네이버',
+        'kakao': '카카오'
+      };
+      return names[found.method] || found.method;
+    }
+    // 보조: Auth0 캐시 확인
+    const keys = Object.keys(localStorage).filter(k => k.includes('@@auth0spajs@@'));
+    for(const k of keys) {
+      try {
+        const val = JSON.parse(localStorage.getItem(k)||'{}');
+        const u = val?.body?.decodedPayload || val?.body?.user || {};
+        if((u.email||'').toLowerCase() === email.toLowerCase()) {
+          const sub = u.sub||'';
+          if(sub.startsWith('google')) return 'Google';
+          if(sub.startsWith('apple')) return 'Apple';
+          if(sub.startsWith('naver')) return '네이버';
+          if(sub.startsWith('kakao')) return '카카오';
+        }
+      } catch(e2){}
+    }
+  } catch(e){}
+  return null;
+}
+
+/* ── 인증 코드 확인 ── */
+function verifySignupCode() {
+  const pending = window._r01PendingSignup;
+  const codeInput = (document.getElementById('averify-code-input')?.value||'').trim();
+  const errEl = document.getElementById('averr-verify');
+  errEl && (errEl.textContent='');
+
+  if(!pending) { errEl && (errEl.textContent='세션이 만료되었습니다. 다시 시도해주세요.'); return; }
+  if(Date.now() - pending.ts > 10*60*1000) {
+    errEl && (errEl.textContent='인증 시간이 초과되었습니다. 다시 가입해주세요.');
+    window._r01PendingSignup = null;
+    return;
+  }
+  if(codeInput !== pending.code) {
+    errEl && (errEl.textContent='인증 코드가 올바르지 않습니다.');
+    return;
+  }
+
+  // 인증 성공 — 계정 저장
+  const accounts = _r01Accounts();
+  accounts.push({email:pending.email, pw:pending.pw, ts:Date.now()});
+  _saveR01Accounts(accounts);
+  window._r01PendingSignup = null;
+
+  // 신규 가입: 기존 프로필 초기화 후 온보딩으로
+  localStorage.removeItem('vd_profile');
+  setAuthed({email:pending.email, name:pending.email.split('@')[0], method:'email'});
+
+  // 열려있는 모든 모달 닫기 (약관 팝업 등)
+  document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  closeTermsModal();
+
+  // 인증 화면 닫고 온보딩으로
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('onboarding').classList.remove('hidden');
+  document.getElementById('app').style.display='none';
+}
+
+function resendVerify() {
+  const pending = window._r01PendingSignup;
+  if(!pending) { alert('세션이 만료되었습니다. 다시 가입해주세요.'); return; }
+  // 새 코드 발급
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  pending.code = code; pending.ts = Date.now();
+  const codeEl = document.getElementById('averify-demo-code');
+  if(codeEl) codeEl.textContent = code;
+  alert('새 인증 코드를 발송했습니다. (데모 화면에서 확인하세요)');
+}
+
+/* ── 비밀번호 찾기 ── */
+function sendResetPw() {
+  const email = (document.getElementById('aforgot-email')?.value||'').trim();
+  const err   = document.getElementById('aerr-forgot');
+  err.textContent = '';
+  if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
+  const accounts = _r01Accounts();
+  if(!accounts.find(a=>a.email===email)) { err.textContent='가입되지 않은 이메일입니다.'; return; }
+  alert(email+'으로 비밀번호 재설정 링크를 발송했습니다.');
+  switchAuthTab('login');
+}
+
+/* ── 약관 체크박스 ── */
+function toggleAllTerms(el) {
+  ['agree-terms','agree-privacy','agree-marketing'].forEach(id=>{
+    const c=document.getElementById(id); if(c) c.checked=el.checked;
+  });
+}
+function syncAllCheck() {
+  const a = document.getElementById('agree-all');
+  if(a) a.checked = !!(
+    document.getElementById('agree-terms')?.checked &&
+    document.getElementById('agree-privacy')?.checked &&
+    document.getElementById('agree-marketing')?.checked
+  );
+}
+
+/* ── 약관 모달 ── */
+const R01_TERMS = {
+  terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 Route01이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p>Route01은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li>Route01 AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 20회 무료</li><li>Starter: 9,900원/월 (100회)</li><li>Pro: 29,900원/월 (무제한)</li><li>Team: 99,000원/월 (5인)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
+  privacy:{title:'개인정보처리방침',html:`<h3>1. 수집 항목</h3><ul><li><strong>필수:</strong> 이메일, 소셜 로그인 식별자</li><li><strong>선택:</strong> 스타트업명, 업종, 단계, 팀 규모</li></ul><h3>2. 수집 목적</h3><ul><li>서비스 제공 및 회원 관리</li><li>맞춤형 AI 자문 제공</li><li>마케팅 정보 발송 (동의 시)</li></ul><h3>3. 보유 기간</h3><p>회원 탈퇴 시 즉시 삭제</p><h3>4. 처리 위탁</h3><ul><li>Anthropic: AI 답변 생성</li><li>Auth0(Okta): 로그인 인증</li><li>토스페이먼츠: 결제 처리</li></ul><h3>5. 이용자 권리</h3><p>열람·수정·삭제 요청: privacy@route01.kr</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`}
+};
+function openTermsModal(type) {
+  const d = R01_TERMS[type]; if(!d) return;
+  const m = document.getElementById('terms-modal');
+  const t = document.getElementById('terms-modal-title');
+  const b = document.getElementById('terms-modal-body');
+  if(!m||!t||!b) return;
+  t.textContent = d.title;
+  b.innerHTML = d.html;
+  m.style.display = 'flex';     // display:flex 강제 (z-index 문제 보완)
+  m.classList.add('open');
+}
+function closeTermsModal() {
+  const m = document.getElementById('terms-modal');
+  if(!m) return;
+  m.classList.remove('open');
+  m.style.display = '';
+}
+// window에 노출 (onclick 속성, footer 링크 등에서 접근 가능하도록)
+/* window expose moved to end of file */
+
+/* ── 추천 질문 ── */
+const R01_SUG = {
+  all:['시드 투자를 처음 받으려면 어떻게 시작해야 하나요?','우리 비즈니스 모델의 약점을 솔직하게 짚어주세요','PMF를 어떻게 측정하고 검증할 수 있나요?','경쟁사 대비 차별화 전략을 어떻게 잡아야 할까요?','IR 덱에 반드시 들어가야 할 내용은 무엇인가요?','초기 팀 구성에서 가장 중요한 역할은 무엇인가요?','글로벌 진출을 고려할 때 언제가 적기인가요?','번아웃 없이 스타트업을 지속하는 방법이 있나요?'],
+  investment:['시드 투자를 처음 받으려면 어떻게 시작해야 하나요?','IR 덱에 반드시 들어가야 할 내용은 무엇인가요?','VC와 엔젤 투자의 차이는 무엇인가요?','밸류에이션을 어떻게 산정하나요?','텀싯에서 꼭 확인해야 할 조항은?'],
+  strategy:['PMF를 어떻게 측정하고 검증할 수 있나요?','우리 비즈니스 모델의 약점을 솔직하게 짚어주세요','경쟁사 대비 차별화 전략을 어떻게 잡아야 할까요?','지금 피벗해야 할지 어떻게 판단하나요?','성장 KPI를 어떻게 설계할까요?'],
+  marketing:['초기 스타트업에서 첫 고객을 어떻게 확보하나요?','CAC를 줄이는 효과적인 방법은?','돈 없이 바이럴을 만드는 방법이 있나요?','B2B와 B2C 마케팅 전략의 차이는?'],
+  finance:['런웨이를 늘리기 위한 비용 절감 전략은?','스타트업에서 받을 수 있는 세제 혜택은?','단위경제(Unit Economics)를 어떻게 계산하나요?','재무모델은 어떻게 만들어야 하나요?'],
+  hr:['초기 팀 구성에서 가장 중요한 역할은?','공동창업자와 지분을 어떻게 나눠야 하나요?','스톡옵션 풀은 얼마나 잡아야 하나요?','첫 직원 채용 시 주의할 점은?'],
+  legal:['서비스 출시 전 법적으로 꼭 챙겨야 할 것들은?','개인정보처리방침 필수 항목은?','NDA는 언제 써야 하나요?','소프트웨어 특허를 받을 수 있나요?']
+};
+
+/* ── 도메인별 추천 질문 풀 (각 20개) ── */
+const R01_SUG_POOL = {
+  investment: [
+    '시드 투자 유치를 위한 첫 번째 단계는?',
+    'VC가 가장 중요하게 보는 IR 지표는?',
+    '시드/시리즈A 밸류에이션 산정 방법은?',
+    '투자자 미팅 전 반드시 준비해야 할 것은?',
+    '텀싯에서 놓치면 안 되는 핵심 조항은?',
+    'SAFE와 전환사채 중 어떤 게 유리한가요?',
+    '국내 VC와 해외 VC의 투자 기준 차이는?',
+    '엔젤 투자자를 어떻게 찾고 접근하나요?',
+    '투자 유치 없이 성장할 수 있는 방법은?',
+    '데이터룸에 꼭 넣어야 할 자료 목록은?',
+    '투자자와의 관계를 장기적으로 유지하는 법은?',
+    'IR 덱에서 가장 설득력 있는 슬라이드는?',
+    '초기 스타트업 적정 지분 희석 비율은?',
+    '투자 거절 후 재도전하는 올바른 방법은?',
+    'TIPS 프로그램 신청 조건과 절차는?',
+    '크라우드펀딩이 스타트업에게 유효한가요?',
+    '투자자에게 트랙션을 효과적으로 보여주는 법?',
+    'Post-money 밸류에이션 협상 전략은?',
+    '공동창업자 지분 구조 어떻게 설계할까요?',
+    '시리즈A를 위한 KPI 목표치는 어느 정도?',
+  ],
+  strategy: [
+    'PMF(제품-시장 적합성)를 검증하는 방법은?',
+    '비즈니스 모델의 핵심 약점을 찾는 방법은?',
+    '경쟁사 대비 차별화 포인트를 설정하는 법?',
+    '지금 피벗해야 할지 어떻게 판단하나요?',
+    '스타트업 성장 단계별 핵심 KPI는?',
+    '블루오션 시장을 발굴하는 프레임워크는?',
+    '고객 인터뷰로 인사이트 얻는 방법은?',
+    'TAM/SAM/SOM을 현실적으로 계산하는 법?',
+    'OKR과 KPI 중 초기 스타트업에 맞는 것은?',
+    '경쟁사가 없는 시장, 진짜 기회일까요?',
+    '제품 로드맵 우선순위 결정 방법은?',
+    'B2B vs B2C 전환 시 체크리스트는?',
+    '무료 서비스에서 유료로 전환하는 전략은?',
+    '파트너십과 직접 성장 중 어떤 게 유리?',
+    '린 스타트업 방법론을 실제 적용하는 법?',
+    '플랫폼 비즈니스의 닭-달걀 문제 해결책은?',
+    '경쟁사 분석을 체계적으로 하는 방법은?',
+    '스타트업이 대기업과 경쟁할 수 있는 전략?',
+    '초기 고객 100명을 확보하는 전략은?',
+    '제품 방향성이 흔들릴 때 기준 잡는 법?',
+  ],
+  marketing: [
+    'CAC(고객 획득 비용)를 낮추는 방법은?',
+    '초기 스타트업에게 가장 효과적인 채널은?',
+    '콘텐츠 마케팅으로 유기적 성장하는 법?',
+    'SNS 팔로워 없이 제품을 알리는 방법은?',
+    'LTV(고객 생애 가치)를 높이는 전략은?',
+    '바이럴 루프를 설계하는 방법은?',
+    '언론 노출 없이 PR 효과를 얻는 방법은?',
+    'B2B 마케팅에서 리드 생성 전략은?',
+    '퍼포먼스 마케팅 예산 배분 방법은?',
+    '리텐션을 높이는 이메일 마케팅 전략은?',
+    '인플루언서 마케팅 ROI를 높이는 법?',
+    '커뮤니티를 활용한 성장 전략은?',
+    'SEO로 초기 트래픽을 확보하는 방법은?',
+    '제품 출시 전 대기자 명단 모으는 법?',
+    'NPS(순추천지수) 개선 방법은?',
+    '경쟁사와 다른 포지셔닝 메시지 만들기?',
+    '오프라인 이벤트로 마케팅하는 전략은?',
+    'ABM(계정 기반 마케팅)이란 무엇인가요?',
+    '그로스 해킹 실험을 설계하는 방법은?',
+    '유료 광고 없이 첫 1000명 확보하는 법?',
+  ],
+  finance: [
+    '스타트업 런웨이를 계산하는 방법은?',
+    '현금 소진율(번 레이트)을 줄이는 전략은?',
+    '손익분기점 계산 방법과 활용법은?',
+    '벤처기업 세제 혜택을 최대로 받는 법?',
+    '재무모델을 만드는 기본 프레임워크는?',
+    '단위경제(Unit Economics) 분석 방법은?',
+    '스타트업이 받을 수 있는 정부 보조금은?',
+    'R&D 세액공제 신청 방법과 조건은?',
+    '투자금 회계 처리 방법은?',
+    '벤처기업 확인서 발급 조건과 절차는?',
+    '창업 초기 법인 설립 시 자본금은 얼마?',
+    '스톡옵션 회계 처리 방법은?',
+    '매출 인식 기준 어떻게 적용하나요?',
+    '간이과세자 vs 일반과세자 어떤 게 유리?',
+    'EBITDA와 순이익 중 투자자가 보는 것은?',
+    'SaaS 비즈니스 핵심 재무 지표는?',
+    '해외 매출 외환 처리 방법은?',
+    '직원 급여 지급 시 세금 처리 방법은?',
+    '재무 예측 모델에서 가장 중요한 가정은?',
+    '내부 회계 시스템 언제 구축해야 하나요?',
+  ],
+  hr: [
+    '초기 팀에서 가장 먼저 채용할 직군은?',
+    '공동창업자 지분 분배 방법과 기준은?',
+    '스톡옵션 풀은 얼마나 설정해야 하나요?',
+    '개발자 채용 시 기술 면접 방법은?',
+    '스타트업 조직 문화를 만드는 방법은?',
+    '직원 이탈을 막는 리텐션 전략은?',
+    '프리랜서 vs 정규직 고용 결정 기준은?',
+    '근로계약서 작성 시 필수 체크사항은?',
+    'OKR로 팀 성과를 관리하는 방법은?',
+    '원격근무 팀의 생산성을 높이는 법은?',
+    '초기 직원에게 적정 연봉 수준은?',
+    '공동창업자 갈등 예방하는 방법은?',
+    '채용 공고 없이 좋은 인재 찾는 법은?',
+    '팀원 온보딩 프로세스 만드는 방법은?',
+    '성과 평가 시스템 어떻게 설계하나요?',
+    '4대 보험 가입 시기와 절차는?',
+    '최저임금 인상이 스타트업에 미치는 영향?',
+    '팀 빌딩 이벤트 효과적인 방법은?',
+    'CTO 없이 개발팀을 운영하는 방법은?',
+    '해외 인재 고용 시 주의사항은?',
+  ],
+  legal: [
+    '서비스 출시 전 법적으로 준비할 것들은?',
+    '이용약관에 반드시 포함해야 할 조항은?',
+    '개인정보처리방침 필수 기재 항목은?',
+    'NDA(비밀유지계약서) 작성 핵심 포인트는?',
+    '소프트웨어 특허 출원 가능한 범위는?',
+    '상표 등록 절차와 비용은 어떻게 되나요?',
+    '오픈소스 라이선스 사용 시 주의사항은?',
+    '공동창업자 계약서 필수 내용은?',
+    '투자 계약서에서 협상 가능한 조항은?',
+    '정보통신망법 주요 의무 사항은?',
+    '개인정보보호법 위반 시 처벌 수위는?',
+    '직원 IP 귀속 조항 어떻게 작성하나요?',
+    '서비스 약관 분쟁 시 준거법 설정법은?',
+    '외주 개발 계약서 핵심 체크포인트는?',
+    '온라인 플랫폼 사업자 의무 사항은?',
+    '해외 서비스 시 적용되는 법률은?',
+    'GDPR이 한국 스타트업에 적용되나요?',
+    '특허 침해 대응 방법과 절차는?',
+    '법인 설립 시 주의해야 할 사항은?',
+    '공정거래법에서 스타트업이 주의할 점은?',
+  ],
+};
+
+/* 도메인별 현재 페이지 인덱스 */
+const _sugPage = {};
+
+function renderSugChips(key) {
+  const wrap = document.getElementById('sug-chips'); if(!wrap) return;
+  const pool = R01_SUG_POOL[key] || R01_SUG_POOL['investment'];
+
+  // 페이지 인덱스 순환 (클릭마다 다른 10개)
+  if(_sugPage[key] === undefined) _sugPage[key] = 0;
+  const start = (_sugPage[key] * 10) % pool.length;
+  // 10개 슬라이싱 (배열 끝에서 감싸기)
+  let qs = [];
+  for(let i = 0; i < 10; i++) {
+    qs.push(pool[(start + i) % pool.length]);
+  }
+
+  wrap.innerHTML = qs.map(q =>
+    `<button class="sug-chip" onclick="useSugChip(this)">${esc(q)}</button>`
+  ).join('');
+}
+
+function filterSugDomain(key, btn) {
+  document.querySelectorAll('.ws-dc').forEach(c => c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // 같은 도메인 재클릭 시 다음 페이지 보여주기
+  const currentKey = btn?.dataset?.domain || key;
+  if(_sugPage[currentKey] === undefined) _sugPage[currentKey] = 0;
+  else _sugPage[currentKey]++;
+  renderSugChips(currentKey);
+}
+function useSugChip(btn) {
+  const text = btn.textContent.trim();
+  // 웰컴화면이 보이는 경우 → ws-input에 넣고 바로 전송
+  const ws = document.getElementById('welcome-screen');
+  const wsInp = document.getElementById('ws-input');
+  if(ws && ws.style.display !== 'none' && wsInp) {
+    wsInp.value = text;
+    wsResize(wsInp);
+    wsInp.focus();
+    setTimeout(() => wsSend(), 80);
+    return;
+  }
+  // 대화 중인 경우 → 하단 input에 넣고 포커스
+  const inp = document.getElementById('input');
+  if(inp) { inp.value = text; resize(inp); inp.focus(); }
+}
+
+/* ── 프로필 배너 ── */
+function showProfileBannerIfNeeded() {
+  const banner = document.getElementById('profile-banner'); if(!banner) return;
+  const dismissed = localStorage.getItem('r01_banner_x');
+  const hasProfile = !!(profile.industry && profile.stage);
+  banner.style.display = (!hasProfile && !dismissed) ? 'flex' : 'none';
+}
+function dismissProfileBanner() {
+  localStorage.setItem('r01_banner_x','1');
+  const b = document.getElementById('profile-banner'); if(b) b.style.display='none';
+}
+
+/* ── unified-area: 프로필 배지 동기화 ── */
+function syncUnifiedBadges() {
+  const ind = document.getElementById('ub-industry');
+  const st  = document.getElementById('ub-stage');
+  const inv = document.getElementById('ub-invest');
+  const co  = document.getElementById('ub-concern');
+  const sy  = document.getElementById('ub-style');
+
+  // 사업 소개
+  const industryText = profile.industry
+    ? (profile.industry.length > 22 ? profile.industry.slice(0,22)+'…' : profile.industry)
+    : '미설정';
+  if(ind) ind.textContent = industryText;
+
+  // 단계 · 타겟
+  const targetShort = profile.target
+    ? profile.target.replace('(기업)','').replace('(소비자)','').replace('(공공/정부)','').trim()
+    : '';
+  const stageVal = profile.stage
+    ? (targetShort ? `${profile.stage} · ${targetShort}` : profile.stage)
+    : (targetShort || '미설정');
+  if(st) st.textContent = stageVal;
+
+  // 투자 상황
+  if(inv) inv.textContent = profile.invest || '미설정';
+
+  // 핵심 고민
+  const concernText = profile.concern
+    ? (profile.concern.length > 22 ? profile.concern.slice(0,22)+'…' : profile.concern)
+    : '미설정';
+  if(co) co.textContent = concernText;
+
+  // 멘토 스타일
+  if(sy) sy.textContent = profile.style || 'YC 파트너식 직설';
+}
+
+/* ── 통합 히스토리 ── */
+const R01_HIST_KEY = 'r01_hist_v1';
+function saveR01History(q, a) {
+  try {
+    const h = JSON.parse(localStorage.getItem(R01_HIST_KEY)||'[]');
+    h.unshift({id:Date.now(), q:q.slice(0,200), a, ts:new Date().toLocaleString('ko')});
+    if(h.length>60) h.length=60;
+    localStorage.setItem(R01_HIST_KEY, JSON.stringify(h));
+    renderR01History();
+  } catch(e){}
+}
+function renderR01History() {
+  const el = document.getElementById('history-list'); if(!el) return;
+  try {
+    const h = JSON.parse(localStorage.getItem(R01_HIST_KEY)||'[]');
+    if(!h.length){el.innerHTML='<div class="pop-empty">아직 질문 기록이 없어요.</div>';return;}
+    el.innerHTML = h.map(item=>`
+      <button class="hist-item" onclick="openR01HistModal(${item.id})">
+        <div class="hist-item-q">${_esc(item.q)}</div>
+        <div class="hist-item-meta">${item.ts}</div>
+      </button>`).join('');
+  } catch(e){el.innerHTML='<div class="pop-empty">아직 질문 기록이 없어요.</div>';}
+}
+function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function openR01HistModal(id) {
+  try {
+    const h = JSON.parse(localStorage.getItem(R01_HIST_KEY)||'[]');
+    const item = h.find(x=>x.id==id); if(!item) return;
+    // 모달 대신 바로 채팅 화면으로 이동
+    rmWelcome();
+    const chat = document.getElementById('chat');
+    if(chat) chat.innerHTML = '';
+    messages = [];
+    docsSentOnce = false;
+    busy = false;
+
+    addMsg('user', item.q, []);
+    messages.push({role:'user', content:item.q});
+    addMsg('ai', item.a || '');
+    messages.push({role:'assistant', content:item.a || ''});
+
+    setTimeout(()=>{
+      if(chat) chat.scrollTop = chat.scrollHeight;
+      document.getElementById('input')?.focus();
+    }, 80);
+  } catch(e){}
+}
+function clearAllHistory() {
+  if(!confirm('전체 질문 기록을 삭제할까요?')) return;
+  localStorage.removeItem(R01_HIST_KEY); renderR01History();
+}
+
+/* ── DOMContentLoaded: launch/send 후킹 ── */
+document.addEventListener('DOMContentLoaded', ()=>{
+  /* launch 후킹: 원본 실행 후 새 기능 초기화 */
+  const _origLaunch = window.launch;
+  window.launch = function() {
+    if(_origLaunch) _origLaunch.call(this);
+
+    // 초기화
+    renderSugChips('investment'); // 기본 도메인 투자/IR
+    showProfileBannerIfNeeded();
+    renderR01History();
+    syncUnifiedBadges();
+
+    // 웰컴 화면 활성화 (chat/input-area 숨김)
+    const ws = document.getElementById('welcome-screen');
+    const chat = document.getElementById('chat');
+    const inputArea = document.querySelector('.input-area');
+    if(ws) ws.classList.remove('hidden');
+    if(chat) { chat.classList.remove('active'); }
+    if(inputArea) { inputArea.classList.remove('active'); }
+
+    // ws-input 포커스
+    setTimeout(()=>{ document.getElementById('ws-input')?.focus(); }, 150);
+  };
+
+  /* send 후킹: 질문 시 unified-area 숨기고 히스토리 저장 */
+  const _origSend = window.send;
+  window.send = async function() {
+    const inp = document.getElementById('input');
+    const q = (inp?.value||'').trim();
+    if(!q && !window.chatPendingFiles?.length) return;
+
+    // 웰컴 화면 → 채팅 모드 전환 (rmWelcome이 이미 처리했을 수 있음)
+    const ws = document.getElementById('welcome-screen');
+    if(ws && !ws.classList.contains('hidden')) { rmWelcome(); }
+
+    if(_origSend) await _origSend.call(this);
+
+    // 히스토리 저장 (3초 후 마지막 AI 답변 가져오기)
+    if(q) {
+      setTimeout(()=>{
+        const chatRes = document.getElementById('chat-res');
+        const lastA = chatRes?.getAttribute('data-for-export')||'';
+        if(lastA) saveR01History(q, lastA);
+      }, 3500);
+    }
+  };
+
+  /* applyProfile 후킹: unified badges 동기화 */
+  const _origApply = window.applyProfile;
+  window.applyProfile = function() {
+    if(_origApply) _origApply.call(this);
+    syncUnifiedBadges();
+  };
+
+  /* cancelOnboardingEdit 수정: auth gate 숨기기 */
+  const _origCancel = window.cancelOnboardingEdit;
+  window.cancelOnboardingEdit = function() {
+    /* auth 확실히 숨기기 */
+    const authEl = document.getElementById('auth');
+    if(authEl) authEl.classList.add('hidden');
+    if(_origCancel) _origCancel.call(this);
+  };
+
+  /* 약관 모달 배경 클릭 닫기 */
+  const termsModal = document.getElementById('terms-modal');
+  if(termsModal) termsModal.addEventListener('click', e=>{ if(e.target===termsModal) closeTermsModal(); });
+
+  /* 약관 보기 버튼 — addEventListener 방식으로 확실히 연결 */
+  const btnViewTerms = document.getElementById('btn-view-terms');
+  const btnViewPrivacy = document.getElementById('btn-view-privacy');
+  if(btnViewTerms) btnViewTerms.addEventListener('click', function(e){
+    e.preventDefault(); e.stopPropagation(); openTermsModal('terms');
+  });
+  if(btnViewPrivacy) btnViewPrivacy.addEventListener('click', function(e){
+    e.preventDefault(); e.stopPropagation(); openTermsModal('privacy');
+  });
+
+  /* 이메일 입력 후 포커스 벗어날 때 즉시 중복 체크 */
+  const signupEmailEl = document.getElementById('asignup-email');
+  if(signupEmailEl) {
+    signupEmailEl.addEventListener('blur', function() {
+      const email = this.value.trim();
+      const dupEl = document.getElementById('aerr-email-dup');
+      if(!dupEl) return;
+      if(!email || !email.includes('@')) { _clearDupMsg(); return; }
+
+      // r01_accs에서 중복 체크 (소셜/이메일 구분)
+      const accounts = _r01Accounts();
+      const found = accounts.find(a => a.email && a.email.toLowerCase() === email.toLowerCase());
+
+      if(found) {
+        if(found.method && found.method !== 'email') {
+          // 소셜 가입
+          const providerNames = {
+            'google-oauth2':'Google', 'apple':'Apple',
+            'naver':'네이버', 'kakao':'카카오'
+          };
+          const pName = providerNames[found.method] || found.method;
+          _showDupMsg(dupEl, pName + ' 계정으로 가입된 이메일입니다.', pName + ' 로그인하기 →');
+        } else {
+          // 이메일 가입
+          _showDupMsg(dupEl, '이미 이메일로 가입된 계정입니다.', '로그인하기 →');
+        }
+        return;
+      }
+
+      _clearDupMsg();
+    });
+
+    // 이메일 입력 시작하면 중복 메시지 초기화
+    signupEmailEl.addEventListener('input', function() {
+      const dupEl = document.getElementById('aerr-email-dup');
+      if(dupEl) dupEl.textContent = '';
+    });
+  }
+
+  /* aterms-row: 체크박스 직접 클릭만 동작 (행 전체 클릭 방지) */
+  document.querySelectorAll('.aterms-row').forEach(row => {
+    row.addEventListener('click', function(e){
+      // 체크박스나 보기 버튼 클릭은 그대로 통과
+      if(e.target.type === 'checkbox' || e.target.tagName === 'BUTTON') return;
+      // 나머지 영역 클릭은 해당 행의 체크박스 toggle
+      const cb = row.querySelector('input[type=checkbox]');
+      if(cb) cb.checked = !cb.checked;
+      if(cb && (cb.id === 'agree-terms' || cb.id === 'agree-privacy' || cb.id === 'agree-marketing')) {
+        syncAllCheck();
+      }
+      if(cb && cb.id === 'agree-all') {
+        toggleAllTerms(cb);
+      }
+    });
+  });
+});
+
+
+
+/* ══════════════════════════════════════
+   웰컴 화면 입력창 핸들러
+══════════════════════════════════════ */
+function wsOnKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    wsSend();
+  }
+}
+
+function wsResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 240) + 'px';
+}
+
+function wsSend() {
+  const wsInput = document.getElementById('ws-input');
+  const mainInput = document.getElementById('input');
+  if(!wsInput) return;
+  const text = wsInput.value.trim();
+  if(!text && !chatPendingFiles.length) return;
+
+  // 웰컴 입력값을 메인 input으로 복사 후 send 호출
+  if(mainInput) mainInput.value = text;
+  wsInput.value = '';
+  wsInput.style.height = 'auto';
+
+  // rmWelcome으로 화면 전환 후 send
+  rmWelcome();
+  setTimeout(() => send(), 50);
+}
+
+
+function checkGrantAccess() {
+  // 유료 플랜 체크 (현재는 localStorage의 plan으로 판단)
+  const plan = localStorage.getItem('r01_plan') || 'free';
+  if(plan === 'free') {
+    // 무료 회원 안내 모달
+    const msg = document.createElement('div');
+    msg.className = 'modal-bg open';
+    msg.id = 'grant-access-modal';
+    msg.innerHTML = `
+      <div class="modal" style="max-width:400px;text-align:center">
+        <button class="modal-close" onclick="document.getElementById('grant-access-modal').remove()">×</button>
+        <div style="font-size:32px;margin-bottom:12px">🔒</div>
+        <div class="modal-title">유료 회원 전용 서비스</div>
+        <div class="modal-sub">지원사업 도우미는 <strong>Starter 플랜 이상</strong> 회원만 이용할 수 있어요.<br>월 9,900원으로 시작해 보세요.</div>
+        <div style="margin:1.5rem 0;padding:16px;background:var(--bg);border-radius:var(--r);font-size:13px;color:var(--ink2);text-align:left;line-height:1.7">
+          <div><strong>✅ Starter (9,900원/월)</strong></div>
+          <div>· 월 100회 질문</div>
+          <div>· PDF 파일 업로드</div>
+          <div><strong style="color:var(--cta)">✅ 지원사업 도우미 포함</strong></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="modal-btn" onclick="document.getElementById('grant-access-modal').remove()" style="flex:1">닫기</button>
+          <button class="modal-btn pri" onclick="alert('요금제 페이지 준비 중입니다.');document.getElementById('grant-access-modal').remove()" style="flex:1">요금제 보기 →</button>
+        </div>
+      </div>`;
+    document.body.appendChild(msg);
+    msg.addEventListener('click', e => { if(e.target===msg) msg.remove(); });
+  } else {
+    openGrantModal();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   전역 함수 즉시 노출 — onclick 속성에서 접근 가능
+   (defer 없이 로드되므로 스크립트 로드 즉시 등록)
+═══════════════════════════════════════════════ */
+
+/* ── 홈(웰컴화면)으로 이동 ── */
+function goHome() {
+  // 대화 상태 초기화
+  messages = [];
+  busy = false;
+  docsSentOnce = false;
+  // send-btn 활성화
+  const sendBtn = document.getElementById('send-btn');
+  if(sendBtn) sendBtn.disabled = false;
+  // ws-input 초기화
+  const wsInp = document.getElementById('ws-input');
+  if(wsInp) wsInp.value = '';
+  // showWelcome()으로 통일 (chat 초기화 + 웰컴화면 표시)
+  showWelcome();
+}
+(function exposeGlobals() {
+  var fns = {
+    // Auth
+    switchAuthTab: switchAuthTab,
+    emailLogin: emailLogin,
+    emailSignup: emailSignup,
+    togglePwEye: togglePwEye,
+    showForgotPw: showForgotPw,
+    sendResetPw: sendResetPw,
+    verifySignupCode: verifySignupCode,
+    resendVerify: resendVerify,
+    toggleAllTerms: toggleAllTerms,
+    syncAllCheck: syncAllCheck,
+    openTermsModal: openTermsModal,
+    closeTermsModal: closeTermsModal,
+    // App
+    loginProvider: loginProvider,
+    demoLogin: demoLogin,
+    logout: logout,
+    openAuth0Settings: openAuth0Settings,
+    closeAuth0Settings: closeAuth0Settings,
+    saveAuth0Settings: saveAuth0Settings,
+    openKeyModal: openKeyModal,
+    closeKeyModal: closeKeyModal,
+    saveKey: saveKey,
+    deleteKey: deleteKey,
+    toggleKeyVis: toggleKeyVis,
+    openModal: openModal,
+    closeModal: closeModal,
+    openStyleModal: openStyleModal,
+    closeStyleModal: closeStyleModal,
+    openGrantModal: openGrantModal,
+    closeGrantModal: closeGrantModal,
+    closeHistModal: closeHistModal,
+    followUpFromHist: followUpFromHist,
+    editProfile: editProfile,
+    filterSugDomain: filterSugDomain,
+    checkGrantAccess: checkGrantAccess,
+    useSugChip: useSugChip,
+    dismissProfileBanner: dismissProfileBanner,
+    clearAllHistory: clearAllHistory,
+    exportAnswer: exportAnswer,
+    send: send,
+    onKey: onKey,
+    resize: resize,
+    wsSend: wsSend,
+    wsOnKey: wsOnKey,
+    wsResize: wsResize,
+    filterSugDomain: filterSugDomain,
+    chatFileSelect: chatFileSelect,
+    obFileSelect: obFileSelect,
+    obDragOver: obDragOver,
+    obDragLeave: obDragLeave,
+    obDrop: obDrop,
+    removeObFile: removeObFile,
+    removeChatFile: removeChatFile,
+    submitGrantHelper: submitGrantHelper,
+    grantFileChosen: grantFileChosen,
+    grantRemoveFile: grantRemoveFile,
+    cancelOnboardingEdit: cancelOnboardingEdit,
+    finishOnboarding: finishOnboarding,
+    skipOnboarding: skipOnboarding,
+    goStep: goStep,
+    setIndustry: setIndustry,
+    toggleSector: toggleSector,
+    onSectorOtherInput: onSectorOtherInput,
+    onIndustryInput: onIndustryInput,
+    pickChip: pickChip,
+    selectDomain: selectDomain,
+    switchTab: switchTab,
+    openHistModal: openHistModal,
+    handleAuthCallback: handleAuthCallback,
+    refreshAllReportBubbleMarkdown: refreshAllReportBubbleMarkdown,
+    startAfterLogin: startAfterLogin,
+    goHome: goHome,
+  };
+  for (var k in fns) {
+    try { window[k] = fns[k]; } catch(e) {}
+  }
+})();
