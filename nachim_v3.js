@@ -1576,6 +1576,7 @@ function checkProfileBeforeSend(text){
   // 프로필 없는 경우 — 안내 모달 표시
   const m = document.createElement('div');
   m.className = 'modal-bg open';
+    m.style.zIndex = '9999';
   m.id = 'no-profile-modal';
   m.innerHTML = `
     <div class="modal" style="max-width:400px;text-align:center">
@@ -1627,6 +1628,7 @@ async function doSend(text){
     if(usage >= planInfo.limit){
       const m = document.createElement('div');
       m.className = 'modal-bg open';
+        m.style.zIndex = '9999';
       m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
         <div style="font-size:32px;margin-bottom:12px">📊</div>
         <div class="modal-title">이번 달 질문 한도에 도달했어요</div>
@@ -3978,6 +3980,7 @@ function pickMentorOrUpgrade(el, styleKey){
   if(isPaid){ pickChip('style', el); return; }
   const m = document.createElement('div');
   m.className = 'modal-bg open';
+  m.style.zIndex = '9999';
   m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
     <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
     <div style="font-size:32px;margin-bottom:10px">🔒</div>
@@ -3998,6 +4001,7 @@ function checkUploadAccess(){
   if(plan === 'free'){
     const m = document.createElement('div');
     m.className = 'modal-bg open';
+    m.style.zIndex = '9999';
     m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
       <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
       <div style="font-size:32px;margin-bottom:10px">📎</div>
