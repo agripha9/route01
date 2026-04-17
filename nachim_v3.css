@@ -1755,6 +1755,7 @@ header .style-btn.danger:hover {
   }
   header .style-btn span { display: none; }
 }
+
 /* ══════════════════════════════════════
    로그인 화면 — 뷰포트 꽉 맞춤 (잘림 방지)
 ══════════════════════════════════════ */
@@ -1763,32 +1764,32 @@ header .style-btn.danger:hover {
 #auth { overflow: hidden !important; }
 .auth-shell { overflow: hidden !important; }
 
-/* 왼쪽: 내부 스크롤만 허용 */
-.auth-brand { overflow-y: auto !important; overflow-x: hidden !important; }
+/* 왼쪽: 내부 스크롤, 위쪽부터 배치 */
+.auth-brand {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-items: flex-start !important;  /* 위에서부터 배치 — 위잘림 방지 */
+  padding-top: 2.5rem !important;
+  padding-bottom: 2.5rem !important;
+}
 
-/* 오른쪽: 내부 스크롤만 허용 */
+/* 오른쪽: 내부 스크롤 */
 .auth-right { overflow-y: auto !important; overflow-x: hidden !important; }
 
-/* 브랜드 내부 — 간격을 vh 기준으로 압축 */
-.auth-brand-inner { gap: clamp(4px, 1.2vh, 14px) !important; }
-.auth-brand-logo  { height: clamp(44px, 7vh, 72px) !important; }
-.auth-brand-kicker { margin: 0 !important; }
+/* 브랜드 내부 — 원래 간격 유지하되 vh로 자연스럽게 */
+.auth-brand-inner { gap: 0 !important; }
+.auth-brand-logo  { height: clamp(56px, 8vh, 80px) !important; margin-bottom: clamp(4px, 1vh, 8px) !important; }
+.auth-brand-kicker { margin-bottom: clamp(2px, 0.5vh, 4px) !important; }
 .auth-brand-title {
-  font-size: clamp(18px, 3vh, 34px) !important;
-  margin-bottom: 0 !important;
+  font-size: clamp(22px, 3.2vh, 38px) !important;
+  margin-bottom: clamp(0.8rem, 2vh, 1.25rem) !important;
 }
 .auth-brand-pills {
-  margin-bottom: 0 !important;
-  gap: clamp(4px, 0.7vh, 8px) !important;
+  margin-bottom: clamp(0.8rem, 2vh, 2rem) !important;
+  gap: 8px !important;
 }
-.auth-pill {
-  padding: clamp(3px, 0.5vh, 5px) clamp(7px, 1vh, 12px) !important;
-  font-size: clamp(10px, 1.3vh, 12px) !important;
-}
+.auth-pill { padding: 5px 12px !important; font-size: 12px !important; }
 .auth-brand-mentors { margin-top: 0 !important; }
-.auth-mentor-label  { margin-bottom: clamp(4px, 0.8vh, 10px) !important; }
-.auth-mentor-chips  { gap: clamp(3px, 0.6vh, 6px) !important; }
-.auth-mentor-chip {
-  padding: clamp(4px, 0.6vh, 6px) clamp(7px, 1vh, 12px) !important;
-  font-size: clamp(10px, 1.4vh, 13px) !important;
-}
+.auth-mentor-label  { margin-bottom: 10px !important; }
+.auth-mentor-chips  { gap: 6px !important; }
+.auth-mentor-chip   { padding: 6px 12px !important; font-size: 13px !important; }
