@@ -1794,3 +1794,39 @@ header .style-btn.danger:hover {
 .auth-mentor-label  { margin-bottom: 10px !important; font-size: 12px !important; }
 .auth-mentor-chips  { gap: 8px !important; }
 .auth-mentor-chip   { padding: 7px 13px !important; font-size: 13px !important; line-height: 1.4 !important; }
+
+/* ══════════════════════════════════════
+   온보딩 Step1 — 필수 표시 + 컴팩트 칩
+══════════════════════════════════════ */
+
+/* 필수 배지 */
+.ob-required {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--brand-main);
+  background: rgba(139,26,26,.08);
+  border: 1px solid rgba(139,26,26,.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  text-transform: none;
+}
+
+/* 컴팩트 칩 그리드 — 위아래 폭 최소화 */
+.ob-chip-grid--compact { margin-bottom: 0.75rem !important; }
+
+.ob-chip--sm {
+  padding: 7px 10px !important;
+  font-size: 13px !important;
+}
+
+/* 선택 시 강조 색상 — 업종 태그와 동일한 스타일 */
+.ob-chip--sm.sel {
+  border-color: var(--brand-point) !important;
+  background: rgba(26,58,110,0.10) !important;
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+}

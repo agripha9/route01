@@ -263,10 +263,10 @@
     <div class="ob-title">스타트업을 소개해 주세요</div>
     <div class="ob-sub">아래 4가지가 맞춤형 자문의 핵심입니다.</div>
 
-    <label class="ob-label">사업 한 줄 소개 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 무엇을 만드는 팀인가요?</span></label>
+    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">*필수</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 무엇을 만드는 팀인가요?</span></label>
     <input class="ob-input" id="industry-in" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
 
-    <label class="ob-label">업종 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 복수 선택 가능</span></label>
+    <label class="ob-label">업종 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 복수 선택 가능 · 해당 업종이 없으면 기타 클릭 후 입력</span></label>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="industry-tags">
       <span class="ind-tag" data-sector="SaaS" onclick="toggleSector(this)">SaaS</span>
       <span class="ind-tag" data-sector="앱/플랫폼" onclick="toggleSector(this)">앱</span>
@@ -291,25 +291,25 @@
     </div>
     <input class="ob-input" id="sector-other-in" placeholder="업종을 직접 입력하세요" oninput="onSectorOtherInput(this.value)" style="display:none;margin-bottom:10px"/>
 
-    <label class="ob-label" style="margin-top:4px">현재 단계</label>
-    <div class="ob-grid-3" id="stage-grid">
-      <div class="ob-chip" data-val="아이디어" onclick="pickChip('stage',this)">아이디어</div>
-      <div class="ob-chip" data-val="MVP 개발중" onclick="pickChip('stage',this)">MVP</div>
-      <div class="ob-chip" data-val="초기 매출" onclick="pickChip('stage',this)">초기 매출</div>
-      <div class="ob-chip" data-val="시드 준비" onclick="pickChip('stage',this)">시드 준비</div>
-      <div class="ob-chip" data-val="시드 완료" onclick="pickChip('stage',this)">시드 완료</div>
-      <div class="ob-chip" data-val="시리즈A+" onclick="pickChip('stage',this)">시리즈A+</div>
+    <label class="ob-label" style="margin-top:4px">현재 단계 <span class="ob-required">*필수</span></label>
+    <div class="ob-grid-3 ob-chip-grid--compact" id="stage-grid">
+      <div class="ob-chip ob-chip--sm" data-val="아이디어" onclick="pickChip('stage',this)">아이디어</div>
+      <div class="ob-chip ob-chip--sm" data-val="MVP 개발중" onclick="pickChip('stage',this)">MVP</div>
+      <div class="ob-chip ob-chip--sm" data-val="초기 매출" onclick="pickChip('stage',this)">초기 매출</div>
+      <div class="ob-chip ob-chip--sm" data-val="시드 준비" onclick="pickChip('stage',this)">시드 준비</div>
+      <div class="ob-chip ob-chip--sm" data-val="시드 완료" onclick="pickChip('stage',this)">시드 완료</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈A+" onclick="pickChip('stage',this)">시리즈A+</div>
     </div>
 
-    <label class="ob-label" style="margin-top:4px">타겟 고객</label>
-    <div class="ob-grid" id="target-grid">
-      <div class="ob-chip" data-val="B2B (기업)" onclick="pickChip('target',this)">B2B (기업)</div>
-      <div class="ob-chip" data-val="B2C (소비자)" onclick="pickChip('target',this)">B2C (소비자)</div>
-      <div class="ob-chip" data-val="B2G (공공/정부)" onclick="pickChip('target',this)">B2G (공공)</div>
-      <div class="ob-chip" data-val="B2B+B2C 복합" onclick="pickChip('target',this)">복합</div>
+    <label class="ob-label" style="margin-top:4px">타겟 고객 <span class="ob-required">*필수</span></label>
+    <div class="ob-grid ob-chip-grid--compact" id="target-grid">
+      <div class="ob-chip ob-chip--sm" data-val="B2B (기업)" onclick="pickChip('target',this)">B2B (기업)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2C (소비자)" onclick="pickChip('target',this)">B2C (소비자)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2G (공공/정부)" onclick="pickChip('target',this)">B2G (공공)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2B+B2C 복합" onclick="pickChip('target',this)">복합</div>
     </div>
 
-    <label class="ob-label" style="margin-top:4px">핵심 고민 또는 목표 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 지금 가장 급한 것은?</span></label>
+    <label class="ob-label" style="margin-top:4px">핵심 고민 또는 목표 <span class="ob-required">*필수</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 지금 가장 급한 것은?</span></label>
     <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶은데 IR 준비를 어떻게 시작할지 모르겠어요."></textarea>
 
     <div class="ob-btn-row">

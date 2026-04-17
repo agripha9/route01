@@ -825,7 +825,7 @@ function pickChip(type, el) {
   validate();
 }
 function validate() {
-  if (step===1) document.getElementById('btn1').disabled=!(ob.industry&&ob.stage&&ob.concern);
+  if (step===1) document.getElementById('btn1').disabled=!(ob.industry&&ob.stage&&ob.target&&ob.concern);
   // Step2는 모두 선택사항이므로 항상 활성화
   const btn2 = document.getElementById('btn2');
   if (btn2) btn2.disabled = false;
