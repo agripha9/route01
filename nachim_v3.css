@@ -1969,3 +1969,128 @@ header .style-btn.danger:hover {
   color: var(--brand-point) !important;
   font-weight: 700 !important;
 }
+
+/* ══════════════════════════════════════
+   답변 화면 — 애플 스타일 완전 통일
+   채팅 너비 — 중앙 정렬 + 최대 너비
+══════════════════════════════════════ */
+
+/* 채팅 영역 중앙 정렬 — Claude처럼 */
+.chat {
+  padding: 2rem max(1.75rem, calc((100% - 760px) / 2)) 1.75rem !important;
+}
+.input-area-inner {
+  max-width: 760px !important;
+  margin: 0 auto !important;
+}
+.welcome-screen .ws-content {
+  max-width: 720px !important;
+}
+
+/* ── 글머리 기호 완전 통일 ── */
+/* 빨간 동그라미 등 커스텀 bullet 제거 */
+.report-bubble ul,
+.report-bubble ol {
+  margin: 0.5rem 0 0.85rem !important;
+  padding-left: 1.6rem !important;
+}
+.report-bubble ul { list-style-type: disc !important; }
+.report-bubble ol { list-style-type: decimal !important; }
+
+.report-bubble li {
+  margin-bottom: 0.4rem !important;
+  line-height: 1.65 !important;
+  color: var(--ink) !important;
+}
+/* marker 색상 — 브랜드 컬러로 통일 */
+.report-bubble ul > li::marker {
+  color: var(--brand-point) !important;
+  font-size: 0.85em;
+}
+.report-bubble ol > li::marker {
+  color: var(--brand-main) !important;
+  font-weight: 700;
+}
+/* ::before / ::after 완전 제거 */
+.report-bubble li::before,
+.report-bubble li::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ── h2 섹션 헤더 — 브랜드 라인 */
+.report-bubble h2 {
+  font-size: 16px !important;
+  font-weight: 750 !important;
+  color: var(--ink) !important;
+  margin: 1.4rem 0 0.55rem !important;
+  padding-bottom: 6px !important;
+  border-bottom: 2px solid var(--brand-main) !important;
+  letter-spacing: -0.3px !important;
+}
+.report-bubble h3 {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  margin: 1rem 0 0.4rem !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* ── 표 — 브랜드 헤더 색상 */
+.report-bubble table,
+.m-bubble table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border) !important;
+  margin: 0.85rem 0 !important;
+  font-size: 13px !important;
+}
+.report-bubble th,
+.m-bubble th {
+  background: var(--brand-main) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  padding: 8px 11px !important;
+  text-align: center !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  white-space: nowrap;
+  -webkit-print-color-adjust: exact;
+}
+.report-bubble td,
+.m-bubble td {
+  padding: 7px 11px !important;
+  border: 1px solid var(--border) !important;
+  vertical-align: top !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--ink) !important;
+}
+.report-bubble tbody tr:nth-child(even) td,
+.m-bubble tbody tr:nth-child(even) td {
+  background: rgba(26,58,110,.03) !important;
+}
+
+/* ── blockquote */
+.report-bubble blockquote {
+  margin: 0.85rem 0 !important;
+  padding: 10px 14px !important;
+  border-left: 3px solid var(--brand-point) !important;
+  background: rgba(26,58,110,.04) !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: var(--ink2) !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+}
+
+/* ── strong */
+.report-bubble strong {
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+}

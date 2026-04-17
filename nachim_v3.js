@@ -2713,10 +2713,13 @@ async function exportAnswer(type, id /*, btn */){
       'p{margin:0 0 12pt 0;}',
       'h1,h2,h3{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-weight:800;color:#1d1d1f;letter-spacing:-0.2pt;}',
       'h1{font-size:16pt;margin:18pt 0 10pt 0;}',
-      'h2{font-size:13.5pt;margin:16pt 0 9pt 0;}',
-      'h3{font-size:12pt;margin:14pt 0 8pt 0;}',
+      'h2{font-size:13.5pt;font-weight:800;color:#1d1d1f;margin:16pt 0 9pt 0;padding-bottom:4pt;border-bottom:2pt solid #8B1A1A;}',
+      'h3{font-size:12pt;font-weight:700;color:#1d1d1f;margin:14pt 0 8pt 0;}',
       'strong{font-weight:800;color:#1d1d1f;}',
-      'ul,ol{padding-left:30pt;margin:8pt 0 12pt 0;}',
+      'ul,ol{padding-left:26pt;margin:8pt 0 12pt 0;}',
+      'ul li::marker{color:#1a3a6e;}',
+      'ol li::marker{color:#8B1A1A;font-weight:700;}',
+      'blockquote{margin:10pt 0;padding:8pt 12pt;border-left:3pt solid #1a3a6e;background:#f0f4ff;color:#424245;font-size:10.5pt;line-height:1.55;}',
       'table{border-collapse:collapse;width:100%;border:1px solid #c8ccd4;margin:10pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 9pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'td{padding:4pt 9pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;line-height:1.35;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
@@ -2799,17 +2802,33 @@ async function exportAnswer(type, id /*, btn */){
         td.style.backgroundColor = '#fdf5f5';
       });
 
-      // 3. 인용구(회색 상자) 완벽 제어
+      // 3. 인용구 — 브랜드 블루 border + 연파랑 배경
       doc.querySelectorAll('blockquote').forEach(bq => {
-        bq.style.backgroundColor = '#f5f5f7';
-        bq.style.padding = '10pt';
-        bq.style.borderLeft = '3px solid #d2d2d7';
+        bq.style.backgroundColor = '#f0f4ff';
+        bq.style.padding = '8pt 12pt';
+        bq.style.borderLeft = '3pt solid #1a3a6e';
         bq.style.margin = '10pt 0';
       });
-      // ★ 핵심: Word는 blockquote의 배경을 무시하므로 내부 p 태그에도 배경색 주입
       doc.querySelectorAll('blockquote p').forEach(p => {
-        p.style.backgroundColor = '#f5f5f7';
+        p.style.backgroundColor = '#f0f4ff';
         p.style.margin = '0 0 5pt 0';
+        p.style.color = '#424245';
+      });
+
+      // 3b. h2 — 브랜드 레드 하단 라인
+      doc.querySelectorAll('h2').forEach(h => {
+        h.style.fontSize = '13.5pt';
+        h.style.fontWeight = '800';
+        h.style.color = '#1d1d1f';
+        h.style.borderBottom = '2pt solid #8B1A1A';
+        h.style.paddingBottom = '3pt';
+        h.style.marginBottom = '8pt';
+      });
+      doc.querySelectorAll('h3').forEach(h => {
+        h.style.fontSize = '12pt';
+        h.style.fontWeight = '700';
+        h.style.color = '#1d1d1f';
+        h.style.marginBottom = '6pt';
       });
 
       // 4. 기울임꼴 유지 (회색 박스 안/밖 모두)
