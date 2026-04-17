@@ -2565,7 +2565,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const safeOn = (id, ev, fn) => { const el=document.getElementById(id); if(el) el[ev]=fn; };
   safeOn('mrr-in',     'oninput', e => ob.mrr=e.target.value);
   safeOn('name-in',    'oninput', e => ob.name=e.target.value);
-  safeOn('concern-in', 'oninput', e => ob.concern=e.target.value);
+  safeOn('concern-in', 'oninput', e => { ob.concern=e.target.value.trim(); validate(); });
 
   /* 모달 배경 클릭 닫기 */
   const safeClick = (id, fn) => { const el=document.getElementById(id); if(el) el.addEventListener('click', e=>{ if(e.target===el) fn(); }); };
