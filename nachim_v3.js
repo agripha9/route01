@@ -728,48 +728,42 @@ const DOMAIN_EXPERT_PERSONAS = {
 - 용어: NDA, 이용약관, 개인정보, 특허·상표·저작권, 라이선스, 준법. 모든 구체 사안은 변호사·변리사 자문을 반복 권고한다.`
 };
 
-/* ── 멘토 메타 정보 (로그인 화면 + 선택 모달에서 표시) ── */
 const MENTOR_META = {
   'Paul Graham (YC)': {
-    tag: 'YC',
-    tagColor: '#F26522',
-    emoji: '🔶',
-    headline: '초기 생존 & PMF',
-    desc: 'Y Combinator 공동창업자. "Do things that don\'t scale"의 저자. 초기 스타트업의 생존·PMF·직설적 피드백에 특화. 군더더기 없는 결론과 구체적 액션을 제시한다.'
+    tag:'YC', tagColor:'#F26522', emoji:'🔶',
+    headline:'초기 생존 · PMF · 직설적 실행',
+    desc:'"Do things that don\'t scale." 지금 당장 할 수 있는 것에 집중. 수치와 사례로 직설적 피드백.',
+    free: true
   },
-  'Patrick Collison (Stripe)': {
-    tag: 'Stripe',
-    tagColor: '#635BFF',
-    emoji: '⚡',
-    headline: '실행 속도 & 글로벌 확장',
-    desc: 'Stripe CEO. 빠른 실행, 글로벌 스케일, 엔지니어링 문화를 중시. "주당 몇 번 배포하냐"를 먼저 묻는다. 실행 속도·기술 깊이·글로벌 확장 전략에 탁월하다.'
+  'Peter Thiel (Founders Fund)': {
+    tag:'Founders Fund', tagColor:'#1a3a8a', emoji:'♟️',
+    headline:'독점 · 역발상 · 0→1 전략',
+    desc:'"경쟁은 패자의 것." 아무도 가지 않는 길, 10배 이상의 차별화, 독점 가능한 시장을 찾아라.',
+    free: true
   },
   'Brian Chesky (Airbnb)': {
-    tag: 'Airbnb',
-    tagColor: '#FF5A5F',
-    emoji: '🏠',
-    headline: '위기관리 & 브랜드',
-    desc: 'Airbnb CEO. 코로나 위기를 창의적 전략으로 극복한 위기관리의 대가. 브랜드 스토리·고객 경험·D2C 전략, 그리고 "1000명의 팬"을 먼저 만드는 방식을 강조한다.'
+    tag:'Airbnb', tagColor:'#FF5A5F', emoji:'🏠',
+    headline:'위기관리 · 브랜드 · 고객 경험',
+    desc:'"11성급 경험을 설계하라." 위기를 기회로, 진짜 팬 1000명부터 만드는 브랜드 전략.',
+    free: false
   },
   'Jensen Huang (NVIDIA)': {
-    tag: 'NVIDIA',
-    tagColor: '#76b900',
-    emoji: '💚',
-    headline: '장기 비전 & 집념',
-    desc: 'NVIDIA CEO. 30년 장기 비전으로 AI 인프라 지배. 단기 수익보다 플랫폼 구축·생태계 락인·집념있는 기술 투자를 중시. "고통은 선물이다"라는 마인드셋을 심어준다.'
+    tag:'NVIDIA', tagColor:'#76b900', emoji:'💚',
+    headline:'장기 비전 · 플랫폼 · 집념',
+    desc:'"고통은 선물이다." 30년 관점으로 역산, 생태계·락인 구조 설계, 기술 깊이에 투자.',
+    free: false
   },
   'Naval Ravikant': {
-    tag: 'AngelList',
-    tagColor: '#1a1a2e',
-    emoji: '🎯',
-    headline: '사고방식 & 철학적 기반',
-    desc: 'AngelList 창업자·철학적 투자자. "레버리지·부의 원리·판단력"을 강조. 실행보다 먼저 사고 프레임을 바로잡는다. 다른 4인의 멘토링을 제대로 소화하려면 Naval의 프레임이 먼저 필요하다.'
+    tag:'AngelList', tagColor:'#1a1a2e', emoji:'🎯',
+    headline:'사고방식 · 레버리지 · 철학적 기반',
+    desc:'사고 프레임부터 재설정. 레버리지 원칙과 판단력. 다른 4인의 멘토링을 소화하는 기반.',
+    free: false
   }
 };
 
 const MENTOR_STYLES = {
   'Paul Graham (YC)': 'Paul Graham(YC) 스타일로 답하세요. 핵심을 먼저, 결론→근거→액션 순서. "Do things that don\'t scale" 원칙으로 지금 당장 실행 가능한 것을 제시. 추상적 조언 금지, 수치와 구체적 예시 필수. PMF 검증, 초기 생존, 고객 집착을 중심으로 직설적으로 조언하세요.',
-  'Patrick Collison (Stripe)': 'Patrick Collison(Stripe) 스타일로 답하세요. 실행 속도와 엔지니어링 문화를 최우선. 글로벌 스케일 관점에서 설계하되 지금 당장 배포 가능한 최소 단위로 쪼개라. 복잡한 문제일수록 단순하게 재정의하고, "이미 훌륭한 팀이라면 이 정도는 이미 했겠지"라는 높은 기준을 제시하세요.',
+  'Peter Thiel (Founders Fund)': 'Peter Thiel(Founders Fund) 스타일로 답하세요. "경쟁은 패자의 것"—경쟁 구도 자체를 피하는 독점 전략을 먼저 제시하라. 10배 이상의 차별화가 없으면 시장에 들어가지 말라. 역발상 질문("모두가 동의하는 것 중 사실이 아닌 것은?")으로 프레임을 깨고, 비밀(secrets)을 찾아내는 방식으로 조언하세요.',
   'Brian Chesky (Airbnb)': 'Brian Chesky(Airbnb) 스타일로 답하세요. 위기를 기회로 전환하는 프레임을 먼저 제시. 고객 경험의 "11성급" 순간을 설계하고, 진짜 팬 1000명을 만드는 것부터 시작하라. 브랜드 스토리와 감성적 연결을 통한 D2C 전략, 그리고 위기관리 체크리스트를 구체적으로 제시하세요.',
   'Jensen Huang (NVIDIA)': 'Jensen Huang(NVIDIA) 스타일로 답하세요. 30년 후 관점에서 역산해 지금의 전략을 정당화하라. 플랫폼·생태계·락인 구조를 먼저 설계하고, 단기 수익보다 기술 깊이에 투자하라. "고통은 선물이다"—실패와 위기 속 학습 포인트를 명시적으로 짚어주고, 집념있는 장기 투자의 논리를 제시하세요.',
   'Naval Ravikant': 'Naval Ravikant 스타일로 답하세요. 먼저 사고 프레임을 재설정하라—잘못된 질문에 좋은 답을 구하지 말고, 질문 자체를 바꿔라. 레버리지(코드·미디어·자본·노동) 관점에서 최소 투입으로 최대 확장성을 설계하라. 스펙이 아닌 판단력을 키우는 원칙을 제시하고, 마지막에 근본적 사고를 위한 질문 1개를 반드시 포함하세요.'
@@ -2502,25 +2496,39 @@ function openStyleModal(){
   const grid=document.getElementById('style-modal-grid');
   if(!grid) return;
   const cur=profile.style||'Paul Graham (YC)';
+  const plan = getCurrentPlan ? getCurrentPlan() : 'free';
+  const isPaid = (plan === 'starter' || plan === 'pro' || plan === 'team');
+
   grid.innerHTML = Object.keys(MENTOR_META).map(k => {
     const m = MENTOR_META[k];
     const isSel = k === cur;
-    return `
-    <button class="mentor-card ${isSel?'mentor-card--sel':''}" data-style="${esc(k)}" style="text-align:left;padding:14px 16px;border-radius:12px;border:2px solid ${isSel?'var(--cta)':'var(--border)'};background:${isSel?'#fff8f2':'var(--card)'};cursor:pointer;transition:all .15s">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:20px">${m.emoji}</span>
-        <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:${m.tagColor}18;color:${m.tagColor}">${m.tag}</span>
-        ${isSel?'<span style="margin-left:auto;font-size:11px;color:var(--cta);font-weight:700">✓ 선택됨</span>':''}
+    const isLocked = !m.free && !isPaid;
+    return `<div class="ob-mentor-row ${isSel?'sel':''} ${isLocked?'ob-mentor-row--locked':''}" data-style="${esc(k)}" style="cursor:pointer">
+      <div class="ob-mentor-row-left">
+        <span class="ob-mentor-row-emoji">${m.emoji}</span>
+        <div class="ob-mentor-row-info">
+          <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag" style="background:${m.tagColor}18;color:${m.tagColor}">${m.tag}</span>${isSel?'<span style="margin-left:6px;font-size:11px;color:var(--cta);font-weight:700">✓ 선택됨</span>':''}</div>
+          <div class="ob-mentor-row-kw">${esc(m.headline)}</div>
+          <div class="ob-mentor-row-desc">${esc(m.desc)}</div>
+        </div>
       </div>
-      <div style="font-weight:750;font-size:14px;color:var(--ink);margin-bottom:2px">${esc(k)}</div>
-      <div style="font-size:11px;font-weight:600;color:${m.tagColor};margin-bottom:5px">${esc(m.headline)}</div>
-      <div style="font-size:12px;color:var(--ink2);line-height:1.5">${esc(m.desc)}</div>
-    </button>`;
+      <div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>
+    </div>`;
   }).join('');
-  grid.style.gridTemplateColumns = '1fr';
-  grid.style.gap = '8px';
+
   grid.querySelectorAll('[data-style]').forEach(btn=>{
-    btn.addEventListener('click',()=>setMentorStyle(btn.getAttribute('data-style')));
+    btn.addEventListener('click',()=>{
+      const s = btn.getAttribute('data-style');
+      const meta = MENTOR_META[s];
+      const pl = getCurrentPlan ? getCurrentPlan() : 'free';
+      const paid = (pl === 'starter' || pl === 'pro' || pl === 'team');
+      if(meta && !meta.free && !paid){
+        closeStyleModal();
+        openPricingModal();
+        return;
+      }
+      setMentorStyle(s);
+    });
   });
   document.getElementById('style-modal').classList.add('open');
 }
@@ -3952,6 +3960,50 @@ function submitWithdraw(){
   showAuthGate();
   initAuthHeroMessaging();
 }
+/* PRO 잠금 멘토 클릭 시 (온보딩용) */
+function pickMentorOrUpgrade(el, styleKey){
+  const plan = getCurrentPlan ? getCurrentPlan() : 'free';
+  const isPaid = (plan === 'starter' || plan === 'pro' || plan === 'team');
+  if(isPaid){ pickChip('style', el); return; }
+  const m = document.createElement('div');
+  m.className = 'modal-bg open';
+  m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
+    <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
+    <div style="font-size:32px;margin-bottom:10px">🔒</div>
+    <div class="modal-title">Starter 이상 전용 멘토</div>
+    <div class="modal-sub">이 멘토 스타일은 Starter 플랜 이상에서 이용할 수 있어요.</div>
+    <div style="display:flex;gap:8px;margin-top:1.25rem">
+      <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
+      <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+}
+
+/* 파일 업로드 접근 제어 */
+function checkUploadAccess(){
+  const plan = getCurrentPlan ? getCurrentPlan() : 'free';
+  if(plan === 'free'){
+    const m = document.createElement('div');
+    m.className = 'modal-bg open';
+    m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
+      <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
+      <div style="font-size:32px;margin-bottom:10px">📎</div>
+      <div class="modal-title">Starter 이상 전용 기능</div>
+      <div class="modal-sub">파일 업로드는 Starter 플랜(₩9,900/월) 이상에서 이용할 수 있어요.</div>
+      <div style="display:flex;gap:8px;margin-top:1.25rem">
+        <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
+        <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+    return;
+  }
+  document.getElementById('ob-file-input')?.click();
+}
+
 (function exposeGlobals() {
   var fns = {
     // Auth
@@ -4038,7 +4090,8 @@ function submitWithdraw(){
     openWithdraw: openWithdraw,
     closeWithdraw: closeWithdraw,
     submitWithdraw: submitWithdraw,
-    incrementUsage: incrementUsage,
+    pickMentorOrUpgrade: pickMentorOrUpgrade,
+    checkUploadAccess: checkUploadAccess,
   };
   for (var k in fns) {
     try { window[k] = fns[k]; } catch(e) {}

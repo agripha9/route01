@@ -323,66 +323,104 @@
     <div class="ob-sub">선택사항이지만 입력할수록 자문이 정확해집니다.</div>
 
     <label class="ob-label">팀 규모</label>
-    <div class="ob-grid" id="team-grid">
-      <div class="ob-chip" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
-      <div class="ob-chip" data-val="2~3명" onclick="pickChip('team',this)">2~3명</div>
-      <div class="ob-chip" data-val="4~10명" onclick="pickChip('team',this)">4~10명</div>
-      <div class="ob-chip" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
+    <div class="ob-grid ob-chip-grid--compact" id="team-grid">
+      <div class="ob-chip ob-chip--sm" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
+      <div class="ob-chip ob-chip--sm" data-val="2~3명" onclick="pickChip('team',this)">2~3명</div>
+      <div class="ob-chip ob-chip--sm" data-val="4~10명" onclick="pickChip('team',this)">4~10명</div>
+      <div class="ob-chip ob-chip--sm" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
     </div>
 
     <label class="ob-label">월 매출(MRR) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 없으면 비워두세요</span></label>
     <input class="ob-input" id="mrr-in" type="text" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
 
     <label class="ob-label">투자 상황</label>
-    <div class="ob-grid" id="invest-grid">
-      <div class="ob-chip" data-val="미투자" onclick="pickChip('invest',this)">미투자</div>
-      <div class="ob-chip" data-val="엔젤/시드 완료" onclick="pickChip('invest',this)">엔젤/시드</div>
-      <div class="ob-chip" data-val="시리즈A 완료" onclick="pickChip('invest',this)">시리즈A</div>
-      <div class="ob-chip" data-val="시리즈B+" onclick="pickChip('invest',this)">시리즈B+</div>
+    <div class="ob-grid ob-chip-grid--compact" id="invest-grid">
+      <div class="ob-chip ob-chip--sm" data-val="미투자" onclick="pickChip('invest',this)">미투자</div>
+      <div class="ob-chip ob-chip--sm" data-val="엔젤/시드 완료" onclick="pickChip('invest',this)">엔젤/시드</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈A 완료" onclick="pickChip('invest',this)">시리즈A</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈B+" onclick="pickChip('invest',this)">시리즈B+</div>
     </div>
 
     <label class="ob-label">스타트업 이름 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 선택</span></label>
     <input class="ob-input" id="name-in" type="text" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
 
-    <label class="ob-label">멘토 스타일 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 기본: Paul Graham (YC)</span></label>
-    <div class="ob-mentor-grid" id="style-grid">
-      <div class="ob-mentor-card sel" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
-        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#fff3ec;color:#F26522">YC</span><span class="ob-mentor-emoji">🔶</span></div>
-        <div class="ob-mentor-name">Paul Graham</div>
-        <div class="ob-mentor-kw">초기 생존 · PMF</div>
-        <div class="ob-mentor-desc">직설적 피드백, 지금 당장 실행 가능한 것을 제시. "Do things that don't scale."</div>
+    <label class="ob-label">멘토 스타일 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 기본: Paul Graham · 나머지는 Starter 이상</span></label>
+    <div class="ob-mentor-list" id="style-grid">
+
+      <!-- 1. Paul Graham — 무료 -->
+      <div class="ob-mentor-row sel" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-row-left">
+          <span class="ob-mentor-row-emoji">🔶</span>
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Paul Graham <span class="ob-mentor-row-tag" style="background:#fff3ec;color:#F26522">YC</span></div>
+            <div class="ob-mentor-row-kw">초기 생존 · PMF · 직설적 실행</div>
+            <div class="ob-mentor-row-desc">"Do things that don't scale." 지금 당장 할 수 있는 것에 집중. 수치와 사례로 직설적 피드백.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge free-badge">FREE</div>
       </div>
-      <div class="ob-mentor-card" data-val="Patrick Collison (Stripe)" onclick="pickChip('style',this)">
-        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0efff;color:#635BFF">Stripe</span><span class="ob-mentor-emoji">⚡</span></div>
-        <div class="ob-mentor-name">Patrick Collison</div>
-        <div class="ob-mentor-kw">실행 속도 · 글로벌 확장</div>
-        <div class="ob-mentor-desc">빠른 실행, 엔지니어링 문화, 글로벌 스케일. 배포 주기가 경쟁력이다.</div>
+
+      <!-- 2. Peter Thiel — 무료 -->
+      <div class="ob-mentor-row" data-val="Peter Thiel (Founders Fund)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-row-left">
+          <span class="ob-mentor-row-emoji">♟️</span>
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Peter Thiel <span class="ob-mentor-row-tag" style="background:#e8f0fe;color:#1a3a8a">Founders Fund</span></div>
+            <div class="ob-mentor-row-kw">독점 · 역발상 · 0→1 전략</div>
+            <div class="ob-mentor-row-desc">"경쟁은 패자의 것." 아무도 가지 않는 길, 10배 이상의 차별화, 독점 가능한 시장을 찾아라.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge free-badge">FREE</div>
       </div>
-      <div class="ob-mentor-card" data-val="Brian Chesky (Airbnb)" onclick="pickChip('style',this)">
-        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#fff0f0;color:#FF5A5F">Airbnb</span><span class="ob-mentor-emoji">🏠</span></div>
-        <div class="ob-mentor-name">Brian Chesky</div>
-        <div class="ob-mentor-kw">위기관리 · 브랜드</div>
-        <div class="ob-mentor-desc">위기를 기회로 전환. 진짜 팬 1000명을 먼저 만들고, 브랜드 스토리로 확장.</div>
+
+      <!-- 3. Brian Chesky — PRO -->
+      <div class="ob-mentor-row ob-mentor-row--locked" data-val="Brian Chesky (Airbnb)" onclick="pickMentorOrUpgrade(this,'Brian Chesky (Airbnb)')">
+        <div class="ob-mentor-row-left">
+          <span class="ob-mentor-row-emoji">🏠</span>
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Brian Chesky <span class="ob-mentor-row-tag" style="background:#fff0f0;color:#FF5A5F">Airbnb</span></div>
+            <div class="ob-mentor-row-kw">위기관리 · 브랜드 · 고객 경험</div>
+            <div class="ob-mentor-row-desc">"11성급 경험을 설계하라." 위기를 기회로, 진짜 팬 1000명부터 만드는 브랜드 전략.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge pro-badge">PRO</div>
       </div>
-      <div class="ob-mentor-card" data-val="Jensen Huang (NVIDIA)" onclick="pickChip('style',this)">
-        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0fff0;color:#76b900">NVIDIA</span><span class="ob-mentor-emoji">💚</span></div>
-        <div class="ob-mentor-name">Jensen Huang</div>
-        <div class="ob-mentor-kw">장기 비전 · 집념</div>
-        <div class="ob-mentor-desc">30년 관점으로 역산. 플랫폼·생태계·락인 설계. "고통은 선물이다."</div>
+
+      <!-- 4. Jensen Huang — PRO -->
+      <div class="ob-mentor-row ob-mentor-row--locked" data-val="Jensen Huang (NVIDIA)" onclick="pickMentorOrUpgrade(this,'Jensen Huang (NVIDIA)')">
+        <div class="ob-mentor-row-left">
+          <span class="ob-mentor-row-emoji">💚</span>
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Jensen Huang <span class="ob-mentor-row-tag" style="background:#f0fff0;color:#76b900">NVIDIA</span></div>
+            <div class="ob-mentor-row-kw">장기 비전 · 플랫폼 · 집념</div>
+            <div class="ob-mentor-row-desc">"고통은 선물이다." 30년 관점으로 역산, 생태계·락인 구조 설계, 기술 깊이에 투자.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge pro-badge">PRO</div>
       </div>
-      <div class="ob-mentor-card" data-val="Naval Ravikant" onclick="pickChip('style',this)">
-        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0f0f0;color:#1a1a2e">AngelList</span><span class="ob-mentor-emoji">🎯</span></div>
-        <div class="ob-mentor-name">Naval Ravikant</div>
-        <div class="ob-mentor-kw">사고방식 · 철학적 기반</div>
-        <div class="ob-mentor-desc">사고 프레임 재설정, 레버리지 원칙, 판단력. 다른 멘토의 기반이 되는 철학.</div>
+
+      <!-- 5. Naval Ravikant — PRO -->
+      <div class="ob-mentor-row ob-mentor-row--locked" data-val="Naval Ravikant" onclick="pickMentorOrUpgrade(this,'Naval Ravikant')">
+        <div class="ob-mentor-row-left">
+          <span class="ob-mentor-row-emoji">🎯</span>
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Naval Ravikant <span class="ob-mentor-row-tag" style="background:#f0f0f0;color:#1a1a2e">AngelList</span></div>
+            <div class="ob-mentor-row-kw">사고방식 · 레버리지 · 철학적 기반</div>
+            <div class="ob-mentor-row-desc">사고 프레임부터 재설정. 레버리지 원칙과 판단력. 다른 4인의 멘토링을 소화하는 기반.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge pro-badge">PRO</div>
       </div>
+
     </div>
 
-    <label class="ob-label" style="margin-top:.5rem">관련 자료 업로드 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 선택사항</span></label>
-    <div class="upload-zone" id="ob-drop-zone" onclick="document.getElementById('ob-file-input').click()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
+    <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드
+      <span class="ob-pro-lock">🔒 Starter 이상</span>
+    </label>
+    <div class="upload-zone upload-zone--locked" id="ob-drop-zone" onclick="checkUploadAccess()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
       <div class="upload-zone-icon">📎</div>
       <div class="upload-zone-text">파일을 끌어다 놓거나 클릭하여 업로드</div>
-      <div class="upload-zone-sub">회사소개서 · IR 자료 · 재무제표 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> 업로드 가능 · 파일당 최대 20MB</div>
+      <div class="upload-zone-sub">회사소개서 · IR 자료 · 재무제표 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> · 파일당 최대 20MB · <strong>Starter 플랜 이상</strong></div>
     </div>
     <input type="file" id="ob-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="obFileSelect(this.files)"/>
     <div class="file-list" id="ob-file-list"></div>
