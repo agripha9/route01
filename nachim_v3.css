@@ -1824,9 +1824,11 @@ header .style-btn.danger:hover {
 }
 
 /* 선택 시 강조 색상 — 업종 태그와 동일한 스타일 */
-.ob-chip--sm.sel {
+/* stage/target 칩 선택 색 — 명시도 높여서 기본 .ob-chip.sel 덮어쓰기 */
+#stage-grid .ob-chip.sel,
+#target-grid .ob-chip.sel {
   border-color: var(--brand-point) !important;
-  background: rgba(26,58,110,0.10) !important;
-  color: var(--ink) !important;
-  font-weight: 600 !important;
+  background: rgba(26,58,110,0.12) !important;
+  color: var(--brand-point) !important;
+  font-weight: 700 !important;
 }
