@@ -1770,26 +1770,27 @@ header .style-btn.danger:hover {
   justify-content: center !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 2rem 2.5rem !important;
+  padding: 2.5rem 3rem !important;
 }
 
 /* 오른쪽: 내부 스크롤 */
 .auth-right { overflow-y: auto !important; overflow-x: hidden !important; }
 
-/* 브랜드 내부 — 원래 간격 복원 */
+/* 브랜드 내부 — 넉넉한 줄간격 */
 .auth-brand-inner { gap: 0 !important; }
-.auth-brand-logo  { height: clamp(56px, 7vh, 80px) !important; margin-bottom: 4px !important; }
-.auth-brand-kicker { margin-bottom: 0 !important; }
+.auth-brand-logo  { height: 72px !important; margin-bottom: 6px !important; }
+.auth-brand-kicker { margin-bottom: 4px !important; font-size: 12px !important; }
 .auth-brand-title {
-  font-size: clamp(22px, 3.2vh, 38px) !important;
-  margin-bottom: clamp(0.8rem, 1.8vh, 1.25rem) !important;
+  font-size: clamp(24px, 3.2vh, 38px) !important;
+  margin-bottom: 1.5rem !important;
 }
 .auth-brand-pills {
-  margin-bottom: clamp(0.8rem, 1.8vh, 2rem) !important;
+  margin-bottom: 1.75rem !important;
   gap: 8px !important;
 }
 .auth-pill { padding: 5px 12px !important; font-size: 12px !important; }
 .auth-brand-mentors { margin-top: 0 !important; }
-.auth-mentor-label  { margin-bottom: 10px !important; }
-.auth-mentor-chips  { gap: 6px !important; }
-.auth-mentor-chip   { padding: 6px 12px !important; font-size: 13px !important; }
+.auth-mentor-desc   { font-size: 14px !important; line-height: 1.6 !important; margin-bottom: 1.25rem !important; }
+.auth-mentor-label  { margin-bottom: 10px !important; font-size: 12px !important; }
+.auth-mentor-chips  { gap: 8px !important; }
+.auth-mentor-chip   { padding: 7px 13px !important; font-size: 13px !important; line-height: 1.4 !important; }
