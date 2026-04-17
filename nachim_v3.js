@@ -520,7 +520,7 @@ function closeGrantModal(){
   if(m) m.classList.remove('open');
 }
 function buildGrantSystem(){
-  const styleGuide = MENTOR_STYLES[profile.style] || MENTOR_STYLES['YC 파트너식 직설'];
+  const styleGuide = MENTOR_STYLES[profile.style] || MENTOR_STYLES['Paul Graham (YC)'];
   let sys=`당신은 한국의 정부지원사업(기업부설연구소, 창업·R&D 지원, 지역·중소벤처 사업, TIPS 등) 사업계획서 작성에 특화된 전문가입니다.
 
 **임무**
@@ -534,7 +534,7 @@ function buildGrantSystem(){
 - 출력: 마크다운(## · ###), 표·목록 적극 활용.
 - 마지막에 "## 제출 전 체크리스트"로 공고·양식 대비 점검 항목을 정리합니다.
 
-[멘토 톤: ${profile.style||'YC 파트너식 직설'}]
+[멘토 톤: ${profile.style||'Paul Graham (YC)'}]
 ${styleGuide}
 `;
   if(profile.industry){
@@ -813,7 +813,11 @@ function onSectorOtherInput(val) {
   validate();
 }
 function pickChip(type, el) {
-  el.closest('[id$="-grid"]').querySelectorAll('.ob-chip').forEach(c=>c.classList.remove('sel'));
+  const grid = el.closest('[id$="-grid"]') || el.closest('[id$="-list"]');
+  if(grid){
+    // ob-chip 또는 ob-mentor-row 모두 처리
+    grid.querySelectorAll('.ob-chip, .ob-mentor-row').forEach(c=>c.classList.remove('sel'));
+  }
   el.classList.add('sel');
   ob[type] = el.dataset.val;
   validate();
@@ -920,7 +924,14 @@ function hydrateOnboardingFromOb(){
   };
   setSel('stage-grid', ob.stage||'');
   setSel('team-grid',  ob.team||'');
-  setSel('style-grid', ob.style||'Paul Graham (YC)');
+  // style-grid는 ob-mentor-row 구조 — data-val로 sel 클래스 복원
+  const styleGrid = document.getElementById('style-grid');
+  if(styleGrid){
+    const curStyle = ob.style || 'Paul Graham (YC)';
+    styleGrid.querySelectorAll('[data-val]').forEach(c=>{
+      c.classList.toggle('sel', c.dataset.val === curStyle);
+    });
+  }
 
   validate();
 }
