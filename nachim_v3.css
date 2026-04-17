@@ -69,9 +69,9 @@ body{
 #auth{
   position:fixed;inset:0;z-index:2000;
   background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  padding:max(2.5rem, env(safe-area-inset-top)) max(1.75rem, env(safe-area-inset-right)) max(2.5rem, env(safe-area-inset-bottom)) max(1.75rem, env(safe-area-inset-left));
-  overflow-y:auto;-webkit-overflow-scrolling:touch;isolation:isolate
+  display:flex;align-items:stretch;justify-content:center;
+  padding:0;
+  overflow:hidden;isolation:isolate
 }
 #auth.hidden{display:none}
 /* auth-shell legacy removed */
