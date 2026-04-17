@@ -1764,28 +1764,28 @@ header .style-btn.danger:hover {
 #auth { overflow: hidden !important; }
 .auth-shell { overflow: hidden !important; }
 
-/* 왼쪽: 내부 스크롤, 위쪽부터 배치 */
+/* 왼쪽: 세로 중앙 정렬, 내부만 스크롤 */
 .auth-brand {
+  align-items: center !important;
+  justify-content: center !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  align-items: flex-start !important;  /* 위에서부터 배치 — 위잘림 방지 */
-  padding-top: 2.5rem !important;
-  padding-bottom: 2.5rem !important;
+  padding: 2rem 2.5rem !important;
 }
 
 /* 오른쪽: 내부 스크롤 */
 .auth-right { overflow-y: auto !important; overflow-x: hidden !important; }
 
-/* 브랜드 내부 — 원래 간격 유지하되 vh로 자연스럽게 */
+/* 브랜드 내부 — 원래 간격 복원 */
 .auth-brand-inner { gap: 0 !important; }
-.auth-brand-logo  { height: clamp(56px, 8vh, 80px) !important; margin-bottom: clamp(4px, 1vh, 8px) !important; }
-.auth-brand-kicker { margin-bottom: clamp(2px, 0.5vh, 4px) !important; }
+.auth-brand-logo  { height: clamp(56px, 7vh, 80px) !important; margin-bottom: 4px !important; }
+.auth-brand-kicker { margin-bottom: 0 !important; }
 .auth-brand-title {
   font-size: clamp(22px, 3.2vh, 38px) !important;
-  margin-bottom: clamp(0.8rem, 2vh, 1.25rem) !important;
+  margin-bottom: clamp(0.8rem, 1.8vh, 1.25rem) !important;
 }
 .auth-brand-pills {
-  margin-bottom: clamp(0.8rem, 2vh, 2rem) !important;
+  margin-bottom: clamp(0.8rem, 1.8vh, 2rem) !important;
   gap: 8px !important;
 }
 .auth-pill { padding: 5px 12px !important; font-size: 12px !important; }
