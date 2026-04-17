@@ -344,19 +344,37 @@
     <label class="ob-label">스타트업 이름 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 선택</span></label>
     <input class="ob-input" id="name-in" type="text" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
 
-    <label class="ob-label">멘토 스타일</label>
-    <div class="ob-grid" id="style-grid">
-      <div class="ob-chip sel" data-val="YC 파트너식 직설" onclick="pickChip('style',this)">
-        <span class="em">⚡</span>YC 파트너식 직설
+    <label class="ob-label">멘토 스타일 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 기본: Paul Graham (YC)</span></label>
+    <div class="ob-mentor-grid" id="style-grid">
+      <div class="ob-mentor-card sel" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#fff3ec;color:#F26522">YC</span><span class="ob-mentor-emoji">🔶</span></div>
+        <div class="ob-mentor-name">Paul Graham</div>
+        <div class="ob-mentor-kw">초기 생존 · PMF</div>
+        <div class="ob-mentor-desc">직설적 피드백, 지금 당장 실행 가능한 것을 제시. "Do things that don't scale."</div>
       </div>
-      <div class="ob-chip" data-val="소크라테스식 질문" onclick="pickChip('style',this)">
-        <span class="em">🔍</span>소크라테스식 질문
+      <div class="ob-mentor-card" data-val="Patrick Collison (Stripe)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0efff;color:#635BFF">Stripe</span><span class="ob-mentor-emoji">⚡</span></div>
+        <div class="ob-mentor-name">Patrick Collison</div>
+        <div class="ob-mentor-kw">실행 속도 · 글로벌 확장</div>
+        <div class="ob-mentor-desc">빠른 실행, 엔지니어링 문화, 글로벌 스케일. 배포 주기가 경쟁력이다.</div>
       </div>
-      <div class="ob-chip" data-val="데이터 중심 분석" onclick="pickChip('style',this)">
-        <span class="em">📈</span>데이터 중심 분석
+      <div class="ob-mentor-card" data-val="Brian Chesky (Airbnb)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#fff0f0;color:#FF5A5F">Airbnb</span><span class="ob-mentor-emoji">🏠</span></div>
+        <div class="ob-mentor-name">Brian Chesky</div>
+        <div class="ob-mentor-kw">위기관리 · 브랜드</div>
+        <div class="ob-mentor-desc">위기를 기회로 전환. 진짜 팬 1000명을 먼저 만들고, 브랜드 스토리로 확장.</div>
       </div>
-      <div class="ob-chip" data-val="국내 시장 특화" onclick="pickChip('style',this)">
-        <span class="em">🇰🇷</span>국내 시장 특화
+      <div class="ob-mentor-card" data-val="Jensen Huang (NVIDIA)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0fff0;color:#76b900">NVIDIA</span><span class="ob-mentor-emoji">💚</span></div>
+        <div class="ob-mentor-name">Jensen Huang</div>
+        <div class="ob-mentor-kw">장기 비전 · 집념</div>
+        <div class="ob-mentor-desc">30년 관점으로 역산. 플랫폼·생태계·락인 설계. "고통은 선물이다."</div>
+      </div>
+      <div class="ob-mentor-card" data-val="Naval Ravikant" onclick="pickChip('style',this)">
+        <div class="ob-mentor-top"><span class="ob-mentor-tag" style="background:#f0f0f0;color:#1a1a2e">AngelList</span><span class="ob-mentor-emoji">🎯</span></div>
+        <div class="ob-mentor-name">Naval Ravikant</div>
+        <div class="ob-mentor-kw">사고방식 · 철학적 기반</div>
+        <div class="ob-mentor-desc">사고 프레임 재설정, 레버리지 원칙, 판단력. 다른 멘토의 기반이 되는 철학.</div>
       </div>
     </div>
 
@@ -395,6 +413,10 @@
     <div class="header-actions">
       <button class="home-icon-btn" onclick="goHome()" title="홈으로">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="style-btn" onclick="openMyPage()" title="마이페이지">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        마이페이지
       </button>
       <button class="style-btn danger" id="logout-btn" onclick="logout()" title="로그아웃">
         로그아웃
@@ -714,6 +736,81 @@
     </div>
   </div>
 </div>
+<!-- 마이페이지 모달 -->
+<div class="modal-bg" id="mypage-modal">
+  <div class="modal modal-wide" style="max-width:560px">
+    <button class="modal-close" onclick="closeMyPage()">×</button>
+    <div class="modal-title">마이페이지</div>
+    <div id="mypage-body"></div>
+  </div>
+</div>
+
+<!-- 요금제 선택 모달 -->
+<div class="modal-bg" id="pricing-modal">
+  <div class="modal modal-wide" style="max-width:600px">
+    <button class="modal-close" onclick="closePricingModal()">×</button>
+    <div class="modal-title">요금제</div>
+    <div class="modal-sub">더 많은 질문과 기능이 필요하신가요?</div>
+    <div id="pricing-body"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closePricingModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="modal-bg" id="pw-change-modal">
+  <div class="modal" style="width:400px">
+    <button class="modal-close" onclick="closePwChange()">×</button>
+    <div class="modal-title">비밀번호 변경</div>
+    <div class="afield" style="margin-bottom:12px">
+      <label class="afield-label" for="pw-cur">현재 비밀번호</label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-cur" type="password" placeholder="현재 비밀번호"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-cur',this)">👁</button>
+      </div>
+    </div>
+    <div class="afield" style="margin-bottom:12px">
+      <label class="afield-label" for="pw-new">새 비밀번호 <span style="font-weight:400;color:var(--ink3)">(8자 이상)</span></label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-new" type="password" placeholder="새 비밀번호"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new',this)">👁</button>
+      </div>
+    </div>
+    <div class="afield" style="margin-bottom:16px">
+      <label class="afield-label" for="pw-new2">새 비밀번호 확인</label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-new2" type="password" placeholder="새 비밀번호 재입력"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new2',this)">👁</button>
+      </div>
+    </div>
+    <div class="aerr" id="aerr-pw-change" style="margin-bottom:10px"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closePwChange()">취소</button>
+      <button class="modal-btn pri" onclick="submitPwChange()">변경하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 회원탈퇴 확인 모달 -->
+<div class="modal-bg" id="withdraw-modal">
+  <div class="modal" style="width:380px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div class="modal-title">정말 탈퇴하시겠어요?</div>
+    <div class="modal-sub" style="text-align:left;padding:12px 16px;background:var(--bg);border-radius:var(--r);margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--ink2)">
+      탈퇴 시 다음 데이터가 모두 삭제됩니다:<br>
+      • 프로필 정보<br>
+      • 질문 기록<br>
+      • 구독 정보 (환불 불가)<br><br>
+      <strong>이 작업은 되돌릴 수 없습니다.</strong>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeWithdraw()">취소</button>
+      <button class="modal-btn modal-btn--danger" onclick="submitWithdraw()">탈퇴하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 프로필 모달 -->
 <div class="modal-bg" id="modal">
   <div class="modal">

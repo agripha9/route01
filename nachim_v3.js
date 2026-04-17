@@ -728,17 +728,57 @@ const DOMAIN_EXPERT_PERSONAS = {
 - 용어: NDA, 이용약관, 개인정보, 특허·상표·저작권, 라이선스, 준법. 모든 구체 사안은 변호사·변리사 자문을 반복 권고한다.`
 };
 
+/* ── 멘토 메타 정보 (로그인 화면 + 선택 모달에서 표시) ── */
+const MENTOR_META = {
+  'Paul Graham (YC)': {
+    tag: 'YC',
+    tagColor: '#F26522',
+    emoji: '🔶',
+    headline: '초기 생존 & PMF',
+    desc: 'Y Combinator 공동창업자. "Do things that don\'t scale"의 저자. 초기 스타트업의 생존·PMF·직설적 피드백에 특화. 군더더기 없는 결론과 구체적 액션을 제시한다.'
+  },
+  'Patrick Collison (Stripe)': {
+    tag: 'Stripe',
+    tagColor: '#635BFF',
+    emoji: '⚡',
+    headline: '실행 속도 & 글로벌 확장',
+    desc: 'Stripe CEO. 빠른 실행, 글로벌 스케일, 엔지니어링 문화를 중시. "주당 몇 번 배포하냐"를 먼저 묻는다. 실행 속도·기술 깊이·글로벌 확장 전략에 탁월하다.'
+  },
+  'Brian Chesky (Airbnb)': {
+    tag: 'Airbnb',
+    tagColor: '#FF5A5F',
+    emoji: '🏠',
+    headline: '위기관리 & 브랜드',
+    desc: 'Airbnb CEO. 코로나 위기를 창의적 전략으로 극복한 위기관리의 대가. 브랜드 스토리·고객 경험·D2C 전략, 그리고 "1000명의 팬"을 먼저 만드는 방식을 강조한다.'
+  },
+  'Jensen Huang (NVIDIA)': {
+    tag: 'NVIDIA',
+    tagColor: '#76b900',
+    emoji: '💚',
+    headline: '장기 비전 & 집념',
+    desc: 'NVIDIA CEO. 30년 장기 비전으로 AI 인프라 지배. 단기 수익보다 플랫폼 구축·생태계 락인·집념있는 기술 투자를 중시. "고통은 선물이다"라는 마인드셋을 심어준다.'
+  },
+  'Naval Ravikant': {
+    tag: 'AngelList',
+    tagColor: '#1a1a2e',
+    emoji: '🎯',
+    headline: '사고방식 & 철학적 기반',
+    desc: 'AngelList 창업자·철학적 투자자. "레버리지·부의 원리·판단력"을 강조. 실행보다 먼저 사고 프레임을 바로잡는다. 다른 4인의 멘토링을 제대로 소화하려면 Naval의 프레임이 먼저 필요하다.'
+  }
+};
+
 const MENTOR_STYLES = {
-  'YC 파트너식 직설':'Paul Graham의 직설적 방식으로 핵심을 먼저 말하고 구체적 액션을 제시하세요. 추상적 조언 금지, 수치와 예시 필수.',
-  '소크라테스식 질문':'창업자가 스스로 답을 찾도록 질문 중심으로 이끌어주세요. 매 응답 마지막에 생각을 자극하는 질문 1개를 꼭 포함하세요.',
-  '데이터 중심 분석':'모든 주장에 데이터와 수치를 근거로 제시하세요. 업계 벤치마크, 통계, 사례 수치를 구체적으로 언급하세요.',
-  '국내 시장 특화':'한국 스타트업 생태계 특성(정부지원사업, 국내 VC 성향, 규제 환경, K-스타트업 사례)을 반영한 현실적 조언을 우선하세요.'
+  'Paul Graham (YC)': 'Paul Graham(YC) 스타일로 답하세요. 핵심을 먼저, 결론→근거→액션 순서. "Do things that don\'t scale" 원칙으로 지금 당장 실행 가능한 것을 제시. 추상적 조언 금지, 수치와 구체적 예시 필수. PMF 검증, 초기 생존, 고객 집착을 중심으로 직설적으로 조언하세요.',
+  'Patrick Collison (Stripe)': 'Patrick Collison(Stripe) 스타일로 답하세요. 실행 속도와 엔지니어링 문화를 최우선. 글로벌 스케일 관점에서 설계하되 지금 당장 배포 가능한 최소 단위로 쪼개라. 복잡한 문제일수록 단순하게 재정의하고, "이미 훌륭한 팀이라면 이 정도는 이미 했겠지"라는 높은 기준을 제시하세요.',
+  'Brian Chesky (Airbnb)': 'Brian Chesky(Airbnb) 스타일로 답하세요. 위기를 기회로 전환하는 프레임을 먼저 제시. 고객 경험의 "11성급" 순간을 설계하고, 진짜 팬 1000명을 만드는 것부터 시작하라. 브랜드 스토리와 감성적 연결을 통한 D2C 전략, 그리고 위기관리 체크리스트를 구체적으로 제시하세요.',
+  'Jensen Huang (NVIDIA)': 'Jensen Huang(NVIDIA) 스타일로 답하세요. 30년 후 관점에서 역산해 지금의 전략을 정당화하라. 플랫폼·생태계·락인 구조를 먼저 설계하고, 단기 수익보다 기술 깊이에 투자하라. "고통은 선물이다"—실패와 위기 속 학습 포인트를 명시적으로 짚어주고, 집념있는 장기 투자의 논리를 제시하세요.',
+  'Naval Ravikant': 'Naval Ravikant 스타일로 답하세요. 먼저 사고 프레임을 재설정하라—잘못된 질문에 좋은 답을 구하지 말고, 질문 자체를 바꿔라. 레버리지(코드·미디어·자본·노동) 관점에서 최소 투입으로 최대 확장성을 설계하라. 스펙이 아닌 판단력을 키우는 원칙을 제시하고, 마지막에 근본적 사고를 위한 질문 1개를 반드시 포함하세요.'
 };
 let profile = {};
 let domain = 'strategy';
 let messages = [];
 let busy = false;
-let ob = {industry:'',sector:[],sectorOther:'',stage:'',target:'',team:'',mrr:'',invest:'',name:'',concern:'',style:'YC 파트너식 직설'};
+let ob = {industry:'',sector:[],sectorOther:'',stage:'',target:'',team:'',mrr:'',invest:'',name:'',concern:'',style:'Paul Graham (YC)'};
 let step = 1;
 
 /* ─── 온보딩 ────────────────────────── */
@@ -886,7 +926,7 @@ function hydrateOnboardingFromOb(){
   };
   setSel('stage-grid', ob.stage||'');
   setSel('team-grid',  ob.team||'');
-  setSel('style-grid', ob.style||'YC 파트너식 직설');
+  setSel('style-grid', ob.style||'Paul Graham (YC)');
 
   validate();
 }
@@ -913,9 +953,9 @@ function applyProfile(){
   const pbInfo=document.getElementById('pb-info');
   if(pbInfo) pbInfo.textContent=(profile.industry&&profile.stage)?`${profile.stage} · ${profile.industry}`:'프로필 미설정';
   const styleEl=document.getElementById('pb-style');
-  if(styleEl) styleEl.textContent=profile.style||'YC 파트너식 직설';
+  if(styleEl) styleEl.textContent=profile.style||'Paul Graham (YC)';
   const styleBtn=document.getElementById('style-btn-text');
-  if(styleBtn) styleBtn.textContent=profile.style||'YC 파트너식 직설';
+  if(styleBtn) styleBtn.textContent=profile.style||'Paul Graham (YC)';
 }
 
 /* (popular questions tab removed) */
@@ -1455,74 +1495,106 @@ function hideLoad(){const e=document.getElementById('load-msg');if(e)e.remove();
 function fmt(md){return renderMD(md);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* ─── 시스템 프롬프트 (Expert Mode) ─── */
+/* ─── 시스템 프롬프트 (Expert Mode) — 토큰 최적화 + 차별화 강화 ─── */
 function buildDomainScopeLines(){
   return Object.entries(DOMAINS).map(([key,v])=>`- **${key}** → 표시명: 「${v.title}」 / 범위 요약: ${v.desc}`).join('\n');
+}
+
+/* 프로필 요약 JSON — 토큰 최소화 */
+function buildProfileJson(){
+  if(!profile.industry) return null;
+  const p = {};
+  if(profile.industry) p.biz = profile.industry;
+  if(profile.sector && profile.sector.length) p.sector = profile.sector.join(',');
+  if(profile.stage) p.stage = profile.stage;
+  if(profile.target) p.target = profile.target;
+  if(profile.team) p.team = profile.team;
+  if(profile.invest) p.invest = profile.invest;
+  if(profile.mrr) p.mrr = profile.mrr;
+  if(profile.name) p.name = profile.name;
+  if(profile.concern) p.concern = profile.concern.slice(0,200);
+  return JSON.stringify(p);
 }
 
 function buildSys(){
   const domKey=(domain && DOMAINS[domain])?domain:'strategy';
   const cfg=DOMAINS[domKey];
   const persona=DOMAIN_EXPERT_PERSONAS[domKey]||DOMAIN_EXPERT_PERSONAS.strategy;
-  const styleGuide = MENTOR_STYLES[profile.style] || MENTOR_STYLES['YC 파트너식 직설'];
-  let sys=`당신은 한국·실리콘밸리 스타트업 생태계를 깊이 아는 **Route01 Expert Mode** 자문 엔진이다.
-사용자의 질문 주제와 관계없이 스타트업 자문 관점에서 최선의 답변을 제공하라.
+  const styleGuide = MENTOR_STYLES[profile.style] || MENTOR_STYLES['Paul Graham (YC)'];
+  const mentorName = profile.style || 'Paul Graham (YC)';
+  const profileJson = buildProfileJson();
+
+  let sys=`당신은 **Route01** — 한국·실리콘밸리 스타트업 생태계 전문 AI 자문 엔진이다.
+일반 LLM과 달리 스타트업 실전 데이터(YC배치, 국내 VC 포트폴리오, 정부지원사업 패턴)에 기반한 구체적·검증된 자문을 제공한다.
 
 ${persona}
 
-[도메인 기본 역할 요약]
+[현재 도메인: ${cfg.title}]
 ${cfg.sys}
 
-[멘토링 스타일: ${profile.style||'YC 파트너식 직설'}]
+[멘토 스타일: ${mentorName}]
 ${styleGuide}
-
 `;
-  if(profile.industry){
-    sys+=`
-[상담 스타트업 프로필]
-- 사업 한 줄 소개: ${profile.industry}
-- 업종: ${(profile.sector&&profile.sector.length)?profile.sector.join(', '):'미입력'}
-- 단계: ${profile.stage}
-- 타겟 고객: ${profile.target||'미입력'}
-- 투자 상황: ${profile.invest||'미입력'}
-- 팀: ${profile.team}
-${profile.mrr?`- 월 매출: ${profile.mrr}`:''}
-${profile.name?`- 이름: ${profile.name}`:''}
-${profile.concern?`- 핵심 고민: ${profile.concern}`:''}
 
-이 스타트업의 상황에 맞는 구체적 조언을 하세요. 일반론 금지.
-`;
+  if(profileJson){
+    sys += `\n[스타트업 프로필]\n${profileJson}\n이 스타트업 상황에 맞는 구체적 자문을 하라. 일반론 금지.\n`;
+  } else {
+    sys += `\n[프로필 미설정] 일반적인 스타트업 관점에서 답하되, 프로필 설정을 권유하라.\n`;
   }
+
   if(uploadedDocs.filter(f=>f.status==='ok').length){
     const names=uploadedDocs.filter(f=>f.status==='ok').map(f=>f.name).join(', ');
-    sys+=`\n[업로드된 회사 자료]\n창업자가 다음 문서를 제공했습니다: ${names}\n첨부 자료를 적극 참조하여 구체적인 맞춤 자문을 제공하세요.\n`;
+    sys+=`\n[첨부 자료: ${names}] — 자료를 적극 참조하여 구체적 맞춤 자문 제공.\n`;
   }
-  sys+=`
-[가드레일 — 범위 외 질문 처리]
-- 너는 스타트업 전문 자문역 'Route01'이다.
-- 사용자의 질문이 스타트업 창업, 경영, 투자, 비즈니스 모델과 관련 없으면, 아래 문구로 정중히 거절하고 도메인 질문으로 유도하라:
-"죄송하지만 저는 스타트업 자문에 특화된 AI입니다. 관련 고민을 말씀해 주시면 최선을 다해 돕겠습니다."
-- 거절 후에는 사용자가 바로 이어서 질문할 수 있도록, 자문 가능한 분야 예시 3~6개를 짧게 제시하라. (예: BM 고도화, IR 피드백, 시장 분석, 경쟁사 분석, KPI 설계, 투자 전략)
 
+  sys+=`
+[가드레일] 스타트업/창업/경영/투자 외 질문은 정중히 거절 후 자문 가능 분야 3~5개 제시.
 
 [답변 구조 — 필수]
-- 마크다운으로 아래 **섹션 제목을 정확히** 사용한다(짧은 답변이라도 헤더는 유지).
 ## Executive Summary
-3~6문장. 핵심 결론·권고·우선순위만. 경영진이 스캔해도 이해되게.
+3~5문장. 핵심 결론·권고·우선순위.
 ## 근거 및 맥락
-왜 그런지: 수치·가정·프레임워크·벤치마크·비교 사례. 추정은 가정을 명시.
+수치·가정·프레임워크·벤치마크·비교 사례.
 ## 실행 방안 (Action Plan)
-즉시 실행 가능한 단계(우선순위, 검증 방법, 담당 역할이 분명하면 명시, 가능하면 주·2주 단위 마일스톤 감으로 제시).
-- "~할 수 있습니다" 대신 "~하세요" 등 직접적 톤을 유지한다.
-- Action Plan에 이미 다음 단계가 포함되므로, 본문 안에서 불필요한 반복 서술은 줄인다.
+즉시 실행 가능한 단계 (주/2주 단위 마일스톤 포함).
+- "~할 수 있습니다" 대신 "~하세요" 직접 톤 유지.
 
-[보내기 구분 규칙 — 필수]
-- 위 [답변 구조]의 본문(Executive Summary ~ Action Plan)을 모두 마친 뒤에만, 사용자를 위한 부가 문구를 쓸 수 있다. 부가 문구란: 추천 질문·핵심 체크포인트·한 줄 요약·"궁금하면 물어보세요" 등 대화 유도·CTA·잡담에 가까운 문장을 모두 포함한다.
-- 부가 문구는 반드시 아래 구분선 "바로 다음 줄"부터 시작한다. 구분선 앞(본문)에는 아래 문자열을 절대 넣지 마라(부분 일치·코드블록·인용 안에도 금지).
-- 구분선은 한 줄에 아래 문자열만 단독으로 출력한다(앞뒤 공백·따옴표·백틱 없이).
+[구분선 규칙] 본문 완료 후 부가문구(추천질문·CTA 등) 앞에만:
 <<<NACHIM_TAIL>>>
 `;
   return sys;
+}
+
+/* ─── 프로필 없으면 질문 전 안내 ─── */
+function checkProfileBeforeSend(text){
+  if(profile.industry) return true; // 프로필 있으면 통과
+  // 프로필 없는 경우 — 안내 모달 표시
+  const m = document.createElement('div');
+  m.className = 'modal-bg open';
+  m.id = 'no-profile-modal';
+  m.innerHTML = `
+    <div class="modal" style="max-width:400px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">👤</div>
+      <div class="modal-title">프로필을 설정하면 더 정확한 자문을 받을 수 있어요</div>
+      <div class="modal-sub" style="text-align:left;line-height:1.7;margin-bottom:1rem">
+        스타트업 단계, 업종, 핵심 고민을 입력하면:<br>
+        ✅ <strong>맞춤형</strong> 자문 (일반론 → 나만의 조언)<br>
+        ✅ <strong>멘토 스타일</strong>에 맞는 피드백 톤<br>
+        ✅ <strong>도메인별</strong> 구체적 수치와 사례
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="modal-btn" id="no-profile-skip" style="flex:1">일단 질문하기</button>
+        <button class="modal-btn pri" onclick="document.getElementById('no-profile-modal').remove();editProfile();" style="flex:1">프로필 설정 →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  document.getElementById('no-profile-skip').onclick = () => {
+    m.remove();
+    localStorage.setItem('r01_profile_skip','1'); // 이번 세션은 스킵
+    doSend(text);
+  };
+  m.addEventListener('click', e => { if(e.target===m) m.remove(); });
+  return false;
 }
 
 /* ─── 메시지 전송 ──────────────────── */
@@ -1530,14 +1602,43 @@ async function send(){
   if(busy)return;
   const el=document.getElementById('input');
   const t=el.value.trim();
-  if(!t)return;
-  /* 도메인 통합 — 미스매치 체크 비활성화 */
+  if(!t && !chatPendingFiles.length)return;
+  /* 프로필 미설정 체크 (이번 세션 스킵이면 통과) */
+  if(!profile.industry && !localStorage.getItem('r01_profile_skip')){
+    const blocked = checkProfileBeforeSend(t);
+    if(!blocked){ el.value='';resize(el); return; }
+  }
   el.value='';resize(el);
   await doSend(t);
 }
 async function quickAsk(t){if(!busy)await doSend(t);}
 
 async function doSend(text){
+  /* 요금제 한도 체크 */
+  const curPlan = getCurrentPlan ? getCurrentPlan() : 'free';
+  const planInfo = R01_PLANS ? R01_PLANS.find(p=>p.id===curPlan) : null;
+  if(planInfo && planInfo.limit !== 99999){
+    const usage = getMonthlyUsage ? getMonthlyUsage() : 0;
+    if(usage >= planInfo.limit){
+      const m = document.createElement('div');
+      m.className = 'modal-bg open';
+      m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">📊</div>
+        <div class="modal-title">이번 달 질문 한도에 도달했어요</div>
+        <div class="modal-sub">${planInfo.name} 플랜 월 ${planInfo.limit}회 사용 완료.<br>더 많은 자문이 필요하시면 업그레이드하세요.</div>
+        <div style="display:flex;gap:8px;margin-top:1.25rem">
+          <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
+          <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 업그레이드 →</button>
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+      m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+      return;
+    }
+  }
+  /* 사용량 카운트 */
+  if(incrementUsage) incrementUsage();
+
   busy=true;
   document.getElementById('send-btn').disabled=true;
   const filesToSend=[...chatPendingFiles];
@@ -1588,8 +1689,8 @@ async function doSend(text){
       return await res.json();
     };
 
-    /* try to avoid truncation, then auto-continue if still cut */
-    let convo=messages.slice(-10); /* keep a bit more context for continuation */
+    /* 토큰 최적화: 최근 6턴(12메시지)만 유지 */
+    let convo=messages.slice(-12);
     let fullTextAll='';
     let stopReason='';
     let j=null;
@@ -2400,13 +2501,24 @@ function resize(el){
 function openStyleModal(){
   const grid=document.getElementById('style-modal-grid');
   if(!grid) return;
-  const cur=profile.style||'YC 파트너식 직설';
-  grid.innerHTML=Object.keys(MENTOR_STYLES).map(k=>`
-    <button class="modal-btn ${k===cur?'pri':''}" style="text-align:left" data-style="${esc(k)}">
-      <div style="font-weight:750;margin-bottom:4px">${esc(k)}</div>
-      <div style="font-size:12px;font-weight:500;opacity:.85;line-height:1.55">${esc(MENTOR_STYLES[k]).slice(0,120)}${MENTOR_STYLES[k].length>120?'…':''}</div>
-    </button>
-  `).join('');
+  const cur=profile.style||'Paul Graham (YC)';
+  grid.innerHTML = Object.keys(MENTOR_META).map(k => {
+    const m = MENTOR_META[k];
+    const isSel = k === cur;
+    return `
+    <button class="mentor-card ${isSel?'mentor-card--sel':''}" data-style="${esc(k)}" style="text-align:left;padding:14px 16px;border-radius:12px;border:2px solid ${isSel?'var(--cta)':'var(--border)'};background:${isSel?'#fff8f2':'var(--card)'};cursor:pointer;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:20px">${m.emoji}</span>
+        <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:${m.tagColor}18;color:${m.tagColor}">${m.tag}</span>
+        ${isSel?'<span style="margin-left:auto;font-size:11px;color:var(--cta);font-weight:700">✓ 선택됨</span>':''}
+      </div>
+      <div style="font-weight:750;font-size:14px;color:var(--ink);margin-bottom:2px">${esc(k)}</div>
+      <div style="font-size:11px;font-weight:600;color:${m.tagColor};margin-bottom:5px">${esc(m.headline)}</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.5">${esc(m.desc)}</div>
+    </button>`;
+  }).join('');
+  grid.style.gridTemplateColumns = '1fr';
+  grid.style.gap = '8px';
   grid.querySelectorAll('[data-style]').forEach(btn=>{
     btn.addEventListener('click',()=>setMentorStyle(btn.getAttribute('data-style')));
   });
@@ -2420,6 +2532,16 @@ function setMentorStyle(style){
   try{localStorage.setItem('vd_profile',JSON.stringify(profile));}catch(e){}
   applyProfile();
   closeStyleModal();
+  // 멘토 변경 피드백
+  const m = MENTOR_META[s];
+  if(m){
+    const toast = document.createElement('div');
+    toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s';
+    toast.textContent = `${m.emoji} ${s} 스타일로 변경됐습니다`;
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=>{ toast.style.opacity='1'; });
+    setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),300); }, 2000);
+  }
 }
 
 /* ─── 초기화 ────────────────────────── */
@@ -2454,6 +2576,10 @@ document.addEventListener('DOMContentLoaded', function(){
   safeClick('grant-modal',    closeGrantModal);
   safeClick('confirm-modal',  closeConfirm);
   safeClick('hist-modal',     closeHistModal);
+  safeClick('mypage-modal',   closeMyPage);
+  safeClick('pricing-modal',  closePricingModal);
+  safeClick('pw-change-modal',closePwChange);
+  safeClick('withdraw-modal', closeWithdraw);
 
   /* 확인 모달 버튼 — onclick 속성 대신 직접 바인딩 */
   const okBtn=document.getElementById('confirm-ok-btn');
@@ -3326,7 +3452,7 @@ function syncUnifiedBadges() {
   if(co) co.textContent = concernText;
 
   // 멘토 스타일
-  if(sy) sy.textContent = profile.style || 'YC 파트너식 직설';
+  if(sy) sy.textContent = profile.style || 'Paul Graham (YC)';
 }
 
 /* ── 통합 히스토리 ── */
@@ -3603,6 +3729,229 @@ function goHome() {
   // showWelcome()으로 통일 (chat 초기화 + 웰컴화면 표시)
   showWelcome();
 }
+/* ══════════════════════════════════════
+   마이페이지 & 요금제 & 비밀번호 변경
+══════════════════════════════════════ */
+
+/* 요금제 정보 */
+const R01_PLANS = [
+  {
+    id:'free', name:'Free', price:0, priceText:'무료',
+    desc:'가볍게 시작하기',
+    features:['월 10회 질문','추천 질문 이용','도메인별 자문'],
+    limit:10, color:'#6e6e73', cta:'현재 플랜'
+  },
+  {
+    id:'starter', name:'Starter', price:9900, priceText:'₩9,900/월',
+    desc:'본격 자문 시작',
+    features:['월 100회 질문','PDF 파일 업로드','지원사업 도우미','DOCX/PDF 내보내기','이메일 지원'],
+    limit:100, color:'#0071e3', cta:'시작하기', highlight:true
+  },
+  {
+    id:'pro', name:'Pro', price:29000, priceText:'₩29,000/월',
+    desc:'무제한 집중 자문',
+    features:['무제한 질문','PDF 업로드 무제한','지원사업 도우미','전체 멘토 스타일','우선 응답','전담 이메일 지원'],
+    limit:99999, color:'#F26522', cta:'업그레이드'
+  },
+  {
+    id:'team', name:'Team', price:99000, priceText:'₩99,000/월',
+    desc:'팀 전체 자문',
+    features:['5인 계정 공유','Pro 기능 전체 포함','팀 질문 기록 공유','월 500회 질문','데디케이티드 지원'],
+    limit:500, color:'#1d1d1f', cta:'팀 시작'
+  }
+];
+
+function getCurrentPlan(){
+  return localStorage.getItem('r01_plan') || 'free';
+}
+function getMonthlyUsage(){
+  try{
+    const key = 'r01_usage_' + new Date().toISOString().slice(0,7);
+    return parseInt(localStorage.getItem(key)||'0',10);
+  }catch(e){return 0;}
+}
+function incrementUsage(){
+  try{
+    const key = 'r01_usage_' + new Date().toISOString().slice(0,7);
+    const cur = parseInt(localStorage.getItem(key)||'0',10);
+    localStorage.setItem(key, String(cur+1));
+  }catch(e){}
+}
+
+/* 마이페이지 */
+function openMyPage(){
+  const body = document.getElementById('mypage-body');
+  if(!body) return;
+  const authRaw = localStorage.getItem('nachim_auth');
+  let user = null;
+  try{ user = JSON.parse(authRaw)?.user; }catch(e){}
+  const email = user?.email || '이메일 정보 없음';
+  const method = user?.method || (user?.sub?.startsWith('google')?'google-oauth2': user?.sub?.startsWith('apple')?'apple':'email');
+  const isEmail = method === 'email';
+  const plan = getCurrentPlan();
+  const planInfo = R01_PLANS.find(p=>p.id===plan) || R01_PLANS[0];
+  const usage = getMonthlyUsage();
+  const usagePct = Math.min(100, Math.round(usage/planInfo.limit*100));
+
+  const methodLabels = {'google-oauth2':'Google 계정','apple':'Apple 계정','naver':'네이버 계정','kakao':'카카오 계정','email':'이메일/패스워드'};
+
+  body.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- 계정 정보 -->
+      <div style="background:var(--bg);border-radius:12px;padding:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">계정 정보</div>
+        <div class="modal-row"><span class="m-label">이메일</span><div class="m-val">${esc(email)}</div></div>
+        <div class="modal-row"><span class="m-label">로그인 방식</span><div class="m-val">${methodLabels[method]||method}</div></div>
+        ${isEmail ? `<button class="modal-btn" style="margin-top:10px;width:100%" onclick="closeMyPage();openPwChange()">🔑 비밀번호 변경</button>` : ''}
+      </div>
+
+      <!-- 요금제 현황 -->
+      <div style="background:var(--bg);border-radius:12px;padding:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">요금제 현황</div>
+        <div class="modal-row">
+          <span class="m-label">현재 플랜</span>
+          <div class="m-val"><span style="font-weight:700;color:${planInfo.color}">${planInfo.name}</span> — ${planInfo.priceText}</div>
+        </div>
+        <div class="modal-row">
+          <span class="m-label">이번 달 사용</span>
+          <div class="m-val">${usage}회 / ${planInfo.limit===99999?'무제한':planInfo.limit+'회'}</div>
+        </div>
+        ${planInfo.limit !== 99999 ? `
+        <div style="margin:8px 0 4px;height:6px;background:#e8e8ed;border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${usagePct}%;background:${usagePct>80?'#ff3b30':planInfo.color};border-radius:3px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink3)">${usagePct}% 사용</div>` : ''}
+        <button class="modal-btn pri" style="margin-top:12px;width:100%" onclick="closeMyPage();openPricingModal()">요금제 변경 →</button>
+      </div>
+
+      <!-- 데이터 관리 -->
+      <div style="background:var(--bg);border-radius:12px;padding:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">데이터 관리</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="modal-btn" onclick="editProfile();closeMyPage()">프로필 수정</button>
+          <button class="modal-btn" onclick="if(confirm('질문 기록을 모두 삭제할까요?')){localStorage.removeItem('r01_hist_v1');localStorage.removeItem('vd_history');alert('삭제됐습니다.');}">질문 기록 삭제</button>
+        </div>
+      </div>
+
+      <!-- 탈퇴 -->
+      <div style="border-top:1px solid var(--border);padding-top:12px;text-align:center">
+        <button type="button" style="background:none;border:none;color:var(--ink3);font-size:13px;cursor:pointer;text-decoration:underline" onclick="closeMyPage();openWithdraw()">회원 탈퇴</button>
+      </div>
+    </div>`;
+
+  document.getElementById('mypage-modal').classList.add('open');
+}
+function closeMyPage(){
+  document.getElementById('mypage-modal')?.classList.remove('open');
+}
+
+/* 요금제 모달 */
+function openPricingModal(){
+  const body = document.getElementById('pricing-body');
+  if(!body) return;
+  const cur = getCurrentPlan();
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+      ${R01_PLANS.map(p=>`
+        <div style="border:2px solid ${p.id===cur?p.color:'var(--border)'};border-radius:14px;padding:16px;background:${p.highlight?'#fffbf7':'var(--card)'};position:relative">
+          ${p.highlight ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F26522;color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap">인기</div>' : ''}
+          <div style="font-weight:800;font-size:16px;color:${p.color};margin-bottom:2px">${p.name}</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:2px">${p.priceText}</div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">${p.desc}</div>
+          <ul style="margin:0;padding-left:16px;font-size:12px;color:var(--ink2);line-height:1.8;margin-bottom:12px">
+            ${p.features.map(f=>`<li>${esc(f)}</li>`).join('')}
+          </ul>
+          ${p.id===cur
+            ? `<button class="modal-btn" style="width:100%;font-size:12px" disabled>✓ 현재 플랜</button>`
+            : `<button class="modal-btn pri" style="width:100%;font-size:12px;background:${p.color}" onclick="selectPlan('${p.id}')">${p.cta} →</button>`
+          }
+        </div>`).join('')}
+    </div>
+    <p style="font-size:12px;color:var(--ink3);margin-top:12px;text-align:center">결제는 토스페이먼츠를 통해 안전하게 처리됩니다. 언제든 해지 가능.</p>`;
+  document.getElementById('pricing-modal').classList.add('open');
+}
+function closePricingModal(){
+  document.getElementById('pricing-modal')?.classList.remove('open');
+}
+function selectPlan(planId){
+  // 토스페이먼츠 결제 (현재는 데모 — 실제 연동 시 서버 필요)
+  const plan = R01_PLANS.find(p=>p.id===planId);
+  if(!plan) return;
+  if(plan.price === 0){
+    localStorage.setItem('r01_plan','free');
+    closePricingModal();
+    alert('Free 플랜으로 변경됐습니다.');
+    return;
+  }
+  // 결제 안내 (실제 구현 시 토스페이먼츠 SDK 호출)
+  alert(`[준비 중] ${plan.name} 플랜 결제 기능은 곧 오픈됩니다.\n\n문의: contact@route01.kr`);
+}
+
+/* 비밀번호 변경 */
+function openPwChange(){
+  ['pw-cur','pw-new','pw-new2'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const e=document.getElementById('aerr-pw-change'); if(e) e.textContent='';
+  document.getElementById('pw-change-modal')?.classList.add('open');
+}
+function closePwChange(){
+  document.getElementById('pw-change-modal')?.classList.remove('open');
+}
+function submitPwChange(){
+  const cur = document.getElementById('pw-cur')?.value||'';
+  const nw  = document.getElementById('pw-new')?.value||'';
+  const nw2 = document.getElementById('pw-new2')?.value||'';
+  const err = document.getElementById('aerr-pw-change');
+  if(err) err.textContent='';
+
+  const authRaw = localStorage.getItem('nachim_auth');
+  let user = null;
+  try{ user = JSON.parse(authRaw)?.user; }catch(e){}
+  const email = user?.email;
+
+  const accounts = _r01Accounts();
+  const acc = accounts.find(a=>a.email===email);
+  if(!acc){ if(err) err.textContent='소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.'; return; }
+  if(acc.pw !== btoa(cur)){ if(err) err.textContent='현재 비밀번호가 맞지 않습니다.'; return; }
+  if(nw.length<8){ if(err) err.textContent='새 비밀번호는 8자 이상이어야 합니다.'; return; }
+  if(nw!==nw2){ if(err) err.textContent='새 비밀번호가 일치하지 않습니다.'; return; }
+
+  acc.pw = btoa(nw);
+  _saveR01Accounts(accounts);
+  closePwChange();
+  alert('비밀번호가 변경됐습니다.');
+}
+
+/* 회원탈퇴 */
+function openWithdraw(){
+  document.getElementById('withdraw-modal')?.classList.add('open');
+}
+function closeWithdraw(){
+  document.getElementById('withdraw-modal')?.classList.remove('open');
+}
+function submitWithdraw(){
+  // 모든 데이터 삭제
+  const authRaw = localStorage.getItem('nachim_auth');
+  let email = null;
+  try{ email = JSON.parse(authRaw)?.user?.email; }catch(e){}
+
+  if(email){
+    const accounts = _r01Accounts().filter(a=>a.email!==email);
+    _saveR01Accounts(accounts);
+  }
+  ['nachim_auth','vd_profile','vd_history','r01_hist_v1','r01_plan','r01_banner_x','r01_profile_skip',
+   'nachim_api_key','r01_accs'].forEach(k=>localStorage.removeItem(k));
+  // 접두사 기반 키 삭제
+  Object.keys(localStorage).filter(k=>k.startsWith('r01_usage_')).forEach(k=>localStorage.removeItem(k));
+
+  closeWithdraw();
+  alert('탈퇴가 완료됐습니다. 이용해 주셔서 감사합니다.');
+  clearAuthed();
+  showAuthGate();
+  initAuthHeroMessaging();
+}
 (function exposeGlobals() {
   var fns = {
     // Auth
@@ -3651,7 +4000,6 @@ function goHome() {
     wsSend: wsSend,
     wsOnKey: wsOnKey,
     wsResize: wsResize,
-    filterSugDomain: filterSugDomain,
     chatFileSelect: chatFileSelect,
     obFileSelect: obFileSelect,
     obDragOver: obDragOver,
@@ -3678,6 +4026,19 @@ function goHome() {
     refreshAllReportBubbleMarkdown: refreshAllReportBubbleMarkdown,
     startAfterLogin: startAfterLogin,
     goHome: goHome,
+    // 마이페이지
+    openMyPage: openMyPage,
+    closeMyPage: closeMyPage,
+    openPricingModal: openPricingModal,
+    closePricingModal: closePricingModal,
+    selectPlan: selectPlan,
+    openPwChange: openPwChange,
+    closePwChange: closePwChange,
+    submitPwChange: submitPwChange,
+    openWithdraw: openWithdraw,
+    closeWithdraw: closeWithdraw,
+    submitWithdraw: submitWithdraw,
+    incrementUsage: incrementUsage,
   };
   for (var k in fns) {
     try { window[k] = fns[k]; } catch(e) {}
