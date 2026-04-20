@@ -3566,16 +3566,24 @@ function syncUnifiedBadges() {
   if(sy) sy.textContent = profile.style || 'Paul Graham (YC)';
 }
 
+/* ──────────────────────────────────────────────────────────────────
+   DEPRECATED — 이 섹션(r01_hist_v1 시스템)은 더 이상 사용하지 않습니다.
+
+   과거에 vd_history(구)와 r01_hist_v1(신)이 공존하며 같은 #history-list
+   DOM을 덮어쓰는 구조였고, 이 신 시스템의 saveR01History가 답변 본문 대신
+   답변 ID를 저장하는 버그가 있었습니다. 히스토리 클릭 시 "ID만 찍히는"
+   증상의 근원.
+
+   현재 사이드바는 전적으로 vd_history + renderHistory + openHistConversation
+   으로만 동작합니다. 아래 함수들은 hook이나 onclick이 실수로 다시 연결되지
+   않는 한 호출되지 않습니다. 코드 제거 대신 "호출 안 됨 + 경고"로 남겨
+   혹시 남은 참조가 있어도 조용히 무시되게 만듭니다.
+   ────────────────────────────────────────────────────────────────── */
 /* ── 통합 히스토리 ── */
 const R01_HIST_KEY = 'r01_hist_v1';
 function saveR01History(q, a) {
-  try {
-    const h = JSON.parse(localStorage.getItem(R01_HIST_KEY)||'[]');
-    h.unshift({id:Date.now(), q:q.slice(0,200), a, ts:new Date().toLocaleString('ko')});
-    if(h.length>60) h.length=60;
-    localStorage.setItem(R01_HIST_KEY, JSON.stringify(h));
-    renderR01History();
-  } catch(e){}
+  console.warn('[DEPRECATED] saveR01History called — vd_history/saveHistory 시스템을 사용해야 합니다.');
+  /* intentionally no-op to prevent corrupt writes */
 }
 function renderR01History() {
   const el = document.getElementById('history-list'); if(!el) return;
@@ -3615,7 +3623,10 @@ function openR01HistModal(id) {
 }
 function clearAllHistory() {
   if(!confirm('전체 질문 기록을 삭제할까요?')) return;
-  localStorage.removeItem(R01_HIST_KEY); renderR01History();
+  /* 사용 중인 히스토리는 vd_history. r01_hist_v1은 죽은 시스템이지만 혹시 남은 오염 데이터도 같이 정리 */
+  try{ localStorage.removeItem('vd_history'); }catch(e){}
+  try{ localStorage.removeItem('r01_hist_v1'); }catch(e){}
+  if(typeof renderHistory === 'function') renderHistory();
 }
 
 /* ── DOMContentLoaded: launch/send 후킹 ── */
