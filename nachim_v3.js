@@ -2952,8 +2952,63 @@ async function exportAnswer(type, id /*, btn */){
         el.style.fontFamily = "'Malgun Gothic', '맑은 고딕', sans-serif";
       });
 
-      // 2. 표(Table) 완벽 제어
-      doc.querySelectorAll('table').forEach(tbl => {
+      // 1b. 인용구 → 1행 2열 테이블 변환 (Word에서 좌측 막대-배경 갭 제거)
+      //     반드시 아래 '표 후처리' 이전에 실행해야 data-from 마커가 의미를 가짐.
+      doc.querySelectorAll('blockquote').forEach(bq => {
+        const innerHTML = bq.innerHTML;
+
+        const tbl = doc.createElement('table');
+        tbl.setAttribute('cellspacing', '0');
+        tbl.setAttribute('cellpadding', '0');
+        tbl.setAttribute('border', '0');
+        tbl.setAttribute('data-from', 'blockquote');
+        tbl.style.width = '100%';
+        tbl.style.borderCollapse = 'collapse';
+        tbl.style.margin = '11pt 0';
+        tbl.style.border = 'none';
+        tbl.setAttribute('role', 'presentation');
+
+        const tr = doc.createElement('tr');
+
+        const bar = doc.createElement('td');
+        bar.style.width = '3pt';
+        bar.style.minWidth = '3pt';
+        bar.style.padding = '0';
+        bar.style.margin = '0';
+        bar.style.backgroundColor = '#d2d2d7';
+        bar.style.border = 'none';
+        bar.style.setProperty('-webkit-print-color-adjust', 'exact');
+        bar.style.setProperty('print-color-adjust', 'exact');
+        bar.innerHTML = '&nbsp;';
+        bar.style.fontSize = '1pt';
+        bar.style.lineHeight = '1';
+
+        const body = doc.createElement('td');
+        body.style.padding = '9pt 13pt';
+        body.style.backgroundColor = '#f7f8fb';
+        body.style.border = 'none';
+        body.style.color = '#1d1d1f';
+        body.style.fontStyle = 'italic';
+        body.style.setProperty('-webkit-print-color-adjust', 'exact');
+        body.style.setProperty('print-color-adjust', 'exact');
+        body.innerHTML = innerHTML;
+
+        const innerPs = body.querySelectorAll(':scope > p');
+        innerPs.forEach((p, i) => {
+          p.style.margin = '0';
+          p.style.color = '#1d1d1f';
+          p.style.fontStyle = 'italic';
+          if (i > 0) p.style.marginTop = '5pt';
+        });
+
+        tr.appendChild(bar);
+        tr.appendChild(body);
+        tbl.appendChild(tr);
+        bq.replaceWith(tbl);
+      });
+
+      // 2. 표(Table) 완벽 제어 (blockquote를 table로 변환한 것은 제외)
+      doc.querySelectorAll('table:not([data-from="blockquote"])').forEach(tbl => {
         tbl.style.borderCollapse = 'collapse';
         tbl.style.width = '100%';
         tbl.style.marginBottom = '15pt';
@@ -2964,7 +3019,7 @@ async function exportAnswer(type, id /*, btn */){
         const tblStyle = tbl.getAttribute('style') || '';
         tbl.setAttribute('style', tblStyle + ';mso-cellspacing:0;mso-yfti-tbllook:0;mso-padding-alt:0pt 0pt 0pt 0pt;');
       });
-      doc.querySelectorAll('th').forEach(th => {
+      doc.querySelectorAll('table:not([data-from="blockquote"]) th').forEach(th => {
         th.style.setProperty('background-color', '#8B1A1A', 'important');
         th.style.setProperty('color', '#ffffff', 'important');
         th.style.padding = '4pt 8pt';
@@ -2980,7 +3035,7 @@ async function exportAnswer(type, id /*, btn */){
         // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
-      doc.querySelectorAll('td').forEach(td => {
+      doc.querySelectorAll('table:not([data-from="blockquote"]) td').forEach(td => {
         td.style.padding = '3pt 8pt';
         td.style.border = '1px solid #d2d2d7';
         td.style.verticalAlign = 'middle';
@@ -3035,7 +3090,7 @@ async function exportAnswer(type, id /*, btn */){
          Word는 <thead><tr>을 "각 페이지에 반복할 행"으로 해석함. 표가 페이지를 넘길 때
          헤더가 뜬금없이 다시 나타나는 현상의 원인. 작은 표(3~5행)에서는 부자연스러우므로
          thead → tbody 병합. */
-      doc.querySelectorAll('table').forEach(tbl => {
+      doc.querySelectorAll('table:not([data-from="blockquote"])').forEach(tbl => {
         const thead = tbl.querySelector('thead');
         if(!thead) return;
         let tbody = tbl.querySelector('tbody');
@@ -3051,40 +3106,7 @@ async function exportAnswer(type, id /*, btn */){
         thead.remove();
       });
 
-      // 3. 인용구 — 브랜드 블루 좌측 막대, 연회색 배경 (컨설팅 톤)
-      doc.querySelectorAll('blockquote').forEach(bq => {
-        /* Word의 기본 blockquote 들여쓰기(margin-left)와 mso-ascii 값을 제거해
-           border-left와 background가 서로 붙도록. */
-        bq.style.backgroundColor = '#f7f8fb';
-        bq.style.padding = '9pt 13pt';
-        bq.style.borderLeft = '3pt solid #d2d2d7';
-        bq.style.margin = '11pt 0';
-        bq.style.marginLeft = '0';
-        bq.style.marginRight = '0';
-        bq.style.paddingLeft = '13pt';
-        bq.style.fontStyle = 'italic';
-        bq.style.color = '#1d1d1f';
-        bq.style.setProperty('mso-element', 'para-border-div');
-        bq.style.setProperty('-webkit-print-color-adjust', 'exact');
-        bq.style.setProperty('print-color-adjust', 'exact');
-      });
-      doc.querySelectorAll('blockquote p').forEach(p => {
-        p.style.backgroundColor = '#f7f8fb';
-        p.style.margin = '0';
-        p.style.color = '#1d1d1f';
-        p.style.fontStyle = 'italic';
-      });
-      /* 블록쿼트 안 <p>가 여러 개일 때 사이 간격만 추가 (위아래 패딩 대칭 유지).
-         첫·끝 p의 위/아래 마진은 0 으로 이미 세팅됨. */
-      doc.querySelectorAll('blockquote').forEach(bq => {
-        const ps = bq.querySelectorAll(':scope > p');
-        ps.forEach((p, i) => {
-          if (i > 0) p.style.marginTop = '5pt';
-          if (i < ps.length - 1) p.style.marginBottom = '0';
-          else p.style.marginBottom = '0';
-          if (i === 0) p.style.marginTop = '0';
-        });
-      });
+      // 3. (인용구 변환은 위 1b에서 이미 처리됨 — 이 위치에선 스킵)
 
       // 3b. h2 — 컨설팅 리포트 섹션 제목 (좌측 브랜드 레드 세로 막대 유지)
       doc.querySelectorAll('h2').forEach(h => {
