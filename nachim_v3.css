@@ -885,14 +885,16 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble hr{border:none;height:1px;background:var(--border);margin:1rem 0}
 .m-bubble a{color:#1d1d1f;text-decoration:underline;text-underline-offset:2px}
 .m-bubble a:hover{text-decoration-thickness:1.5px}
-.m-bubble table{width:100%;margin:.75rem 0;border-collapse:collapse;border:1px solid #e6e8ee;border-radius:var(--r);overflow:hidden}
-.m-bubble th,.m-bubble td{padding:12px 14px;border:1px solid #e6e8ee;vertical-align:top}
-.m-bubble th{background:var(--brand-main);color:#fff;font-size:12px;font-weight:600;text-align:center;white-space:nowrap;letter-spacing:-0.08px}
-.m-bubble caption{caption-side:top;text-align:center;font-weight:600;color:var(--ink);margin:0 0 .5rem;font-size:13px}
-.m-bubble td{font-size:13px;color:var(--ink);line-height:1.47;letter-spacing:-0.224px}
-.m-bubble tbody tr:nth-child(even) td{background:var(--bg)}
-.m-bubble tbody tr:hover td{background:var(--bg3)}
-.m-bubble blockquote{margin:.85rem 0;padding:12px 14px;border-left:3px solid var(--apple-blue);background:var(--bg);border-radius:0 var(--r) var(--r) 0;color:var(--ink2);font-size:13.5px;line-height:1.47}
+.m-bubble table{width:100%;margin:1.2rem 0;border-collapse:collapse;border:1px solid #d2d2d7;border-radius:8px;overflow:hidden;background:#fff;font-size:14px}
+.m-bubble th,.m-bubble td{padding:11px 16px;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.55}
+.m-bubble th{background:#8B1A1A;color:#fff;font-size:14px;font-weight:700;text-align:center;letter-spacing:-0.005em;padding:12px 16px;border-color:#8B1A1A}
+.m-bubble caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;margin:0 0 .5rem;font-size:14px}
+.m-bubble td{font-size:14px;color:#2c2c2e;line-height:1.55;letter-spacing:-0.01em}
+.m-bubble tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa}
+.m-bubble tbody tr:nth-child(even) td{background:#fafafa}
+.m-bubble tbody tr:nth-child(even) td:first-child{background:#f5f5f7}
+.m-bubble tbody tr:hover td{background:#f0f0f3}
+.m-bubble blockquote{margin:1.5rem 0;padding:.9rem 1.25rem;border-left:3px solid #d2d2d7;background:#f7f8fb;border-radius:0 6px 6px 0;color:#1d1d1f;font-size:14px;line-height:1.65;font-style:italic}
 .dots{display:flex;gap:4px;padding:4px 0}
 .dots span{width:5px;height:5px;border-radius:50%;background:var(--ink3);animation:bounce 1.1s infinite}
 .dots span:nth-child(2){animation-delay:.18s}
@@ -2362,41 +2364,56 @@ header .style-btn.danger:hover {
   letter-spacing: -0.2px !important;
 }
 
-/* ── 표 — 브랜드 헤더 색상 */
+/* ── 표 최종 override (위 :where 규칙과 동일 값으로 통일, 캐스케이드 충돌 방지) */
 .report-bubble table,
 .m-bubble table {
   width: 100% !important;
   border-collapse: collapse !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   overflow: hidden !important;
-  border: 1px solid var(--border) !important;
-  margin: 0.85rem 0 !important;
-  font-size: 13px !important;
+  border: 1px solid #d2d2d7 !important;
+  margin: 1.2rem 0 !important;
+  font-size: 14px !important;
+  background: #fff !important;
 }
 .report-bubble th,
 .m-bubble th {
-  background: var(--brand-main) !important;
+  background: #8B1A1A !important;
   color: #fff !important;
   font-weight: 700 !important;
-  font-size: 12px !important;
-  padding: 8px 11px !important;
+  font-size: 14px !important;
+  padding: 12px 16px !important;
   text-align: center !important;
-  border: 1px solid rgba(255,255,255,.12) !important;
-  white-space: nowrap;
+  border: 1px solid #8B1A1A !important;
+  letter-spacing: -0.005em !important;
   -webkit-print-color-adjust: exact;
 }
 .report-bubble td,
 .m-bubble td {
-  padding: 7px 11px !important;
-  border: 1px solid var(--border) !important;
-  vertical-align: top !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
-  color: var(--ink) !important;
+  padding: 11px 16px !important;
+  border: 1px solid #e5e5ea !important;
+  vertical-align: middle !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  color: #2c2c2e !important;
+  background: #fff !important;
+  text-align: left !important;
 }
+/* 첫 열 — 라벨 강조 */
+.report-bubble tbody td:first-child,
+.m-bubble tbody td:first-child {
+  font-weight: 600 !important;
+  color: #1d1d1f !important;
+  background: #fafafa !important;
+}
+/* 짝수 행 — 옅은 중성 회색 (네이비 톤 제거) */
 .report-bubble tbody tr:nth-child(even) td,
 .m-bubble tbody tr:nth-child(even) td {
-  background: rgba(26,58,110,.03) !important;
+  background: #fafafa !important;
+}
+.report-bubble tbody tr:nth-child(even) td:first-child,
+.m-bubble tbody tr:nth-child(even) td:first-child {
+  background: #f5f5f7 !important;
 }
 
 /* ── blockquote (최종 override — 위 규칙과 일치시켜 캐스케이드 충돌 방지) */
