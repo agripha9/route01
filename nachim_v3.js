@@ -2973,15 +2973,20 @@ async function exportAnswer(type, id /*, btn */){
         tbl.setAttribute('cellpadding', '0');
         tbl.setAttribute('border', '0');
         tbl.setAttribute('data-from', 'blockquote');
-        /* 일반 본문 표와 동일한 폭 — 100%. 좌우 margin 0으로 표들과 좌우 정렬 일치 */
+        /* 일반 본문 표와 동일한 폭 — 100%. 좌우 margin 0으로 표들과 좌우 정렬 일치.
+           본문 표는 1px 테두리를 가지므로 외곽선 위치를 맞추기 위해 동일한 두께의
+           투명 테두리를 부여 — 시각적으로 폭이 동일해짐. */
         tbl.style.width = '100%';
         tbl.style.marginLeft = '0';
         tbl.style.marginRight = '0';
         tbl.style.marginTop = '0';
         tbl.style.marginBottom = '0';
         tbl.style.borderCollapse = 'collapse';
-        tbl.style.border = 'none';
+        tbl.style.border = '1px solid transparent';
         tbl.setAttribute('role', 'presentation');
+        /* Word 고유 spacing/padding 명시적으로 0 — 셀 간 및 테두리-내용 간 간격 완전 제거 */
+        const prevTblStyle = tbl.getAttribute('style') || '';
+        tbl.setAttribute('style', prevTblStyle + ';mso-cellspacing:0;mso-padding-alt:0pt 0pt 0pt 0pt;mso-yfti-tbllook:0;');
 
         const tr = doc.createElement('tr');
 
