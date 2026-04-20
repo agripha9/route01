@@ -3628,7 +3628,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // 초기화
     renderSugChips('investment'); // 기본 도메인 투자/IR
     showProfileBannerIfNeeded();
-    renderR01History();
+    /* 구 히스토리 시스템(vd_history)만 사용 — 신 시스템(r01_hist_v1)은 ID-as-body 버그로 비활성화.
+       오염된 r01_hist_v1 데이터는 한 번만 정리 */
+    try{
+      const r01raw = localStorage.getItem('r01_hist_v1');
+      if(r01raw){
+        const arr = JSON.parse(r01raw);
+        if(Array.isArray(arr) && arr.some(x=>/^a\d{13}[a-z0-9]+$/.test(String(x?.a||'').trim()))){
+          localStorage.removeItem('r01_hist_v1');
+        }
+      }
+    }catch(e){ try{localStorage.removeItem('r01_hist_v1');}catch(_){} }
+    if(typeof renderHistory === 'function') renderHistory();
     syncUnifiedBadges();
 
     // 웰컴 화면 활성화 (chat/input-area 숨김)
@@ -3656,14 +3667,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     if(_origSend) await _origSend.call(this);
 
-    // 히스토리 저장 (3초 후 마지막 AI 답변 가져오기)
-    if(q) {
-      setTimeout(()=>{
-        const chatRes = document.getElementById('chat-res');
-        const lastA = chatRes?.getAttribute('data-for-export')||'';
-        if(lastA) saveR01History(q, lastA);
-      }, 3500);
-    }
+    /* 히스토리 저장 비활성화: doSend()가 이미 saveHistory(q, finalText, ...)를 호출함.
+       여기서 data-for-export(=답변 ID)를 답변 본문으로 착각해 저장하면
+       나중에 히스토리 클릭 시 본문 자리에 ID만 렌더되는 버그 발생. */
   };
 
   /* applyProfile 후킹: unified badges 동기화 */
