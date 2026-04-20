@@ -840,7 +840,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td{
   color:#2c2c2e;
-  background:#fff;
+  /* 기본 배경 없음 — table의 #fff 상속. 첫 열/짝수 행 규칙이 필요 시 덮어씀. */
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td{
   background:#fafafa;
@@ -2396,8 +2396,9 @@ header .style-btn.danger:hover {
   font-size: 14px !important;
   line-height: 1.55 !important;
   color: #2c2c2e !important;
-  background: #fff !important;
   text-align: left !important;
+  /* background는 아래 first-child / nth-child(even) 규칙이 결정하도록 비움 —
+     지정 없는 td는 table의 기본 배경(#fff)을 상속 */
 }
 /* 첫 열 — 라벨 강조 */
 .report-bubble tbody td:first-child,

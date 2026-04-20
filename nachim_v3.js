@@ -2412,7 +2412,9 @@ function buildWordDocHtml(title, meta, bodyHtml, cssText){
     'th,td{border:1px solid #d2d2d7;padding:4pt 7pt;vertical-align:top;line-height:1.35;}',
     'caption{caption-side:top;text-align:center;font-weight:800;color:#1d1d1f;margin:0 0 10pt 0;}',
     'th{background:#8B1A1A !important;color:#ffffff !important;font-weight:700;text-align:center;-webkit-print-color-adjust:exact;}',
-    'tbody tr:nth-child(even) td{background:#fdf5f5;}',
+    'tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa;}',
+    'tbody tr:nth-child(even) td{background:#fafafa;}',
+    'tbody tr:nth-child(even) td:first-child{background:#f5f5f7;}',
     'code{font-family:Consolas,Menlo,monospace;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
     'pre{font-family:Consolas,Menlo,monospace;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 15pt 0;border:1px solid #d2d2d7;}',
     'pre code{background:transparent;border:none;padding:0;color:inherit;}',
@@ -3087,18 +3089,18 @@ async function exportAnswer(type, id /*, btn */){
         const prev = td.getAttribute('style') || '';
         td.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
       });
-      // tr에 고정 높이와 cantSplit 유사 힌트
-      doc.querySelectorAll('tr').forEach(tr => {
+      // tr에 고정 높이와 cantSplit 유사 힌트 (blockquote 변환 테이블은 제외)
+      doc.querySelectorAll('table:not([data-from="blockquote"]) tr').forEach(tr => {
         tr.style.height = 'auto';
         const prev = tr.getAttribute('style') || '';
         tr.setAttribute('style', prev + ';mso-yfti-irow:0;page-break-inside:avoid;mso-row-cant-split:yes;');
       });
       // 짝수 행 연한 배경 (컨설팅 리포트 톤 — 중성 그레이)
-      doc.querySelectorAll('tbody tr:nth-child(even) td').forEach(td => {
+      doc.querySelectorAll('table:not([data-from="blockquote"]) tbody tr:nth-child(even) td').forEach(td => {
         td.style.backgroundColor = '#fafafa';
       });
       // 첫 번째 열 — 레이블 열 느낌으로 살짝 강조
-      doc.querySelectorAll('tbody tr').forEach(tr => {
+      doc.querySelectorAll('table:not([data-from="blockquote"]) tbody tr').forEach(tr => {
         const firstTd = tr.querySelector('td');
         if(firstTd){
           firstTd.style.setProperty('font-weight', '600');
