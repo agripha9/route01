@@ -2720,6 +2720,9 @@ async function exportAnswer(type, id /*, btn */){
       'ul li::marker{color:#1a3a6e;}',
       'ol li::marker{color:#8B1A1A;font-weight:700;}',
       'blockquote{margin:10pt 0;padding:8pt 12pt;border-left:3pt solid #1a3a6e;background:#f0f4ff;color:#424245;font-size:10.5pt;line-height:1.55;}',
+      /* Word change-bar(변경 추적 세로선) 방어 — <ins>/<del> 및 body 블록·인라인 좌측 보더 차단 */
+      'ul,ol,li,p,span,div,strong,em,a,code,h1,h2,h3,h4,h5,h6{border-left:none !important;mso-border-left-alt:none !important;mso-border-between:none !important;}',
+      'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       'table{border-collapse:collapse;width:100%;border:1px solid #c8ccd4;margin:10pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 9pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'td{padding:4pt 9pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;line-height:1.35;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
@@ -2842,6 +2845,29 @@ async function exportAnswer(type, id /*, btn */){
         hr.style.border = '0';
         hr.style.borderTop = '1px solid #d2d2d7';
         hr.style.margin = '15pt 0';
+      });
+
+      // 6. Word change-bar(변경 추적 빨간 세로선) 방어
+      //    ① <ins>/<del> 태그는 Word가 "수정 제안"으로 해석해 왼쪽 여백에 빨간 막대를 그림 → 태그만 제거, 내용 유지
+      doc.querySelectorAll('ins, del').forEach(el => {
+        const parent = el.parentNode;
+        if(!parent) return;
+        while(el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      });
+      //    ② 본문 블록/인라인 요소의 border-left와 mso-border-left-* 전부 제거 (표 셀/테두리는 예외)
+      const stripLeftBorder = (st) => String(st||'')
+        .replace(/\bborder-left(-[a-z-]+)?\s*:[^;]+;?/gi,'')
+        .replace(/\bmso-border-left[a-z-]*\s*:[^;]+;?/gi,'')
+        .replace(/\bmso-border-between\s*:[^;]+;?/gi,'')
+        .replace(/;\s*;/g,';').replace(/^;|;$/g,'').trim();
+      const FORCE_NO_LEFT = 'border-left:none !important;border-left-width:0 !important;mso-border-left-alt:none !important;mso-border-left-width:0pt !important;';
+      doc.querySelectorAll('*').forEach(el => {
+        const tag = el.tagName;
+        // 표 관련 태그 + blockquote(의도된 파란 라인)는 건드리지 않음
+        if(tag==='TD'||tag==='TH'||tag==='TABLE'||tag==='TBODY'||tag==='THEAD'||tag==='TFOOT'||tag==='TR'||tag==='COL'||tag==='COLGROUP'||tag==='BR'||tag==='HR'||tag==='BLOCKQUOTE') return;
+        const prev = stripLeftBorder(el.getAttribute('style')||'');
+        el.setAttribute('style', prev ? `${prev};${FORCE_NO_LEFT}` : FORCE_NO_LEFT);
       });
 
       bodyHtml = doc.body.innerHTML;
