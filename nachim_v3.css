@@ -495,9 +495,11 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .report-card{
   background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
   border:1px solid rgba(0,0,0,0.06);overflow:hidden;
-  /* 질문 버블 우측 끝은 아바타(30px)+gap(10px)=40px 만큼 채팅 컬럼 우측에서 안쪽이다.
-     답변 카드 우측 끝도 이 위치와 정확히 일치시키기 위해 우측을 40px 줄여 맞춤. */
+  /* 질문 버블 우측 끝은 아바타(30px)+gap(10px)=40px 만큼 채팅 컬럼 우측에서 안쪽.
+     답변 카드는 .m-body(flex:1, 이미 아바타+gap 만큼 우측으로 밀려있음) 안에서 좌측 정렬.
+     이 카드 자체의 우측을 질문 버블 우측선과 일치하도록 줄임. */
   width:calc(100% - 40px);
+  max-width:100%;
 }
 .report-card .report-bubble{
   background:transparent;border:none;border-radius:0;box-shadow:none;
