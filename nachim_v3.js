@@ -2805,30 +2805,40 @@ async function exportAnswer(type, id /*, btn */){
         tbl.style.borderCollapse = 'collapse';
         tbl.style.width = '100%';
         tbl.style.marginBottom = '15pt';
+        /* Word: 헤더 행을 다음 페이지에 자동 반복하지 않도록 시도.
+           (Word는 tblHeader 속성으로 제어하지만 altChunk HTML에서는 mso-yfti-tbllook으로 힌트 제공) */
+        tbl.setAttribute('cellspacing','0');
+        tbl.setAttribute('cellpadding','0');
+        const tblStyle = tbl.getAttribute('style') || '';
+        tbl.setAttribute('style', tblStyle + ';mso-cellspacing:0;mso-yfti-tbllook:0;mso-padding-alt:0pt 0pt 0pt 0pt;');
       });
       doc.querySelectorAll('th').forEach(th => {
         th.style.setProperty('background-color', '#8B1A1A', 'important');
         th.style.setProperty('color', '#ffffff', 'important');
-        th.style.padding = '5pt 9pt';
+        th.style.padding = '4pt 8pt';
         th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
         th.style.fontSize = '10.5pt';
-        th.style.lineHeight = '1.3';
+        th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
+        /* Word 줄 높이/단락 간격 정확도 강제 */
+        const prev = th.getAttribute('style') || '';
+        th.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
         // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
       doc.querySelectorAll('td').forEach(td => {
-        td.style.padding = '4pt 9pt';
+        td.style.padding = '3pt 8pt';
         td.style.border = '1px solid #d2d2d7';
-        td.style.verticalAlign = 'top';
-        td.style.lineHeight = '1.3';
+        td.style.verticalAlign = 'middle';
+        td.style.lineHeight = '1.25';
         td.style.fontSize = '10.5pt';
-        td.style.height = 'auto';
-        td.style.minHeight = '0';
-        // Word 행 높이 팽창 원인: <p> 태그의 기본 margin
-        // 완전히 제거하고 <br>로만 구분
+        /* Word 행 높이 팽창 원인:
+           1) <p> 태그의 기본 margin (1em top/bottom)
+           2) mso-line-height-rule 미지정 시 큰 줄간격 기본값
+           3) mso-para-margin 미지정 시 단락 사이 자동 간격
+           이 셋을 모두 0 처리 */
         let inner = td.innerHTML
           .replace(/<p[^>]*>\s*/gi, '')       // <p> 열기 제거
           .replace(/\s*<\/p>/gi, '<br>')      // </p> → <br>
@@ -2840,14 +2850,39 @@ async function exportAnswer(type, id /*, btn */){
           child.style.margin = '0';
           child.style.padding = '0';
         });
+        /* Word 줄 높이/단락 간격 정확도 강제 (셀 세로 팽창 방지의 핵심) */
+        const prev = td.getAttribute('style') || '';
+        td.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
       });
-      // tr 높이 명시 (Word 자동 팽창 방지)
+      // tr에 고정 높이와 cantSplit 유사 힌트
       doc.querySelectorAll('tr').forEach(tr => {
         tr.style.height = 'auto';
+        const prev = tr.getAttribute('style') || '';
+        tr.setAttribute('style', prev + ';mso-yfti-irow:0;page-break-inside:avoid;mso-row-cant-split:yes;');
       });
       // 짝수 행 연한 배경
       doc.querySelectorAll('tbody tr:nth-child(even) td').forEach(td => {
         td.style.backgroundColor = '#fdf5f5';
+      });
+
+      /* 헤더행 자동 반복 끄기: thead 안의 tr을 tbody 첫 행으로 이동.
+         Word는 <thead><tr>을 "각 페이지에 반복할 행"으로 해석함. 표가 페이지를 넘길 때
+         헤더가 뜬금없이 다시 나타나는 현상의 원인. 작은 표(3~5행)에서는 부자연스러우므로
+         thead → tbody 병합. */
+      doc.querySelectorAll('table').forEach(tbl => {
+        const thead = tbl.querySelector('thead');
+        if(!thead) return;
+        let tbody = tbl.querySelector('tbody');
+        if(!tbody){
+          tbody = doc.createElement('tbody');
+          tbl.appendChild(tbody);
+        }
+        const rows = [...thead.querySelectorAll('tr')];
+        // 역순으로 tbody 맨 앞에 삽입해서 원래 순서 유지
+        for(let i = rows.length - 1; i >= 0; i--){
+          tbody.insertBefore(rows[i], tbody.firstChild);
+        }
+        thead.remove();
       });
 
       // 3. 인용구 — 브랜드 블루 border + 연파랑 배경
@@ -3627,6 +3662,17 @@ function clearAllHistory() {
   try{ localStorage.removeItem('vd_history'); }catch(e){}
   try{ localStorage.removeItem('r01_hist_v1'); }catch(e){}
   if(typeof renderHistory === 'function') renderHistory();
+
+  /* 현재 대화 화면도 초기화 후 웰컴 화면으로 복귀 */
+  try{
+    const chat = document.getElementById('chat');
+    if(chat) chat.innerHTML = '';
+    if(typeof messages !== 'undefined') messages = [];
+    if(typeof docsSentOnce !== 'undefined') docsSentOnce = false;
+    const cr = document.getElementById('chat-res');
+    if(cr){ cr.innerHTML = ''; cr.setAttribute('data-for-export', ''); }
+    if(typeof showWelcome === 'function') showWelcome();
+  }catch(e){}
 }
 
 /* ── DOMContentLoaded: launch/send 후킹 ── */
