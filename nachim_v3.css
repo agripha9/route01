@@ -613,15 +613,14 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:#1a3a6e;
 }
 .report-card .report-bubble h4{
-  font-size:16px;
+  font-size:17px;
   font-weight:700;
   margin:1.6rem 0 .65rem;
   color:#3d3d3f;
 }
 
 /* AI 답변에서 볼드 단독 단락을 비공식 섹션 제목처럼 처리:
-   한 단락 전체가 <strong>...</strong> 하나로만 채워진 경우 상단 여백과 굵기 강조.
-   실제 마크다운 H3/H4 옆에서도 자연스럽게 어울림. */
+   한 단락 전체가 <strong>...</strong> 하나로만 채워진 경우 상단 여백과 굵기 강조. */
 .report-card .report-bubble p > strong:only-child{
   display:inline-block;
   color:#1d1d1f;
@@ -630,6 +629,29 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   margin-top:1.4rem;
   margin-bottom:.55rem;
   font-weight:700;
+}
+
+/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우에도 시각적 위계를 보정.
+   li > strong 만 있고 그 아래에 본문 블록이 이어지는 패턴 → 제목처럼 크기 up.
+   동시에 번호/불릿 마커는 숨겨서 "번호·기호 중복" 방지. */
+.report-card .report-bubble li > strong:only-child,
+.report-card .report-bubble li > p:only-child > strong:only-child{
+  display:inline-block;
+  font-size:17px;
+  font-weight:700;
+  color:#1a3a6e;
+  letter-spacing:-0.018em;
+}
+.report-card .report-bubble li:has(> strong:only-child),
+.report-card .report-bubble li:has(> p:only-child > strong:only-child){
+  margin-top:1.2rem;
+  margin-bottom:.5rem;
+  list-style:none !important;
+  padding-left:0 !important;
+}
+.report-card .report-bubble li:has(> strong:only-child)::marker,
+.report-card .report-bubble li:has(> p:only-child > strong:only-child)::marker{
+  content:"" !important;
 }
 
 /* 강조 — 굵기만 / 색은 유지(난잡함 방지) */
