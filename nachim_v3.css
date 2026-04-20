@@ -767,10 +767,11 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   margin:.4rem 0;
 }
 
-/* 인용구(blockquote) — 이탤릭으로 본문과 구분. 좌측 막대는 중성 회색. */
+/* 인용구(blockquote) — 이탤릭으로 본문과 구분. 
+   본문 전체 폭이 아닌 중앙에 살짝 들여쓴 블록으로 배치해 시각적 리듬 개선. */
 .report-card .report-bubble blockquote{
-  margin:1.25rem 0;
-  padding:1rem 1.25rem;
+  margin:1.5rem auto;
+  padding:.9rem 1.25rem;
   background:#f7f8fb;
   border-left:3px solid #d2d2d7;
   border-radius:0 6px 6px 0;
@@ -778,6 +779,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-size:14px;
   line-height:1.65;
   font-style:italic;
+  max-width:85%;
 }
 .report-card .report-bubble blockquote p{
   margin:0 0 .5rem;

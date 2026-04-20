@@ -1991,12 +1991,14 @@ function normalizeOrderedListNumbering(html){
       if(liCount<=1) ol.setAttribute('data-single','1');
     });
 
-    /* H3/H4 제목이 이미 숫자로 시작하면(예: "1. 단계별 KPI 전체 맵") 
-       CSS의 ::before 파란 점 마커는 '번호 옆 불릿처럼' 보여 가독성을 해침.
-       data-numbered 속성으로 표시해 CSS에서 ::before를 숨김. */
+    /* H3/H4 제목이 이미 숫자로 시작하면(예: "1. 단계별 KPI", "3~4주차: IR") 
+       CSS의 ::before 불릿 점은 '번호 옆 또 불릿'처럼 보여 가독성을 해침.
+       다양한 번호 표기를 모두 감지해 data-numbered 부여. */
     tmp.querySelectorAll('h2, h3, h4').forEach(h=>{
       const txt=(h.textContent||'').trim();
-      if(/^\d+[.)]\s/.test(txt) || /^\d+(주차|단계|주|장|부|편|절|단원)/.test(txt)){
+      // 숫자 또는 숫자범위(1~2, 3-4, 3·4, 3,4)로 시작 + 마침표/괄호/한국어 섹션 단위
+      const numHead = /^\d+(\s*[~\-–—·,]\s*\d+)?(\s*[.)]|(주차|단계|주|장|부|편|절|단원|차시|교시|챕터|part|week)\b)/i;
+      if(numHead.test(txt)){
         h.setAttribute('data-numbered','1');
       }
     });
