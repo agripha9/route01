@@ -772,14 +772,33 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-style:italic;
 }
 .report-card .report-bubble blockquote p{
-  margin:0 0 .5rem;
+  margin:0 0 .5rem !important;
   color:#1d1d1f;
   font-style:italic;
 }
-.report-card .report-bubble blockquote p:last-child{margin-bottom:0}
-/* 인용구 내부 첫·끝 자식의 기본 마진을 0으로 — 위아래 여백이 패딩값(.9rem)으로 대칭이 되도록 */
+.report-card .report-bubble blockquote p:first-child,
+.report-card .report-bubble blockquote > p:first-child,
+.report-card .report-bubble blockquote p:first-of-type{
+  margin-top:0 !important;
+}
+.report-card .report-bubble blockquote p:last-child,
+.report-card .report-bubble blockquote > p:last-child,
+.report-card .report-bubble blockquote p:last-of-type{
+  margin-bottom:0 !important;
+}
+/* 인용구 내부 모든 직계 자식 첫/끝 마진 0 (이중 보호) */
 .report-card .report-bubble blockquote > *:first-child{margin-top:0 !important;}
 .report-card .report-bubble blockquote > *:last-child{margin-bottom:0 !important;}
+/* p:has(> strong:only-child)가 blockquote 안으로 들어왔을 때 상단 여백이 부활하는 것 차단 */
+.report-card .report-bubble blockquote p:has(> strong:only-child),
+.report-card .report-bubble blockquote p:has(> strong){
+  margin-top:0 !important;
+  margin-bottom:.5rem !important;
+  font-weight:inherit !important;
+}
+.report-card .report-bubble blockquote p:last-child:has(> strong){
+  margin-bottom:0 !important;
+}
 
 /* 답변 내 표 — 컨설팅 리포트 스타일 (본문 폰트 사이즈와 통일, 좌측 정렬 일관) */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) table{
