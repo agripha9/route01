@@ -1991,25 +1991,32 @@ function normalizeOrderedListNumbering(html){
       if(liCount<=1) ol.setAttribute('data-single','1');
     });
 
+    /* H3/H4 제목이 이미 숫자로 시작하면(예: "1. 단계별 KPI 전체 맵") 
+       CSS의 ::before 파란 점 마커는 '번호 옆 불릿처럼' 보여 가독성을 해침.
+       data-numbered 속성으로 표시해 CSS에서 ::before를 숨김. */
+    tmp.querySelectorAll('h2, h3, h4').forEach(h=>{
+      const txt=(h.textContent||'').trim();
+      if(/^\d+[.)]\s/.test(txt) || /^\d+(주차|단계|주|장|부|편|절|단원)/.test(txt)){
+        h.setAttribute('data-numbered','1');
+      }
+    });
+
     const BLOCK_TAGS = new Set(['P','TABLE','UL','OL','BLOCKQUOTE','DIV','PRE','H1','H2','H3','H4','H5','H6']);
 
     tmp.querySelectorAll('li').forEach(li=>{
       const kids=[...li.children];
-      // 뒤에 블록 콘텐츠가 있는지 (표, 하위 리스트, 두 번째 이상의 단락 등)
       const blockKids = kids.filter(el=>BLOCK_TAGS.has(el.tagName));
       if(blockKids.length < 2 && kids.length < 2) return;
-      // 본문 리스트 아이템 (여러 문장, 긴 텍스트)이 아닌지 확인 — 첫 줄이 짧아야 제목 후보
-      // '첫 줄' = li의 텍스트를 줄바꿈 또는 첫 블록 직전까지
       let firstLine = '';
       for(const node of li.childNodes){
-        if(node.nodeType===3){ // text
+        if(node.nodeType===3){
           firstLine += node.nodeValue;
         } else if(node.nodeType===1){
           if(BLOCK_TAGS.has(node.tagName) && firstLine.trim()) break;
           if(node.tagName==='BR') break;
           if(node.tagName==='P' || node.tagName==='STRONG' || node.tagName==='EM' || node.tagName==='CODE' || node.tagName==='SPAN' || node.tagName==='A'){
             firstLine += node.textContent || '';
-            if(node.tagName==='P') break; // 첫 p로 첫 줄 확정
+            if(node.tagName==='P') break;
           } else if(BLOCK_TAGS.has(node.tagName)){
             break;
           }
@@ -2017,11 +2024,9 @@ function normalizeOrderedListNumbering(html){
       }
       firstLine = firstLine.trim();
       if(!firstLine) return;
-      if(firstLine.length > 70) return; // 긴 본문 문장은 제목 아님
-      // 숫자만 있고 제목 텍스트가 거의 없는 경우도 제외
+      if(firstLine.length > 70) return;
       if(firstLine.length < 2) return;
 
-      // 뒤에 실제 블록 콘텐츠가 있는가? (p table ul ol blockquote)
       const hasFollowingBlock = blockKids.length > 0
         || kids.filter(el=>el.tagName!=='P' && BLOCK_TAGS.has(el.tagName)).length > 0;
       if(!hasFollowingBlock && blockKids.length < 1) return;
