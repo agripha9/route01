@@ -1949,9 +1949,17 @@ function renderMD(md){
     let html=marked.parse(src);
     html=normalizeParagraphOrderedLists(html);
     html=unwrapListItemSingleParagraph(html);
+    html=collapseAdjacentHrs(html);
     return html;
   }
-  return renderMDFallback(src);
+  return collapseAdjacentHrs(renderMDFallback(src));
+}
+
+/* 연속된 HR(공백·빈 p 사이 포함)을 하나로 줄임 — AI의 --- 와 우리의 NACHIM_TAIL HR 중복 방지 */
+function collapseAdjacentHrs(html){
+  const s=String(html||'');
+  /* 두 번째 이후의 <hr>(class 포함)과 그 사이의 빈 단락·공백만 제거 */
+  return s.replace(/(<hr\b[^>]*>)((?:\s|<p>\s*<\/p>)*<hr\b[^>]*>)+/gi, '$1');
 }
 
 /* marked GFM 취소선: 스펙은 ~~ 이지만 구현에 따라 단일 ~ 짝도 매칭되어
@@ -1981,7 +1989,11 @@ function preprocessMarkdown(src){
   let s=String(src||'');
   s=neutralizeAsciiTildesOutsideCodeFences(s);
   s=fixBoldWrappedOrderedListLines(s);
-  /* 모델 구분선: 채팅 UI에는 HR로 표시(내보내기에서는 prepareMarkdownForExport에서 삭제됨) */
+  /* 모델 구분선: 채팅 UI에는 HR로 표시(내보내기에서는 prepareMarkdownForExport에서 삭제됨).
+     AI가 TAIL 직전·직후에 자기 스스로 '---' 마크다운 구분선을 추가로 넣는 경우가 있어
+     쌍선으로 보이는 문제 → TAIL과 인접한 --- 선은 TAIL로 흡수. */
+  s=s.replace(/(^|\n)\s*-{3,}\s*\n(\s*<<<NACHIM_TAIL>>>)/g, '$1$2');
+  s=s.replace(/(<<<NACHIM_TAIL>>>\s*)\n\s*-{3,}\s*(\n|$)/g, '$1$2');
   s=s.replace(/^\s*<<<NACHIM_TAIL>>>\s*$/gm,'\n<hr class="nachim-hr">\n');
   /* If a code fence contains only a markdown table, unwrap it (tables should not render as code). */
   s=s.replace(/```(?:\w+)?\n([\s\S]*?)\n```/g,(m,inner)=>{
