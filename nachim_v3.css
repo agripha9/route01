@@ -494,31 +494,84 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble.u{background:var(--brand-point);color:#fff;border-color:transparent;text-align:left}
 .report-card{
   background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);
-  border:1px solid rgba(0,0,0,0.06);overflow:hidden;max-width:860px
+  border:1px solid rgba(0,0,0,0.06);overflow:hidden;max-width:920px
 }
 .report-card .report-bubble{
   background:transparent;border:none;border-radius:0;box-shadow:none;
-  padding:1.35rem 1.5rem 1.25rem;
-  font-family:var(--font-text);font-size:14px;line-height:1.47;letter-spacing:-0.224px;color:var(--ink)
+  padding:1.75rem 2rem 1.5rem;
+  font-family:var(--font-text);
+  font-size:15.5px;
+  line-height:1.72;
+  letter-spacing:-0.012em;
+  color:#1d1d1f;
 }
-.report-card .report-bubble p{margin:0 0 1rem}
+/* 본문 단락 — 여유있는 세로 리듬 */
+.report-card .report-bubble p{
+  margin:0 0 1.15rem;
+  color:#1d1d1f;
+}
 .report-card .report-bubble p:last-child{margin-bottom:0}
-.report-card .report-bubble h1,.report-card .report-bubble h2,.report-card .report-bubble h3{
-  font-family:var(--font-display);color:var(--ink);font-weight:600;line-height:1.2;margin:.75rem 0 .5rem;letter-spacing:-0.02em
+
+/* 제목 계층 — 컨설팅 리포트 톤 */
+.report-card .report-bubble h1,
+.report-card .report-bubble h2,
+.report-card .report-bubble h3,
+.report-card .report-bubble h4{
+  font-family:var(--font-display);
+  color:#1d1d1f;
+  line-height:1.28;
+  letter-spacing:-0.022em;
 }
-.report-card .report-bubble h1{font-size:21px}
-.report-card .report-bubble h2{font-size:17px}
-.report-card .report-bubble h3{font-size:15px}
-.report-card .report-bubble strong{font-weight:600;color:var(--ink)}
+.report-card .report-bubble h1{
+  font-size:24px;
+  font-weight:700;
+  margin:1.5rem 0 .9rem;
+}
+/* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대로 위계 강조 */
+.report-card .report-bubble h2{
+  font-size:19px;
+  font-weight:700;
+  margin:2rem 0 1rem;
+  padding:0.1rem 0 0.1rem 14px;
+  border-left:4px solid #8B1A1A;
+  line-height:1.35;
+}
+.report-card .report-bubble h2:first-child{margin-top:0.25rem}
+/* H3 — 소제목. 짙은 네이비로 H2와 구분 */
+.report-card .report-bubble h3{
+  font-size:16.5px;
+  font-weight:650;
+  margin:1.6rem 0 .7rem;
+  color:#1a3a6e;
+}
+.report-card .report-bubble h4{
+  font-size:15px;
+  font-weight:650;
+  margin:1.3rem 0 .55rem;
+  color:#3d3d3f;
+}
+
+/* 강조 — 굵기만 / 색은 유지(난잡함 방지) */
+.report-card .report-bubble strong{
+  font-weight:650;
+  color:#1d1d1f;
+}
+.report-card .report-bubble em{
+  font-style:italic;
+  color:#424245;
+}
+
+/* 리스트 — 여유있는 들여쓰기, 명확한 마커 색 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) :is(ul, ol){
-  margin:.5rem 0 .7rem;
+  margin:.6rem 0 1.1rem;
   margin-left:0;
-  padding-left:2rem !important;
+  padding-left:1.75rem !important;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li{
   list-style-position:outside !important;
-  padding-left:.5rem;
-  margin-bottom:.5rem;
+  padding-left:.4rem;
+  margin-bottom:.55rem;
+  line-height:1.7;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul{
   list-style-type:disc !important;
@@ -526,26 +579,36 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol{
   list-style-type:decimal !important;
 }
-/* 과거 커스텀 불릿/체크박스/색상(빨강/초록) 잔재를 차단 */
+/* 과거 커스텀 불릿/체크박스/색상 잔재 차단 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li::before,
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li::after{
   content:none !important;
   display:none !important;
 }
-/* 마커 색상은 회색으로 고정(ul/ol 공통) */
-:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) :is(ul,ol) > li::marker{
-  color:var(--ink3) !important;
+/* ul 마커: 브랜드 딥블루 */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul > li::marker{
+  color:#1a3a6e !important;
+  font-weight:700;
+}
+/* ol 마커: 브랜드 레드, 숫자 정렬 */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol > li::marker{
+  color:#8B1A1A !important;
+  font-weight:700;
   font-variant-numeric:tabular-nums;
 }
-/* 중첩 리스트: 단계마다 1.5rem씩 추가 들여쓰기 */
+/* 중첩 리스트 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li > :is(ul, ol){
-  margin-top:.35rem;
-  margin-bottom:.35rem;
-  margin-left:1.5rem;
+  margin-top:.4rem;
+  margin-bottom:.4rem;
+  margin-left:1rem;
+}
+/* 중첩 ul 2단계: 옅은 색 */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul ul > li::marker{
+  color:#6e6e73 !important;
 }
 :is(.chat-msg-text, .report-card .report-bubble, .hist-block-body--answer) li > p{
-  margin:0 0 .35em;
-  color:var(--ink);
+  margin:0 0 .4em;
+  color:#1d1d1f;
 }
 :is(.chat-msg-text, .report-card .report-bubble, .hist-block-body--answer) li > p:last-child{margin-bottom:0}
 :is(.chat-msg-text, .report-card .report-bubble, .hist-block-body--answer) li > p:only-child{
@@ -553,66 +616,100 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   vertical-align:top;
 }
 :is(.chat-msg-text, .report-card .report-bubble, .hist-block-body--answer) blockquote :is(ul, ol){
-  margin:.35rem 0;
+  margin:.4rem 0;
 }
 
-/* 답변 내 표 — Apple 자문 리포트 톤 */
+/* 인용구(blockquote) — 좌측 브랜드 블루 막대 + 연한 배경 + 컨설팅 톤 */
+.report-card .report-bubble blockquote{
+  margin:1.25rem 0;
+  padding:1rem 1.25rem;
+  background:#f7f8fb;
+  border-left:3px solid #1a3a6e;
+  border-radius:0 6px 6px 0;
+  color:#3d3d3f;
+  font-size:14.5px;
+  line-height:1.65;
+  font-style:normal;
+}
+.report-card .report-bubble blockquote p{
+  margin:0 0 .5rem;
+  color:#3d3d3f;
+}
+.report-card .report-bubble blockquote p:last-child{margin-bottom:0}
+
+/* 답변 내 표 — 컨설팅 리포트 스타일 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) table{
   width:100%;
-  margin:.85rem 0;
+  margin:1.1rem 0;
   border-collapse:collapse;
-  border:1px solid var(--border);
-  border-radius:var(--r);
+  border:1px solid #d2d2d7;
+  border-radius:8px;
   overflow:hidden;
-  font-size:13px;
-  background:var(--bg2);
+  font-size:14px;
+  background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,0.02);
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) th,
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td{
-  padding:10px;
-  border:1px solid var(--border);
-  vertical-align:top;
+  padding:10px 14px;
+  border:1px solid #e5e5ea;
+  vertical-align:middle;
   text-align:left;
+  line-height:1.5;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) th{
   text-align:center !important;
-  background:var(--bg);
-  color:var(--ink);
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:-0.06em;
+  background:#8B1A1A;
+  color:#fff;
+  font-size:13px;
+  font-weight:650;
+  letter-spacing:-0.01em;
+  border-color:#8B1A1A;
+  padding:11px 14px;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td:first-child{
-  text-align:center !important;
   font-weight:600;
+  color:#1d1d1f;
+  background:#fafafa;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td{
-  color:var(--ink);
-  background:var(--bg2);
-  line-height:1.5;
+  color:#2c2c2e;
+  background:#fff;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td{
-  background:rgba(245,245,247,.55);
+  background:#fafafa;
+}
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td:first-child{
+  background:#f5f5f7;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:hover td{
-  background:var(--bg3);
+  background:#f0f4ff !important;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) caption{
   caption-side:top;
   text-align:left;
-  font-weight:600;
-  color:var(--ink2);
-  font-size:12px;
-  margin:0 0 .45rem;
-  letter-spacing:-0.02em;
+  font-weight:650;
+  color:#1d1d1f;
+  font-size:13.5px;
+  margin:0 0 .5rem;
+  letter-spacing:-0.01em;
 }
+
+/* 구분선 — 옅은 그라데이션 */
 .nachim-hr{
   border:0;
   height:1px;
-  background:linear-gradient(90deg, transparent, rgba(0,0,0,.14), transparent);
-  margin:14px 0;
+  background:linear-gradient(90deg, transparent, rgba(0,0,0,.1), transparent);
+  margin:1.75rem 0;
 }
-.report-card .answer-actions{margin-top:0;padding:0 1.5rem 1.25rem;background:#fff}
+.report-card .report-bubble hr{
+  border:0;
+  height:1px;
+  background:rgba(0,0,0,0.08);
+  margin:1.5rem 0;
+}
+
+.report-card .answer-actions{margin-top:0;padding:0 2rem 1.5rem;background:#fff}
 .m-bubble code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:12.5px;background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-style:normal;line-height:inherit;vertical-align:baseline;white-space:normal;word-break:keep-all}
 .m-bubble pre{margin:.75rem 0;padding:12px 14px;border-radius:var(--r-lg);background:var(--bg);color:var(--ink);overflow:auto;border:1px solid var(--border);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:13.5px;font-style:normal;line-height:1.55}
 .m-bubble pre code{background:transparent;border:none;padding:0;color:inherit;font-family:inherit;font-style:normal;font-size:inherit;font-weight:400}
@@ -1975,16 +2072,16 @@ header .style-btn.danger:hover {
    채팅 너비 — 중앙 정렬 + 최대 너비
 ══════════════════════════════════════ */
 
-/* 채팅 영역 중앙 정렬 — Claude처럼 */
+/* 채팅 영역 중앙 정렬 — 컨설팅 보고서 느낌으로 폭 확장 */
 .chat {
-  padding: 2rem max(1.75rem, calc((100% - 760px) / 2)) 1.75rem !important;
+  padding: 2.25rem max(1.75rem, calc((100% - 880px) / 2)) 2rem !important;
 }
 .input-area-inner {
-  max-width: 760px !important;
+  max-width: 880px !important;
   margin: 0 auto !important;
 }
 .welcome-screen .ws-content {
-  max-width: 720px !important;
+  max-width: 760px !important;
 }
 
 /* ── 글머리 기호 완전 통일 ── */

@@ -2092,28 +2092,47 @@ function buildExportMetaLine(){
 }
 
 /*보내기(DOCX/PDF) 공통 HTML — Word altChunk / 인쇄 미리보기 겸용 */
-const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:14px;line-height:1.65;margin:0;background:#f5f5f7;color:#1d1d1f}
-.page{padding:2cm}
-.card{background:#fff;border:none;border-radius:18px;padding:22px 24px;box-shadow:none}
-.title{font-size:18px;color:#1d1d1f;margin:0 0 6px;font-weight:700;letter-spacing:-.03em}
-.meta{font-size:13px;color:#6e6e73;margin:0 0 14px}
+const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:11pt;line-height:1.7;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
+.page{padding:1.8cm 2cm}
+.card{background:#fff;border:none;border-radius:12px;padding:26px 30px;box-shadow:none}
+.title{font-size:22px;color:#1d1d1f;margin:0 0 6px;font-weight:700;letter-spacing:-.028em;line-height:1.25}
+.meta{font-size:12px;color:#6e6e73;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e5e5ea}
 .content{max-width:100%}
-p{margin:0 0 14px}
-strong{font-weight:700;color:#1d1d1f}
-ul,ol{margin:8px 0 14px;padding-left:20px}
-li{margin-bottom:6px}
-/* 채팅 .m-bubble blockquote 와 동일: 파란 액센트 + 연회색 배경 */
-blockquote{margin:14px 0;padding:12px 14px;border-left:3px solid #0071e3;background:#f5f5f7;border-radius:0 8px 8px 0;color:#424245;font-size:13.5px;line-height:1.47;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-blockquote p{margin:0 0 8px;color:#424245}
+p{margin:0 0 14px;color:#1d1d1f}
+strong{font-weight:650;color:#1d1d1f}
+em{font-style:italic;color:#424245}
+/* 제목 계층 */
+h1{font-size:19pt;font-weight:700;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3}
+h2{font-size:15pt;font-weight:700;color:#1d1d1f;margin:20pt 0 10pt;padding:2pt 0 2pt 10pt;border-left:3.5pt solid #8B1A1A;line-height:1.35;letter-spacing:-0.015em}
+h2:first-child{margin-top:4pt}
+h3{font-size:12.5pt;font-weight:650;color:#1a3a6e;margin:14pt 0 6pt;letter-spacing:-0.01em}
+h4{font-size:11.5pt;font-weight:650;color:#3d3d3f;margin:12pt 0 5pt}
+/* 리스트 */
+ul,ol{margin:8pt 0 12pt;padding-left:24pt}
+li{margin-bottom:5pt;line-height:1.68}
+ul{list-style-type:disc}
+ol{list-style-type:decimal}
+ul li::marker{color:#1a3a6e;font-weight:700}
+ol li::marker{color:#8B1A1A;font-weight:700}
+li > p{margin:0 0 4pt}
+li > p:last-child{margin-bottom:0}
+/* 인용구 */
+blockquote{margin:14pt 0;padding:10pt 14pt;border-left:3pt solid #1a3a6e;background:#f7f8fb;border-radius:0 6pt 6pt 0;color:#3d3d3f;font-size:10.5pt;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+blockquote p{margin:0 0 6pt;color:#3d3d3f}
 blockquote p:last-child{margin-bottom:0}
-table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:14px 0;border-radius:12px;overflow:hidden}
-th,td{border:1px solid #e8e8ed;padding:5px 9px;vertical-align:top;line-height:1.4}
-thead th{background:#8B1A1A !important;color:#fff !important;font-size:12px;font-weight:700;text-align:center;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-tbody td{border-bottom:1px solid #e8e8ed}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:nth-child(even) td{background:#f5f5f7}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-style:normal;font-size:0.95em;font-weight:400;background:#f5f5f7;padding:1px 6px;border-radius:8px;border:1px solid #e8e8ed;color:#1d1d1f}
-pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-size:13.5px;font-style:normal;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:10px;padding:12px 14px;overflow:auto;border:1px solid #d2d2d7}
+/* 표 — 컨설팅 리포트 */
+table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:12pt 0;border-radius:6pt;overflow:hidden;font-size:10.5pt}
+th,td{border:1px solid #e5e5ea;padding:6pt 10pt;vertical-align:middle;line-height:1.5;text-align:left}
+thead th{background:#8B1A1A !important;color:#fff !important;font-size:10pt;font-weight:650;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
+tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa}
+tbody tr:nth-child(even) td{background:#fafafa}
+tbody tr:nth-child(even) td:first-child{background:#f5f5f7}
+caption{caption-side:top;text-align:left;font-weight:650;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt;letter-spacing:-0.005em}
+/* 구분선 */
+hr{border:0;height:1px;background:rgba(0,0,0,0.08);margin:16pt 0}
+/* 코드 */
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-style:normal;font-size:0.95em;font-weight:400;background:#f5f5f7;padding:1pt 5pt;border-radius:4pt;border:1px solid #e8e8ed;color:#1d1d1f}
+pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-size:10pt;font-style:normal;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;border:1px solid #d2d2d7;margin:10pt 0}
 pre code{font-family:inherit;font-style:normal;font-size:inherit;font-weight:400;background:transparent;border:none;padding:0;color:inherit}`;
 
 function buildExportDocumentHtml(title,meta,bodyHtml,extraCss){
@@ -2748,35 +2767,46 @@ async function exportAnswer(type, id /*, btn */){
       return;
     }
 
-    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 */
+    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 — 컨설팅 리포트 톤 */
     const htmlStyle=[
-      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:11pt;line-height:1.6;}',
+      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:11pt;line-height:1.7;}',
       '.wrap{padding:0;}',
-      '.header{padding:0 0 14pt 0;border-bottom:1px solid #d2d2d7;margin:0 0 14pt 0;}',
-      '.header-title{font-size:20pt;font-weight:800;letter-spacing:-0.3pt;margin:0 0 6pt 0;color:#1d1d1f;}',
-      '.header-meta{font-size:10.5pt;color:#6e6e73;margin:0;line-height:1.4;}',
-      'p{margin:0 0 12pt 0;}',
-      'h1,h2,h3{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-weight:800;color:#1d1d1f;letter-spacing:-0.2pt;}',
-      'h1{font-size:16pt;margin:18pt 0 10pt 0;}',
-      'h2{font-size:13.5pt;font-weight:800;color:#1d1d1f;margin:16pt 0 9pt 0;padding-bottom:4pt;border-bottom:2pt solid #8B1A1A;}',
-      'h3{font-size:12pt;font-weight:700;color:#1d1d1f;margin:14pt 0 8pt 0;}',
-      'strong{font-weight:800;color:#1d1d1f;}',
-      'ul,ol{padding-left:26pt;margin:8pt 0 12pt 0;}',
-      'ul li::marker{color:#1a3a6e;}',
+      '.header{padding:0 0 14pt 0;border-bottom:1px solid #e5e5ea;margin:0 0 18pt 0;}',
+      '.header-title{font-size:20pt;font-weight:700;letter-spacing:-0.3pt;margin:0 0 6pt 0;color:#1d1d1f;line-height:1.3;}',
+      '.header-meta{font-size:10pt;color:#6e6e73;margin:0;line-height:1.4;}',
+      'p{margin:0 0 11pt 0;}',
+      'h1,h2,h3,h4{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;color:#1d1d1f;letter-spacing:-0.2pt;}',
+      'h1{font-size:17pt;font-weight:700;margin:18pt 0 10pt 0;line-height:1.3;}',
+      /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 */
+      'h2{font-size:14pt;font-weight:700;color:#1d1d1f;margin:18pt 0 9pt 0;padding:2pt 0 2pt 10pt;border-left:3pt solid #8B1A1A;line-height:1.35;}',
+      /* H3: 소제목 — 브랜드 네이비 */
+      'h3{font-size:12pt;font-weight:700;color:#1a3a6e;margin:13pt 0 6pt 0;}',
+      'h4{font-size:11pt;font-weight:700;color:#3d3d3f;margin:11pt 0 5pt 0;}',
+      'strong{font-weight:700;color:#1d1d1f;}',
+      'em{font-style:italic;color:#424245;}',
+      'ul,ol{padding-left:24pt;margin:7pt 0 11pt 0;}',
+      'li{margin-bottom:4pt;line-height:1.65;}',
+      'ul li::marker{color:#1a3a6e;font-weight:700;}',
       'ol li::marker{color:#8B1A1A;font-weight:700;}',
-      'blockquote{margin:10pt 0;padding:8pt 12pt;border-left:3pt solid #1a3a6e;background:#f0f4ff;color:#424245;font-size:10.5pt;line-height:1.55;}',
+      /* 인용구 — 브랜드 블루 좌측 막대, 연회색 배경 */
+      'blockquote{margin:11pt 0;padding:9pt 13pt;border-left:3pt solid #1a3a6e;background:#f7f8fb;color:#3d3d3f;font-size:10.5pt;line-height:1.6;}',
+      'blockquote p{margin:0 0 5pt 0;color:#3d3d3f;}',
       /* Word change-bar(변경 추적 세로선) 방어 — <ins>/<del> 및 body 블록·인라인 좌측 보더 차단 */
-      'ul,ol,li,p,span,div,strong,em,a,code,h1,h2,h3,h4,h5,h6{border-left:none !important;mso-border-left-alt:none !important;mso-border-between:none !important;}',
+      'ul,ol,li,p,span,div,strong,em,a,code,h1,h3,h4,h5,h6{border-left:none !important;mso-border-left-alt:none !important;mso-border-between:none !important;}',
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
-      'table{border-collapse:collapse;width:100%;border:1px solid #c8ccd4;margin:10pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 9pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'td{padding:4pt 9pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;line-height:1.35;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'tbody tr:nth-child(even) td{background:#f7f8fb;}',
-      'code{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
-      'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 12pt 0;border:1px solid #d2d2d7;}',
+      /* 표 — 컨설팅 리포트 */
+      'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#2c2c2e;}',
+      'tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa;}',
+      'tbody tr:nth-child(even) td{background:#fafafa;}',
+      'tbody tr:nth-child(even) td:first-child{background:#f5f5f7;}',
+      'caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt 0;}',
+      'code{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;background:#f5f5f7;border:1px solid #e5e5ea;padding:1pt 5pt;border-radius:4pt;color:#1d1d1f;}',
+      'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;margin:0 0 11pt 0;border:1px solid #d2d2d7;}',
       'pre code{background:transparent;border:none;padding:0;color:inherit;font-style:normal;}',
-      'hr{border:none;border-top:1px solid #d2d2d7;margin:14pt 0;}',
-      'a{color:#1d1d1f;text-decoration:underline;}'
+      'hr{border:none;border-top:1px solid #e5e5ea;margin:14pt 0;}',
+      'a{color:#1a3a6e;text-decoration:underline;}'
     ].join('\n');
 
     const mergeStyle=(prev, add)=>{
@@ -2860,9 +2890,23 @@ async function exportAnswer(type, id /*, btn */){
         const prev = tr.getAttribute('style') || '';
         tr.setAttribute('style', prev + ';mso-yfti-irow:0;page-break-inside:avoid;mso-row-cant-split:yes;');
       });
-      // 짝수 행 연한 배경
+      // 짝수 행 연한 배경 (컨설팅 리포트 톤 — 중성 그레이)
       doc.querySelectorAll('tbody tr:nth-child(even) td').forEach(td => {
-        td.style.backgroundColor = '#fdf5f5';
+        td.style.backgroundColor = '#fafafa';
+      });
+      // 첫 번째 열 — 레이블 열 느낌으로 살짝 강조
+      doc.querySelectorAll('tbody tr').forEach(tr => {
+        const firstTd = tr.querySelector('td');
+        if(firstTd){
+          firstTd.style.setProperty('font-weight', '600');
+          firstTd.style.setProperty('color', '#1d1d1f');
+          // 홀수 행 first-child 배경
+          if(!tr.matches(':nth-child(even)')) {
+            firstTd.style.backgroundColor = '#fafafa';
+          } else {
+            firstTd.style.backgroundColor = '#f5f5f7';
+          }
+        }
       });
 
       /* 헤더행 자동 반복 끄기: thead 안의 tr을 tbody 첫 행으로 이동.
@@ -2885,33 +2929,43 @@ async function exportAnswer(type, id /*, btn */){
         thead.remove();
       });
 
-      // 3. 인용구 — 브랜드 블루 border + 연파랑 배경
+      // 3. 인용구 — 브랜드 블루 좌측 막대, 연회색 배경 (컨설팅 톤)
       doc.querySelectorAll('blockquote').forEach(bq => {
-        bq.style.backgroundColor = '#f0f4ff';
-        bq.style.padding = '8pt 12pt';
+        bq.style.backgroundColor = '#f7f8fb';
+        bq.style.padding = '9pt 13pt';
         bq.style.borderLeft = '3pt solid #1a3a6e';
-        bq.style.margin = '10pt 0';
+        bq.style.margin = '11pt 0';
       });
       doc.querySelectorAll('blockquote p').forEach(p => {
-        p.style.backgroundColor = '#f0f4ff';
+        p.style.backgroundColor = '#f7f8fb';
         p.style.margin = '0 0 5pt 0';
-        p.style.color = '#424245';
+        p.style.color = '#3d3d3f';
       });
 
-      // 3b. h2 — 브랜드 레드 하단 라인
+      // 3b. h2 — 컨설팅 리포트 스타일 (좌측 브랜드 레드 세로 막대)
       doc.querySelectorAll('h2').forEach(h => {
-        h.style.fontSize = '13.5pt';
-        h.style.fontWeight = '800';
+        h.style.fontSize = '14pt';
+        h.style.fontWeight = '700';
         h.style.color = '#1d1d1f';
-        h.style.borderBottom = '2pt solid #8B1A1A';
-        h.style.paddingBottom = '3pt';
-        h.style.marginBottom = '8pt';
+        h.style.borderLeft = '3pt solid #8B1A1A';
+        h.style.paddingLeft = '10pt';
+        h.style.paddingTop = '2pt';
+        h.style.paddingBottom = '2pt';
+        h.style.margin = '18pt 0 9pt 0';
+        h.style.lineHeight = '1.35';
       });
+      // H3 — 브랜드 네이비
       doc.querySelectorAll('h3').forEach(h => {
         h.style.fontSize = '12pt';
         h.style.fontWeight = '700';
-        h.style.color = '#1d1d1f';
-        h.style.marginBottom = '6pt';
+        h.style.color = '#1a3a6e';
+        h.style.margin = '13pt 0 6pt 0';
+      });
+      doc.querySelectorAll('h4').forEach(h => {
+        h.style.fontSize = '11pt';
+        h.style.fontWeight = '700';
+        h.style.color = '#3d3d3f';
+        h.style.margin = '11pt 0 5pt 0';
       });
 
       // 4. 기울임꼴 유지 (회색 박스 안/밖 모두)
@@ -2944,8 +2998,8 @@ async function exportAnswer(type, id /*, btn */){
       const FORCE_NO_LEFT = 'border-left:none !important;border-left-width:0 !important;mso-border-left-alt:none !important;mso-border-left-width:0pt !important;';
       doc.querySelectorAll('*').forEach(el => {
         const tag = el.tagName;
-        // 표 관련 태그 + blockquote(의도된 파란 라인)는 건드리지 않음
-        if(tag==='TD'||tag==='TH'||tag==='TABLE'||tag==='TBODY'||tag==='THEAD'||tag==='TFOOT'||tag==='TR'||tag==='COL'||tag==='COLGROUP'||tag==='BR'||tag==='HR'||tag==='BLOCKQUOTE') return;
+        // 표 관련 태그 + blockquote(의도된 파란 라인) + H2(의도된 레드 막대)는 건드리지 않음
+        if(tag==='TD'||tag==='TH'||tag==='TABLE'||tag==='TBODY'||tag==='THEAD'||tag==='TFOOT'||tag==='TR'||tag==='COL'||tag==='COLGROUP'||tag==='BR'||tag==='HR'||tag==='BLOCKQUOTE'||tag==='H2') return;
         const prev = stripLeftBorder(el.getAttribute('style')||'');
         el.setAttribute('style', prev ? `${prev};${FORCE_NO_LEFT}` : FORCE_NO_LEFT);
       });
