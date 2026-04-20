@@ -759,10 +759,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   margin:.4rem 0;
 }
 
-/* 인용구(blockquote) — 이탤릭으로 본문과 구분. 
-   본문 전체 폭이 아닌 중앙에 살짝 들여쓴 블록으로 배치해 시각적 리듬 개선. */
+/* 인용구(blockquote) — 이탤릭으로 본문과 구분. 본문과 동일 폭. */
 .report-card .report-bubble blockquote{
-  margin:1.5rem auto;
+  margin:1.5rem 0;
   padding:.9rem 1.25rem;
   background:#f7f8fb;
   border-left:3px solid #d2d2d7;
@@ -771,7 +770,6 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-size:14px;
   line-height:1.65;
   font-style:italic;
-  max-width:85%;
 }
 .report-card .report-bubble blockquote p{
   margin:0 0 .5rem;
@@ -1903,14 +1901,15 @@ main {
   line-height: 1.6;
 }
 .report-bubble blockquote {
-  margin: 1rem 0;
-  padding: 11px 15px;
-  border-left: 3px solid var(--brand-point);
-  background: rgba(26,58,110,.05);
-  border-radius: 0 8px 8px 0;
-  color: var(--ink2);
+  margin: 1.5rem 0;
+  padding: .9rem 1.25rem;
+  border-left: 3px solid #d2d2d7;
+  background: #f7f8fb;
+  border-radius: 0 6px 6px 0;
+  color: #1d1d1f;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
+  font-style: italic;
 }
 .report-bubble strong {
   font-weight: 700;
@@ -2378,16 +2377,19 @@ header .style-btn.danger:hover {
   background: rgba(26,58,110,.03) !important;
 }
 
-/* ── blockquote */
+/* ── blockquote (최종 override — 위 규칙과 일치시켜 캐스케이드 충돌 방지) */
 .report-bubble blockquote {
-  margin: 0.85rem 0 !important;
-  padding: 10px 14px !important;
-  border-left: 3px solid var(--brand-point) !important;
-  background: rgba(26,58,110,.04) !important;
-  border-radius: 0 8px 8px 0 !important;
-  color: var(--ink2) !important;
-  font-size: 13.5px !important;
-  line-height: 1.6 !important;
+  margin: 1.5rem 0 !important;
+  padding: .9rem 1.25rem !important;
+  border-left: 3px solid #d2d2d7 !important;
+  background: #f7f8fb !important;
+  border-radius: 0 6px 6px 0 !important;
+  color: #1d1d1f !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  font-style: italic !important;
+  max-width: none !important;
+  width: auto !important;
 }
 
 /* ── strong */
