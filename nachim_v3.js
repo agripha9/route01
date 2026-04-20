@@ -1654,31 +1654,36 @@ async function send(){
 async function quickAsk(t){if(!busy)await doSend(t);}
 
 async function doSend(text){
-  /* 요금제 한도 체크 */
-  const curPlan = getCurrentPlan ? getCurrentPlan() : 'free';
-  const planInfo = R01_PLANS ? R01_PLANS.find(p=>p.id===curPlan) : null;
-  if(planInfo && planInfo.limit !== 99999){
-    const usage = getMonthlyUsage ? getMonthlyUsage() : 0;
-    if(usage >= planInfo.limit){
-      const m = document.createElement('div');
-      m.className = 'modal-bg open';
-        m.style.zIndex = '9999';
-      m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
-        <div style="font-size:32px;margin-bottom:12px">📊</div>
-        <div class="modal-title">이번 달 질문 한도에 도달했어요</div>
-        <div class="modal-sub">${planInfo.name} 플랜 월 ${planInfo.limit}회 사용 완료.<br>더 많은 자문이 필요하시면 업그레이드하세요.</div>
-        <div style="display:flex;gap:8px;margin-top:1.25rem">
-          <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
-          <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 업그레이드 →</button>
-        </div>
-      </div>`;
-      document.body.appendChild(m);
-      m.addEventListener('click',e=>{if(e.target===m)m.remove();});
-      return;
+  /* 요금제 한도 체크 — 프로토타입 단계에서는 비활성화.
+     사용자가 직접 자기 Claude API 키를 입력해서 쓰므로 우리가 횟수를 제한할 근거가 없고,
+     실서비스 전환 시(서버/DB 도입 시점) 다시 켜면 됨. */
+  const PROTOTYPE_MODE = true;
+  if(!PROTOTYPE_MODE){
+    const curPlan = getCurrentPlan ? getCurrentPlan() : 'free';
+    const planInfo = R01_PLANS ? R01_PLANS.find(p=>p.id===curPlan) : null;
+    if(planInfo && planInfo.limit !== 99999){
+      const usage = getMonthlyUsage ? getMonthlyUsage() : 0;
+      if(usage >= planInfo.limit){
+        const m = document.createElement('div');
+        m.className = 'modal-bg open';
+          m.style.zIndex = '9999';
+        m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">📊</div>
+          <div class="modal-title">이번 달 질문 한도에 도달했어요</div>
+          <div class="modal-sub">${planInfo.name} 플랜 월 ${planInfo.limit}회 사용 완료.<br>더 많은 자문이 필요하시면 업그레이드하세요.</div>
+          <div style="display:flex;gap:8px;margin-top:1.25rem">
+            <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
+            <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 업그레이드 →</button>
+          </div>
+        </div>`;
+        document.body.appendChild(m);
+        m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+        return;
+      }
     }
+    /* 사용량 카운트 */
+    if(incrementUsage) incrementUsage();
   }
-  /* 사용량 카운트 */
-  if(incrementUsage) incrementUsage();
 
   busy=true;
   document.getElementById('send-btn').disabled=true;
@@ -2573,8 +2578,10 @@ function openStyleModal(){
   const grid=document.getElementById('style-modal-grid');
   if(!grid) return;
   const cur=profile.style||'Paul Graham (YC)';
+  /* 프로토타입 단계: 전체 멘토 개방 */
+  const PROTOTYPE_MODE = true;
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
-  const isPaid = (plan === 'starter' || plan === 'pro' || plan === 'team');
+  const isPaid = PROTOTYPE_MODE ? true : (plan === 'starter' || plan === 'pro' || plan === 'team');
 
   grid.innerHTML = Object.keys(MENTOR_META).map(k => {
     const m = MENTOR_META[k];
@@ -2589,13 +2596,15 @@ function openStyleModal(){
           <div class="ob-mentor-row-desc">${esc(m.desc)}</div>
         </div>
       </div>
-      <div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>
+      ${PROTOTYPE_MODE ? '' : `<div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>`}
     </div>`;
   }).join('');
 
   grid.querySelectorAll('[data-style]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const s = btn.getAttribute('data-style');
+      /* 프로토타입 단계: 무조건 선택 허용 */
+      if(PROTOTYPE_MODE){ setMentorStyle(s); return; }
       const meta = MENTOR_META[s];
       const pl = getCurrentPlan ? getCurrentPlan() : 'free';
       const paid = (pl === 'starter' || pl === 'pro' || pl === 'team');
@@ -3906,6 +3915,10 @@ function wsSend() {
 
 
 function checkGrantAccess() {
+  /* 프로토타입 단계: 모든 회원 접근 허용 */
+  const PROTOTYPE_MODE = true;
+  if(PROTOTYPE_MODE){ openGrantModal(); return; }
+
   // 유료 플랜 체크 (현재는 localStorage의 plan으로 판단)
   const plan = localStorage.getItem('r01_plan') || 'free';
   if(plan === 'free') {
@@ -4182,6 +4195,10 @@ function submitWithdraw(){
 }
 /* PRO 잠금 멘토 클릭 시 (온보딩용) */
 function pickMentorOrUpgrade(el, styleKey){
+  /* 프로토타입 단계: 모든 멘토 스타일 무료 개방 (유료 UI는 추후 서버 연동 시 되살림) */
+  const PROTOTYPE_MODE = true;
+  if(PROTOTYPE_MODE){ pickChip('style', el); return; }
+
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   const isPaid = (plan === 'starter' || plan === 'pro' || plan === 'team');
   if(isPaid){ pickChip('style', el); return; }
@@ -4204,6 +4221,13 @@ function pickMentorOrUpgrade(el, styleKey){
 
 /* 파일 업로드 접근 제어 */
 function checkUploadAccess(){
+  /* 프로토타입 단계: 파일 업로드 자유 허용 */
+  const PROTOTYPE_MODE = true;
+  if(PROTOTYPE_MODE){
+    document.getElementById('ob-file-input')?.click();
+    return;
+  }
+
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   if(plan === 'free'){
     const m = document.createElement('div');
