@@ -2193,7 +2193,7 @@ function buildExportMetaLine(){
 }
 
 /*보내기(DOCX/PDF) 공통 HTML — Word altChunk / 인쇄 미리보기 겸용 */
-const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:11pt;line-height:1.7;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
+const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:10.5pt;line-height:1.7;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
 .brand{font-weight:700;letter-spacing:-0.03em;font-style:normal}
 .page{padding:1.8cm 2cm}
 .card{background:#fff;border:none;border-radius:12px;padding:26px 30px;box-shadow:none}
@@ -2201,35 +2201,40 @@ const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Ap
 .meta{font-size:12px;color:#6e6e73;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e5e5ea}
 .content{max-width:100%}
 p{margin:0 0 14px;color:#1d1d1f}
-strong{font-weight:650;color:#1d1d1f}
-em{font-style:italic;color:#424245}
-/* 제목 계층 */
-h1{font-size:19pt;font-weight:700;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3}
-h2{font-size:15pt;font-weight:700;color:#1d1d1f;margin:20pt 0 10pt;padding:2pt 0 2pt 10pt;border-left:3.5pt solid #8B1A1A;line-height:1.35;letter-spacing:-0.015em}
+strong{font-weight:700;color:#1d1d1f}
+em{font-style:italic;color:#1d1d1f}
+/* 제목 계층 — 화면과 동일 (본문 14 → h4 16 → h3 18 → h2 20 → h1 24, pt 환산) */
+h1{font-size:18pt;font-weight:700;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3}
+h2{font-size:15pt;font-weight:800;color:#1d1d1f;margin:20pt 0 10pt;padding:2pt 0 2pt 10pt;border-left:3.5pt solid #8B1A1A;line-height:1.35;letter-spacing:-0.015em}
 h2:first-child{margin-top:4pt}
-h3{font-size:12.5pt;font-weight:650;color:#1a3a6e;margin:14pt 0 6pt;letter-spacing:-0.01em}
-h4{font-size:11.5pt;font-weight:650;color:#3d3d3f;margin:12pt 0 5pt}
-/* 리스트 */
+h3{font-size:13.5pt;font-weight:700;color:#1d1d1f;margin:14pt 0 6pt;letter-spacing:-0.01em}
+h4{font-size:12pt;font-weight:700;color:#1d1d1f;margin:12pt 0 5pt}
+/* 리스트 — 마커 검정으로 통일 */
 ul,ol{margin:8pt 0 12pt;padding-left:24pt}
 li{margin-bottom:5pt;line-height:1.68}
 ul{list-style-type:disc}
 ol{list-style-type:decimal}
-ul li::marker{color:#1a3a6e;font-weight:700}
-ol li::marker{color:#8B1A1A;font-weight:700}
+ul li::marker{color:#1d1d1f;font-weight:700}
+ol li::marker{color:#1d1d1f;font-weight:700}
 li > p{margin:0 0 4pt}
 li > p:last-child{margin-bottom:0}
-/* 인용구 */
-blockquote{margin:14pt 0;padding:10pt 14pt;border-left:3pt solid #1a3a6e;background:#f7f8fb;border-radius:0 6pt 6pt 0;color:#3d3d3f;font-size:10.5pt;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-blockquote p{margin:0 0 6pt;color:#3d3d3f}
+/* 인용구 — 이탤릭 + 회색 좌측 막대 + 대칭 여백 */
+blockquote{margin:14pt 0;padding:10pt 14pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;border-radius:0 6pt 6pt 0;color:#1d1d1f;font-size:10.5pt;line-height:1.6;font-style:italic;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+blockquote p{margin:0 0 6pt;color:#1d1d1f;font-style:italic}
+blockquote p:first-child{margin-top:0}
 blockquote p:last-child{margin-bottom:0}
-/* 표 — 컨설팅 리포트 */
+blockquote > *:first-child{margin-top:0}
+blockquote > *:last-child{margin-bottom:0}
+/* 표 — 레드 헤더만 유지, 나머지 중성 톤 */
 table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:12pt 0;border-radius:6pt;overflow:hidden;font-size:10.5pt}
 th,td{border:1px solid #e5e5ea;padding:6pt 10pt;vertical-align:middle;line-height:1.5;text-align:left}
-thead th{background:#8B1A1A !important;color:#fff !important;font-size:10pt;font-weight:650;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
+thead th{background:#8B1A1A !important;color:#fff !important;font-size:10.5pt;font-weight:700;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
 tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa}
 tbody tr:nth-child(even) td{background:#fafafa}
 tbody tr:nth-child(even) td:first-child{background:#f5f5f7}
-caption{caption-side:top;text-align:left;font-weight:650;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt;letter-spacing:-0.005em}
+caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt;letter-spacing:-0.005em}
+/* 링크 — 검정 + 밑줄 (파란색 제거) */
+a{color:#1d1d1f;text-decoration:underline}
 /* 구분선 */
 hr{border:0;height:1px;background:rgba(0,0,0,0.08);margin:16pt 0}
 /* 코드 */
@@ -2878,38 +2883,42 @@ async function exportAnswer(type, id /*, btn */){
       return;
     }
 
-    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 — 컨설팅 리포트 톤 */
+    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 — 컨설팅 리포트 톤 (화면과 동기화) */
     const htmlStyle=[
-      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:11pt;line-height:1.7;}',
+      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:10.5pt;line-height:1.7;}',
       '.wrap{padding:0;}',
       '.header{padding:0 0 14pt 0;border-bottom:1px solid #e5e5ea;margin:0 0 18pt 0;}',
       '.header-title{font-size:20pt;font-weight:700;letter-spacing:-0.3pt;margin:0 0 6pt 0;color:#1d1d1f;line-height:1.3;}',
       '.header-meta{font-size:10pt;color:#6e6e73;margin:0;line-height:1.4;}',
-      'p{margin:0 0 11pt 0;}',
+      'p{margin:0 0 11pt 0;color:#1d1d1f;}',
+      /* 제목 — 색은 전부 검정, 크기 사다리는 화면 14/16/18/20/24 에 비례 */
       'h1,h2,h3,h4{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;color:#1d1d1f;letter-spacing:-0.2pt;}',
-      'h1{font-size:17pt;font-weight:700;margin:18pt 0 10pt 0;line-height:1.3;}',
-      /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 */
-      'h2{font-size:14pt;font-weight:700;color:#1d1d1f;margin:18pt 0 9pt 0;padding:2pt 0 2pt 10pt;border-left:3pt solid #8B1A1A;line-height:1.35;}',
-      /* H3: 소제목 — 브랜드 네이비 */
-      'h3{font-size:12pt;font-weight:700;color:#1a3a6e;margin:13pt 0 6pt 0;}',
-      'h4{font-size:11pt;font-weight:700;color:#3d3d3f;margin:11pt 0 5pt 0;}',
+      'h1{font-size:18pt;font-weight:700;margin:18pt 0 10pt 0;line-height:1.3;}',
+      /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 유지 */
+      'h2{font-size:15pt;font-weight:800;color:#1d1d1f;margin:18pt 0 9pt 0;padding:2pt 0 2pt 10pt;border-left:3pt solid #8B1A1A;line-height:1.35;}',
+      /* H3: 소제목 — 색 검정 (네이비 제거) */
+      'h3{font-size:13.5pt;font-weight:700;color:#1d1d1f;margin:13pt 0 6pt 0;}',
+      'h4{font-size:12pt;font-weight:700;color:#1d1d1f;margin:11pt 0 5pt 0;}',
       'strong{font-weight:700;color:#1d1d1f;}',
-      'em{font-style:italic;color:#424245;}',
+      'em{font-style:italic;color:#1d1d1f;}',
       '.brand{font-weight:700;letter-spacing:-0.3pt;}',
       'ul,ol{padding-left:24pt;margin:7pt 0 11pt 0;}',
-      'li{margin-bottom:4pt;line-height:1.65;}',
-      'ul li::marker{color:#1a3a6e;font-weight:700;}',
-      'ol li::marker{color:#8B1A1A;font-weight:700;}',
-      /* 인용구 — 브랜드 블루 좌측 막대, 연회색 배경 */
-      'blockquote{margin:11pt 0;padding:9pt 13pt;border-left:3pt solid #1a3a6e;background:#f7f8fb;color:#3d3d3f;font-size:10.5pt;line-height:1.6;}',
-      'blockquote p{margin:0 0 5pt 0;color:#3d3d3f;}',
-      /* Word change-bar(변경 추적 세로선) 방어 — <ins>/<del> 및 body 블록·인라인 좌측 보더 차단 */
+      'li{margin-bottom:4pt;line-height:1.65;color:#1d1d1f;}',
+      /* 마커 — 검정으로 통일 */
+      'ul li::marker{color:#1d1d1f;font-weight:700;}',
+      'ol li::marker{color:#1d1d1f;font-weight:700;}',
+      /* 인용구 — 이탤릭 + 회색 좌측 막대 + 대칭 여백 */
+      'blockquote{margin:11pt 0;padding:9pt 13pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;color:#1d1d1f;font-size:10.5pt;line-height:1.6;font-style:italic;}',
+      'blockquote p{margin:0 0 5pt 0;color:#1d1d1f;font-style:italic;}',
+      'blockquote p:first-child{margin-top:0;}',
+      'blockquote p:last-child{margin-bottom:0;}',
+      /* Word change-bar(변경 추적 세로선) 방어 — H2는 예외(브랜드 레드 막대 유지) */
       'ul,ol,li,p,span,div,strong,em,a,code,h1,h3,h4,h5,h6{border-left:none !important;mso-border-left-alt:none !important;mso-border-between:none !important;}',
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
-      /* 표 — 컨설팅 리포트 */
+      /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
-      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#2c2c2e;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa;}',
       'tbody tr:nth-child(even) td{background:#fafafa;}',
       'tbody tr:nth-child(even) td:first-child{background:#f5f5f7;}',
@@ -2918,7 +2927,8 @@ async function exportAnswer(type, id /*, btn */){
       'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;margin:0 0 11pt 0;border:1px solid #d2d2d7;}',
       'pre code{background:transparent;border:none;padding:0;color:inherit;font-style:normal;}',
       'hr{border:none;border-top:1px solid #e5e5ea;margin:14pt 0;}',
-      'a{color:#1a3a6e;text-decoration:underline;}'
+      /* 링크 — 검정 + 밑줄 */
+      'a{color:#1d1d1f;text-decoration:underline;}'
     ].join('\n');
 
     const mergeStyle=(prev, add)=>{
