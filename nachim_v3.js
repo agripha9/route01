@@ -1502,7 +1502,7 @@ function addMsg(role,text,files,aiLabel){
       cr.setAttribute('data-for-export',id);
       cr.innerHTML=renderMD(safe);
     }
-    el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
+    el.innerHTML=`<div class="m-body"><div class="report-card"><div class="report-head"><span class="report-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="report-head-name">Route01 AI</span></div><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
   } else {
     const fileHtml=(files&&files.length)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${files.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid #d2d2d7;border-radius:20px;padding:2px 9px;font-size:11px;color:#1d1d1f;font-weight:500">${getIcon(f.name)} ${f.name}</span>`).join('')}</div>`:'';
     el.className = 'message user-msg';
@@ -1515,7 +1515,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-av ai"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></div><div class="m-body"><div class="m-name">Route01 AI</div><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div>`;
+  el.innerHTML=`<div class="m-body"><div class="report-card"><div class="report-head"><span class="report-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="report-head-name">Route01 AI</span></div><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div></div>`;
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
 }
