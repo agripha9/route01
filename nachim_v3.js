@@ -2230,8 +2230,8 @@ table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:12pt 0
 th,td{border:1px solid #e5e5ea;padding:6pt 10pt;vertical-align:middle;line-height:1.5;text-align:left}
 thead th{background:#8B1A1A !important;color:#fff !important;font-size:10.5pt;font-weight:700;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
 tbody td:first-child{font-weight:600;color:#1d1d1f}
-tbody tr:nth-child(odd) td{background:#fdf5f5}
-tbody tr:nth-child(even) td{background:#ffffff}
+tbody tr:nth-child(even) td{background:#fdfafa}
+tbody tr:nth-child(odd) td{background:#ffffff}
 caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt;letter-spacing:-0.005em}
 /* 링크 — 검정 + 밑줄 (파란색 제거) */
 a{color:#1d1d1f;text-decoration:underline}
@@ -2413,8 +2413,8 @@ function buildWordDocHtml(title, meta, bodyHtml, cssText){
     'caption{caption-side:top;text-align:center;font-weight:800;color:#1d1d1f;margin:0 0 10pt 0;}',
     'th{background:#8B1A1A !important;color:#ffffff !important;font-weight:700;text-align:center;-webkit-print-color-adjust:exact;}',
     'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
-    'tbody tr:nth-child(odd) td{background:#fdf5f5;}',
-    'tbody tr:nth-child(even) td{background:#ffffff;}',
+    'tbody tr:nth-child(even) td{background:#fdfafa;}',
+    'tbody tr:nth-child(odd) td{background:#ffffff;}',
     'code{font-family:Consolas,Menlo,monospace;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
     'pre{font-family:Consolas,Menlo,monospace;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 15pt 0;border:1px solid #d2d2d7;}',
     'pre code{background:transparent;border:none;padding:0;color:inherit;}',
@@ -2922,8 +2922,8 @@ async function exportAnswer(type, id /*, btn */){
       'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
       'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
-      'tbody tr:nth-child(odd) td{background:#fdf5f5;}',
-      'tbody tr:nth-child(even) td{background:#ffffff;}',
+      'tbody tr:nth-child(even) td{background:#fdfafa;}',
+      'tbody tr:nth-child(odd) td{background:#ffffff;}',
       'caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt 0;}',
       'code{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;background:#f5f5f7;border:1px solid #e5e5ea;padding:1pt 5pt;border-radius:4pt;color:#1d1d1f;}',
       'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;margin:0 0 11pt 0;border:1px solid #d2d2d7;}',
@@ -3095,11 +3095,11 @@ async function exportAnswer(type, id /*, btn */){
         const prev = tr.getAttribute('style') || '';
         tr.setAttribute('style', prev + ';mso-yfti-irow:0;page-break-inside:avoid;mso-row-cant-split:yes;');
       });
-      // 행 단위 스트라이프 — 홀수 행 옅은 브랜드 레드, 짝수 행 흰색
+      // 행 단위 스트라이프 — 짝수 행 옅은 브랜드 레드, 홀수 행 흰색
       doc.querySelectorAll('table:not([data-from="blockquote"]) tbody tr').forEach((tr, idx) => {
         const tds = tr.querySelectorAll('td');
-        /* :nth-child는 1-based odd/even. idx 0 = 첫 행 = odd = 옅은 레드 */
-        const bg = (idx % 2 === 0) ? '#fdf5f5' : '#ffffff';
+        /* :nth-child는 1-based. idx 0 = 첫 행 = odd = 흰색, idx 1 = even = 옅은 레드 */
+        const bg = (idx % 2 === 0) ? '#ffffff' : '#fdfafa';
         tds.forEach(td => { td.style.backgroundColor = bg; });
         // 첫 열 — 굵기/색만 강조 (배경은 행 스트라이프 그대로)
         const firstTd = tr.querySelector('td');
