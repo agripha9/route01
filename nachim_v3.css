@@ -1836,37 +1836,8 @@ main {
 }
 
 /* ══════════════════════════════════════
-   답변 화면 테이블 — 높이 균일 fix
-══════════════════════════════════════ */
-.m-bubble table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  margin: 12px 0;
-  font-size: 13.5px;
-  line-height: 1.4;
-  table-layout: auto;
-}
-.m-bubble th {
-  background: var(--brand-main) !important;
-  color: #fff !important;
-  font-weight: 700;
-  font-size: 12.5px;
-  padding: 8px 11px;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,.15);
-  vertical-align: middle;
-  white-space: nowrap;
-  -webkit-print-color-adjust: exact;
-}
+   답변 화면 테이블 — 높이 균일 fix (배경/폰트/테두리는 통일 스타일에서 관리) */
 .m-bubble td {
-  padding: 7px 11px;
-  border: 1px solid var(--border);
-  vertical-align: top;
-  font-size: 13px;
-  line-height: 1.45;
   /* 높이 팽창 방지 */
   height: auto !important;
   min-height: 0 !important;
@@ -1876,11 +1847,9 @@ main {
   margin: 0 0 4px;
 }
 .m-bubble td p:last-child { margin-bottom: 0; }
-.m-bubble tbody tr:nth-child(even) td {
-  background: rgba(0,0,0,.025);
-}
+/* 호버 — 네이비 톤이 아닌 중성 회색 */
 .m-bubble tbody tr:hover td {
-  background: rgba(26,58,110,.03);
+  background: #f0f0f3;
 }
 
 /* ══════════════════════════════════════
