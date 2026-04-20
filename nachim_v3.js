@@ -880,8 +880,14 @@ function cancelOnboardingEdit(){
 function hydrateOnboardingFromOb(){
   /* step reset */
   step=1;
-  ['sec1','sec2','sec3'].forEach((s,i)=>document.getElementById(s).classList.toggle('active',i===0));
-  for(let i=1;i<=3;i++) document.getElementById('s'+i).classList.toggle('done',i<=1);
+  ['sec1','sec2'].forEach((s,i)=>{
+    const el=document.getElementById(s);
+    if(el) el.classList.toggle('active', i===0);
+  });
+  for(let i=1;i<=3;i++){
+    const dot=document.getElementById('s'+i);
+    if(dot) dot.classList.toggle('done', i<=1);
+  }
 
   /* inputs */
   const ind=document.getElementById('industry-in');
