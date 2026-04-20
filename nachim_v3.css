@@ -682,6 +682,15 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol{
   list-style-type:decimal !important;
+  counter-reset:item;
+}
+/* 번호 리스트 정상화: 항목이 1개뿐이면 번호 자체를 숨겨 '단락 하나'처럼 보이게 */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol[data-single]{
+  list-style:none !important;
+  padding-left:0 !important;
+}
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol[data-single] > li{
+  padding-left:0 !important;
 }
 /* 과거 커스텀 불릿/체크박스/색상 잔재 차단 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li::before,

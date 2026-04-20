@@ -1594,6 +1594,11 @@ ${styleGuide}
   (예: 나쁨 \`대상 기업 수\` × \`ARPU\`  / 좋음: **대상 기업 수 × ARPU**  또는  (대상 기업 수) × (ARPU))
 - 수식은 괄호와 × ÷ = 기호로, 강조는 **굵게**로 표기.
 - 순서가 있는 "실행 항목/단계 목록"은 마크다운 순서 목록(1. 2. 3.)을 써도 됨. ①②③ 같은 유니코드 원문자를 제목이나 리스트 머리에 쓰지 말 것. 본문 내 인라인 언급으로만 허용.
+- **번호 리스트 규칙**:
+  (a) 각 섹션(### 제목) 안에서 번호 리스트는 반드시 **1부터** 새로 시작한다.
+      (섹션이 달라지면 새 ol을 만들어 1., 2., 3. ... 로. 이전 섹션의 번호를 이어가지 말 것.)
+  (b) 항목이 **하나뿐**이면 번호 리스트를 쓰지 말고 그냥 본문 단락이나 불릿 한 줄로 쓸 것.
+  (c) 같은 섹션 안에서 중간에 본문 단락이 끼어도 번호는 이어서 쓸 것(리스트를 쪼개지 말 것).
 - **번호가 붙은 섹션 "제목"은 절대 리스트(-, 1.)로 쓰지 말 것.** 반드시 ### 또는 #### 헤딩으로.
   (나쁨: "- **1. 현 단계에서 CAC가 의미 없는 이유**" 다음 줄에 본문/표
    좋음: "### 1. 현 단계에서 CAC가 의미 없는 이유" 다음 줄에 본문/표)
@@ -1955,6 +1960,7 @@ function renderMD(md){
     html=normalizeParagraphOrderedLists(html);
     html=unwrapListItemSingleParagraph(html);
     html=collapseAdjacentHrs(html);
+    html=normalizeOrderedListNumbering(html);
     return html;
   }
   return collapseAdjacentHrs(renderMDFallback(src));
@@ -1965,6 +1971,24 @@ function collapseAdjacentHrs(html){
   const s=String(html||'');
   /* 두 번째 이후의 <hr>(class 포함)과 그 사이의 빈 단락·공백만 제거 */
   return s.replace(/(<hr\b[^>]*>)((?:\s|<p>\s*<\/p>)*<hr\b[^>]*>)+/gi, '$1');
+}
+
+/* 번호 리스트 정상화 (사용자 규칙):
+   - 각 <ol>의 start 속성 제거 → 1부터 시작
+   - 항목 1개뿐인 <ol>은 마커 숨김 (data-single 속성 추가해 CSS로 처리) */
+function normalizeOrderedListNumbering(html){
+  try{
+    const tmp=document.createElement('div');
+    tmp.innerHTML=String(html||'');
+    tmp.querySelectorAll('ol').forEach(ol=>{
+      ol.removeAttribute('start');
+      const liCount=[...ol.children].filter(c=>c.tagName==='LI').length;
+      if(liCount<=1) ol.setAttribute('data-single','1');
+    });
+    return tmp.innerHTML;
+  }catch(e){
+    return html;
+  }
 }
 
 /* marked GFM 취소선: 스펙은 ~~ 이지만 구현에 따라 단일 ~ 짝도 매칭되어
