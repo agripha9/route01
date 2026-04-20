@@ -547,7 +547,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:transparent;border:none;border-radius:0;box-shadow:none;
   padding:2.25rem 2.75rem 2rem;
   font-family:var(--font-text);
-  font-size:15.5px;
+  font-size:15px;
   line-height:1.75;
   letter-spacing:-0.012em;
   color:#1d1d1f;
@@ -575,13 +575,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   letter-spacing:-0.022em;
 }
 .report-card .report-bubble h1{
-  font-size:26px;
+  font-size:25px;
   font-weight:700;
   margin:1.5rem 0 1rem;
 }
 /* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대 + 크고 굵게 */
 .report-card .report-bubble h2{
-  font-size:22px;
+  font-size:21px;
   font-weight:800;
   margin:2.75rem 0 1.2rem;
   padding:0.2rem 0 0.2rem 18px;
@@ -594,7 +594,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* H3 — 소제목. 네이비 + 좌측에 작은 점으로 시각 신호.
    !important 로 본문·리스트 관련 다른 규칙과 섞이지 않게 잠금. */
 .report-card .report-bubble h3{
-  font-size:19px !important;
+  font-size:18.5px !important;
   font-weight:700 !important;
   margin:2.2rem 0 .9rem !important;
   color:#1a3a6e !important;
@@ -618,7 +618,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
    단, 폰트 크기·굵기·색은 일반 H3와 동일하게 유지. */
 .report-card .report-bubble h3[data-numbered]{
   padding-left:0;
-  font-size:19px !important;
+  font-size:18.5px !important;
   font-weight:700 !important;
   color:#1a3a6e !important;
 }
@@ -627,7 +627,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
 }
 .report-card .report-bubble h4{
-  font-size:17px !important;
+  font-size:16.5px !important;
   font-weight:700 !important;
   margin:1.6rem 0 .65rem !important;
   color:#3d3d3f !important;
@@ -635,10 +635,10 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display:block !important;
 }
 .report-card .report-bubble h4[data-numbered]{
-  font-size:17px !important;
+  font-size:16.5px !important;
 }
 .report-card .report-bubble h2{
-  font-size:22px !important;
+  font-size:21px !important;
   font-weight:800 !important;
 }
 
@@ -781,7 +781,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   border-left:3px solid #1a3a6e;
   border-radius:0 6px 6px 0;
   color:#3d3d3f;
-  font-size:14.5px;
+  font-size:14px;
   line-height:1.65;
   font-style:normal;
 }
