@@ -777,6 +777,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-style:italic;
 }
 .report-card .report-bubble blockquote p:last-child{margin-bottom:0}
+/* 인용구 내부 첫·끝 자식의 기본 마진을 0으로 — 위아래 여백이 패딩값(.9rem)으로 대칭이 되도록 */
+.report-card .report-bubble blockquote > *:first-child{margin-top:0 !important;}
+.report-card .report-bubble blockquote > *:last-child{margin-bottom:0 !important;}
 
 /* 답변 내 표 — 컨설팅 리포트 스타일 (본문 폰트 사이즈와 통일, 좌측 정렬 일관) */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) table{
