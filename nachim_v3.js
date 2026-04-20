@@ -1564,6 +1564,15 @@ ${styleGuide}
 즉시 실행 가능한 단계 (주/2주 단위 마일스톤 포함).
 - "~할 수 있습니다" 대신 "~하세요" 직접 톤 유지.
 
+[서식 규칙 — 엄수]
+- 한글 변수·수식·지표명에 백틱(\`\`)을 쓰지 말 것. 백틱은 영문 코드·파일명·명령어에만 사용.
+  (예: 나쁨 \`대상 기업 수\` × \`ARPU\`  / 좋음: **대상 기업 수 × ARPU**  또는  (대상 기업 수) × (ARPU))
+- 수식은 괄호와 × ÷ = 기호로, 강조는 **굵게**로 표기.
+- 순서가 있는 목록은 반드시 마크다운 순서 목록(1. 2. 3.)을 쓸 것. ①②③ 같은 유니코드 원문자를 제목이나 리스트 머리에 쓰지 말 것. 본문 내 인라인 언급으로만 허용.
+- 제목(##, ###)은 제목 한 줄에 해당 섹션 번호가 필요하면 "1. TAM — 이론적 최대 시장"처럼 쓸 것.
+- 표는 GitHub Flavored Markdown 표 문법만 사용. 표 셀 안에서 백틱 금지.
+- 코드블록(\`\`\`)은 영문 코드/쿼리/JSON에만 사용. 한글 수식·정의문을 코드블록에 넣지 말 것.
+
 [구분선 규칙] 본문 완료 후 부가문구(추천질문·CTA 등) 앞에만:
 <<<NACHIM_TAIL>>>
 `;
@@ -2067,9 +2076,9 @@ thead th{background:#8B1A1A !important;color:#fff !important;font-size:12px;font
 tbody td{border-bottom:1px solid #e8e8ed}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:nth-child(even) td{background:#f5f5f7}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-style:italic;font-size:0.95em;font-weight:400;background:#f5f5f7;padding:1px 6px;border-radius:8px;border:1px solid #e8e8ed;color:#1d1d1f}
-pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:14px;font-style:italic;line-height:1.75;background:#f5f5f7;color:#1d1d1f;border-radius:10px;padding:12px 14px;overflow:auto;border:1px solid #d2d2d7}
-pre code{font-family:inherit;font-style:italic;font-size:inherit;font-weight:400;background:transparent;border:none;padding:0;color:inherit}`;
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-style:normal;font-size:0.95em;font-weight:400;background:#f5f5f7;padding:1px 6px;border-radius:8px;border:1px solid #e8e8ed;color:#1d1d1f}
+pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;font-size:13.5px;font-style:normal;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:10px;padding:12px 14px;overflow:auto;border:1px solid #d2d2d7}
+pre code{font-family:inherit;font-style:normal;font-size:inherit;font-weight:400;background:transparent;border:none;padding:0;color:inherit}`;
 
 function buildExportDocumentHtml(title,meta,bodyHtml,extraCss){
   const x=extraCss?String(extraCss):'';
@@ -2727,9 +2736,9 @@ async function exportAnswer(type, id /*, btn */){
       'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 9pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'td{padding:4pt 9pt;border:1px solid #d2d2d7;vertical-align:top;text-align:left;line-height:1.35;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
       'tbody tr:nth-child(even) td{background:#f7f8fb;}',
-      'code{font-family:Consolas,Menlo,monospace;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
-      'pre{font-family:Consolas,Menlo,monospace;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 12pt 0;border:1px solid #d2d2d7;}',
-      'pre code{background:transparent;border:none;padding:0;color:inherit;}',
+      'code{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10.5pt;background:#f5f5f7;border:1px solid #d2d2d7;padding:1pt 4pt;border-radius:6pt;color:#1d1d1f;}',
+      'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10.5pt;line-height:1.55;background:#f5f5f7;color:#1d1d1f;border-radius:8pt;padding:10pt 12pt;overflow:auto;margin:0 0 12pt 0;border:1px solid #d2d2d7;}',
+      'pre code{background:transparent;border:none;padding:0;color:inherit;font-style:normal;}',
       'hr{border:none;border-top:1px solid #d2d2d7;margin:14pt 0;}',
       'a{color:#1d1d1f;text-decoration:underline;}'
     ].join('\n');

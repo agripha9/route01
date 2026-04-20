@@ -613,9 +613,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   margin:14px 0;
 }
 .report-card .answer-actions{margin-top:0;padding:0 1.5rem 1.25rem;background:#fff}
-.m-bubble code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:6px}
-.m-bubble pre{margin:.75rem 0;padding:12px 14px;border-radius:var(--r-lg);background:var(--bg);color:var(--ink);overflow:auto;border:1px solid var(--border);font-family:var(--font-text);font-size:14px;font-style:italic;line-height:1.47}
-.m-bubble pre code{background:transparent;border:none;padding:0;color:inherit;font-family:inherit;font-style:italic;font-size:inherit;font-weight:400}
+.m-bubble code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:12.5px;background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-style:normal;line-height:inherit;vertical-align:baseline;white-space:normal;word-break:keep-all}
+.m-bubble pre{margin:.75rem 0;padding:12px 14px;border-radius:var(--r-lg);background:var(--bg);color:var(--ink);overflow:auto;border:1px solid var(--border);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:13.5px;font-style:normal;line-height:1.55}
+.m-bubble pre code{background:transparent;border:none;padding:0;color:inherit;font-family:inherit;font-style:normal;font-size:inherit;font-weight:400}
 .m-bubble hr{border:none;height:1px;background:var(--border);margin:1rem 0}
 .m-bubble a{color:var(--link-blue);text-decoration:none}
 .m-bubble a:hover{text-decoration:underline}
