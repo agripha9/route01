@@ -1515,7 +1515,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble"><div class="route-loader" aria-label="로딩 중"><svg viewBox="0 0 600 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="rl-path-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6e6e73"/><stop offset="100%" stop-color="#8B1A1A"/></linearGradient></defs><line class="rl-track" x1="30" y1="30" x2="570" y2="30"/><line class="rl-progress" x1="30" y1="30" x2="570" y2="30"/><circle class="rl-node rl-n1" cx="150" cy="30" r="4"/><circle class="rl-node rl-n2" cx="270" cy="30" r="4"/><circle class="rl-node rl-n3" cx="390" cy="30" r="4"/><circle class="rl-node rl-n4" cx="510" cy="30" r="4"/><g class="rl-end rl-end-0"><circle cx="30" cy="30" r="14"/><text x="30" y="34" text-anchor="middle">0</text></g><g class="rl-end rl-end-1"><circle cx="570" cy="30" r="14"/><text x="570" y="34" text-anchor="middle">1</text></g></svg><div class="rl-caption">Finding your Route<span class="rl-dots"></span></div></div></div></div></div>`;
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
 }
@@ -1976,7 +1976,7 @@ function collapseAdjacentHrs(html){
 /* 번호 리스트 정상화 (사용자 규칙):
    - 각 <ol>의 start 속성 제거 → 1부터 시작
    - 항목 1개뿐인 <ol>은 마커 숨김 (data-single 속성 추가해 CSS로 처리)
-   - 모델이 "섹션 제목"을 li로 내보낸 경우 (li 첫 줄이 볼드 + 뒤에 블록 콘텐츠가 따라옴)
+   - 모델이 "섹션 제목"을 li로 내보낸 경우 (li 첫 줄이 짧은 한 줄 타이틀 + 뒤에 블록)
      → 마커 숨김 + 첫 줄을 제목 크기로 렌더하도록 data-section-heading 부여. */
 function normalizeOrderedListNumbering(html){
   try{
@@ -1991,28 +1991,41 @@ function normalizeOrderedListNumbering(html){
     });
 
     /* 2. li가 실질적 "섹션 제목"인지 판별
-       조건: 첫 블록이 strong으로 시작 + 그 뒤에 p/table/ul/ol/blockquote 등 블록 콘텐츠가 이어짐
-       → 해당 li에 data-section-heading 부여. 부모 ol/ul도 data-has-heading으로 표시해
-          형제 li들의 번호가 시각적으로 정상으로 보이도록 CSS가 리셋. */
-    const BLOCK_TAGS = new Set(['P','TABLE','UL','OL','BLOCKQUOTE','DIV','PRE']);
+       조건: 첫 블록이 '짧은 한 줄 타이틀'이고 + 뒤에 블록 콘텐츠가 이어짐.
+       '짧은 한 줄 타이틀' 판정:
+         (a) p 안에 strong 하나만 있는 경우, 또는
+         (b) p 안에 텍스트가 ~60자 이하이고 줄바꿈/블록이 없는 경우
+             (주로 '1. 제목', '1주차 — 제목' 같은 형태) */
+    const BLOCK_TAGS = new Set(['P','TABLE','UL','OL','BLOCKQUOTE','DIV','PRE','H1','H2','H3','H4','H5','H6']);
     tmp.querySelectorAll('li').forEach(li=>{
       const kids=[...li.children];
-      if(kids.length < 2) return; // 단일 항목은 제목 아님
+      if(kids.length < 2) return;
       const first=kids[0];
-      // 첫 자식이 p이고 그 첫 인라인이 strong 하나만인지
-      let firstIsBoldOnlyLine=false;
+
+      let looksLikeTitle=false;
+
       if(first.tagName==='P'){
         const pKids=[...first.childNodes].filter(n=> !(n.nodeType===3 && !n.nodeValue.trim()));
+        // (a) 하나의 strong만 있음
         if(pKids.length===1 && pKids[0].nodeType===1 && pKids[0].tagName==='STRONG'){
-          firstIsBoldOnlyLine=true;
+          looksLikeTitle=true;
+        }
+        // (b) 텍스트 길이가 짧음 (~70자 이하) + 내부에 블록 요소 없음
+        const plain=(first.textContent||'').trim();
+        const hasBlockInside=[...first.querySelectorAll('*')].some(el=>BLOCK_TAGS.has(el.tagName));
+        if(!looksLikeTitle && !hasBlockInside && plain.length>0 && plain.length<=70){
+          looksLikeTitle=true;
         }
       } else if(first.tagName==='STRONG'){
-        firstIsBoldOnlyLine=true;
+        looksLikeTitle=true;
       }
-      if(!firstIsBoldOnlyLine) return;
-      // 이후에 블록 콘텐츠가 있는지
+
+      if(!looksLikeTitle) return;
+
+      // 뒤에 블록 콘텐츠가 있는지
       const hasFollowingBlock=kids.slice(1).some(el=>BLOCK_TAGS.has(el.tagName));
       if(!hasFollowingBlock) return;
+
       li.setAttribute('data-section-heading','1');
       const parent=li.parentElement;
       if(parent && (parent.tagName==='OL'||parent.tagName==='UL')){
