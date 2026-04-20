@@ -3053,21 +3053,43 @@ async function exportAnswer(type, id /*, btn */){
 
       // 3. 인용구 — 브랜드 블루 좌측 막대, 연회색 배경 (컨설팅 톤)
       doc.querySelectorAll('blockquote').forEach(bq => {
+        /* Word의 기본 blockquote 들여쓰기(margin-left)와 mso-ascii 값을 제거해
+           border-left와 background가 서로 붙도록. */
         bq.style.backgroundColor = '#f7f8fb';
         bq.style.padding = '9pt 13pt';
-        bq.style.borderLeft = '3pt solid #1a3a6e';
+        bq.style.borderLeft = '3pt solid #d2d2d7';
         bq.style.margin = '11pt 0';
+        bq.style.marginLeft = '0';
+        bq.style.marginRight = '0';
+        bq.style.paddingLeft = '13pt';
+        bq.style.fontStyle = 'italic';
+        bq.style.color = '#1d1d1f';
+        bq.style.setProperty('mso-element', 'para-border-div');
+        bq.style.setProperty('-webkit-print-color-adjust', 'exact');
+        bq.style.setProperty('print-color-adjust', 'exact');
       });
       doc.querySelectorAll('blockquote p').forEach(p => {
         p.style.backgroundColor = '#f7f8fb';
-        p.style.margin = '0 0 5pt 0';
-        p.style.color = '#3d3d3f';
+        p.style.margin = '0';
+        p.style.color = '#1d1d1f';
+        p.style.fontStyle = 'italic';
+      });
+      /* 블록쿼트 안 <p>가 여러 개일 때 사이 간격만 추가 (위아래 패딩 대칭 유지).
+         첫·끝 p의 위/아래 마진은 0 으로 이미 세팅됨. */
+      doc.querySelectorAll('blockquote').forEach(bq => {
+        const ps = bq.querySelectorAll(':scope > p');
+        ps.forEach((p, i) => {
+          if (i > 0) p.style.marginTop = '5pt';
+          if (i < ps.length - 1) p.style.marginBottom = '0';
+          else p.style.marginBottom = '0';
+          if (i === 0) p.style.marginTop = '0';
+        });
       });
 
-      // 3b. h2 — 컨설팅 리포트 스타일 (좌측 브랜드 레드 세로 막대)
+      // 3b. h2 — 컨설팅 리포트 섹션 제목 (좌측 브랜드 레드 세로 막대 유지)
       doc.querySelectorAll('h2').forEach(h => {
-        h.style.fontSize = '14pt';
-        h.style.fontWeight = '700';
+        h.style.fontSize = '15pt';
+        h.style.fontWeight = '800';
         h.style.color = '#1d1d1f';
         h.style.borderLeft = '3pt solid #8B1A1A';
         h.style.paddingLeft = '10pt';
@@ -3076,24 +3098,34 @@ async function exportAnswer(type, id /*, btn */){
         h.style.margin = '18pt 0 9pt 0';
         h.style.lineHeight = '1.35';
       });
-      // H3 — 브랜드 네이비
+      // H3 — 검정 (네이비 제거)
       doc.querySelectorAll('h3').forEach(h => {
-        h.style.fontSize = '12pt';
+        h.style.fontSize = '13.5pt';
         h.style.fontWeight = '700';
-        h.style.color = '#1a3a6e';
+        h.style.color = '#1d1d1f';
         h.style.margin = '13pt 0 6pt 0';
       });
+      // H4 — 검정 (그레이 제거)
       doc.querySelectorAll('h4').forEach(h => {
-        h.style.fontSize = '11pt';
+        h.style.fontSize = '12pt';
         h.style.fontWeight = '700';
-        h.style.color = '#3d3d3f';
+        h.style.color = '#1d1d1f';
         h.style.margin = '11pt 0 5pt 0';
       });
 
-      // 4. 기울임꼴 유지 (회색 박스 안/밖 모두)
+      // H1도 혹시 있으면 검정
+      doc.querySelectorAll('h1').forEach(h => {
+        h.style.fontSize = '18pt';
+        h.style.fontWeight = '700';
+        h.style.color = '#1d1d1f';
+        h.style.margin = '18pt 0 10pt 0';
+      });
+
+      // em/i — 색 검정 (이탤릭으로 구분, 색 다르게 할 필요 없음)
       doc.querySelectorAll('em, i').forEach(el => {
         el.style.fontStyle = 'italic';
         el.style.setProperty('font-style', 'italic', 'important');
+        el.style.color = '#1d1d1f';
       });
 
       // 5. <hr>이 Word에서 빨간 줄로 깨지는 문제 방지 (인라인화)
