@@ -631,27 +631,45 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-weight:700;
 }
 
-/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우에도 시각적 위계를 보정.
-   li > strong 만 있고 그 아래에 본문 블록이 이어지는 패턴 → 제목처럼 크기 up.
-   동시에 번호/불릿 마커는 숨겨서 "번호·기호 중복" 방지. */
-.report-card .report-bubble li > strong:only-child,
-.report-card .report-bubble li > p:only-child > strong:only-child{
-  display:inline-block;
-  font-size:17px;
+/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우에도 시각적 위계 보정.
+   JS의 normalizeOrderedListNumbering 이 li[data-section-heading] 속성을 달아주면
+   그 li는 "섹션 제목"처럼 렌더: 번호/불릿 마커 숨김 + 첫 줄 크기 up. */
+.report-card .report-bubble li[data-section-heading]{
+  list-style:none !important;
+  padding-left:0 !important;
+  margin-left:-2.5rem; /* 부모 ol/ul padding-left(2.5rem) 상쇄 → 제목이 카드 좌측으로 복귀 */
+  margin-top:1.8rem;
+  margin-bottom:.7rem;
+}
+.report-card .report-bubble li[data-section-heading]::marker{
+  content:"" !important;
+}
+.report-card .report-bubble li[data-section-heading] > p:first-child,
+.report-card .report-bubble li[data-section-heading] > strong:first-child{
+  font-size:17.5px;
   font-weight:700;
   color:#1a3a6e;
   letter-spacing:-0.018em;
+  line-height:1.4;
+  margin-bottom:.6rem;
 }
-.report-card .report-bubble li:has(> strong:only-child),
-.report-card .report-bubble li:has(> p:only-child > strong:only-child){
-  margin-top:1.2rem;
-  margin-bottom:.5rem;
-  list-style:none !important;
+.report-card .report-bubble li[data-section-heading] > p:first-child > strong{
+  font-size:inherit;
+  font-weight:inherit;
+  color:inherit;
+}
+/* 리스트 부모에 제목이 하나라도 있으면 리스트 자체 들여쓰기/마진 정돈 */
+.report-card .report-bubble ol[data-has-heading],
+.report-card .report-bubble ul[data-has-heading]{
+  list-style:none;
   padding-left:0 !important;
+  margin:.5rem 0 1rem;
 }
-.report-card .report-bubble li:has(> strong:only-child)::marker,
-.report-card .report-bubble li:has(> p:only-child > strong:only-child)::marker{
-  content:"" !important;
+/* 제목이 아닌 일반 li는 ul[data-has-heading] 안에서도 기존 들여쓰기 유지 */
+.report-card .report-bubble ol[data-has-heading] > li:not([data-section-heading]),
+.report-card .report-bubble ul[data-has-heading] > li:not([data-section-heading]){
+  margin-left:0;
+  padding-left:0;
 }
 
 /* 강조 — 굵기만 / 색은 유지(난잡함 방지) */

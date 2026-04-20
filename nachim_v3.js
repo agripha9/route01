@@ -1975,16 +1975,51 @@ function collapseAdjacentHrs(html){
 
 /* 번호 리스트 정상화 (사용자 규칙):
    - 각 <ol>의 start 속성 제거 → 1부터 시작
-   - 항목 1개뿐인 <ol>은 마커 숨김 (data-single 속성 추가해 CSS로 처리) */
+   - 항목 1개뿐인 <ol>은 마커 숨김 (data-single 속성 추가해 CSS로 처리)
+   - 모델이 "섹션 제목"을 li로 내보낸 경우 (li 첫 줄이 볼드 + 뒤에 블록 콘텐츠가 따라옴)
+     → 마커 숨김 + 첫 줄을 제목 크기로 렌더하도록 data-section-heading 부여. */
 function normalizeOrderedListNumbering(html){
   try{
     const tmp=document.createElement('div');
     tmp.innerHTML=String(html||'');
+
+    /* 1. ol start 제거 + 단일 항목 ol 마크 */
     tmp.querySelectorAll('ol').forEach(ol=>{
       ol.removeAttribute('start');
       const liCount=[...ol.children].filter(c=>c.tagName==='LI').length;
       if(liCount<=1) ol.setAttribute('data-single','1');
     });
+
+    /* 2. li가 실질적 "섹션 제목"인지 판별
+       조건: 첫 블록이 strong으로 시작 + 그 뒤에 p/table/ul/ol/blockquote 등 블록 콘텐츠가 이어짐
+       → 해당 li에 data-section-heading 부여. 부모 ol/ul도 data-has-heading으로 표시해
+          형제 li들의 번호가 시각적으로 정상으로 보이도록 CSS가 리셋. */
+    const BLOCK_TAGS = new Set(['P','TABLE','UL','OL','BLOCKQUOTE','DIV','PRE']);
+    tmp.querySelectorAll('li').forEach(li=>{
+      const kids=[...li.children];
+      if(kids.length < 2) return; // 단일 항목은 제목 아님
+      const first=kids[0];
+      // 첫 자식이 p이고 그 첫 인라인이 strong 하나만인지
+      let firstIsBoldOnlyLine=false;
+      if(first.tagName==='P'){
+        const pKids=[...first.childNodes].filter(n=> !(n.nodeType===3 && !n.nodeValue.trim()));
+        if(pKids.length===1 && pKids[0].nodeType===1 && pKids[0].tagName==='STRONG'){
+          firstIsBoldOnlyLine=true;
+        }
+      } else if(first.tagName==='STRONG'){
+        firstIsBoldOnlyLine=true;
+      }
+      if(!firstIsBoldOnlyLine) return;
+      // 이후에 블록 콘텐츠가 있는지
+      const hasFollowingBlock=kids.slice(1).some(el=>BLOCK_TAGS.has(el.tagName));
+      if(!hasFollowingBlock) return;
+      li.setAttribute('data-section-heading','1');
+      const parent=li.parentElement;
+      if(parent && (parent.tagName==='OL'||parent.tagName==='UL')){
+        parent.setAttribute('data-has-heading','1');
+      }
+    });
+
     return tmp.innerHTML;
   }catch(e){
     return html;
