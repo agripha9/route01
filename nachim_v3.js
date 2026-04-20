@@ -1502,7 +1502,7 @@ function addMsg(role,text,files,aiLabel){
       cr.setAttribute('data-for-export',id);
       cr.innerHTML=renderMD(safe);
     }
-    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name">Route01 AI</span></div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
+    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
   } else {
     const fileHtml=(files&&files.length)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${files.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid #d2d2d7;border-radius:20px;padding:2px 9px;font-size:11px;color:#1d1d1f;font-weight:500">${getIcon(f.name)} ${f.name}</span>`).join('')}</div>`:'';
     el.className = 'message user-msg';
@@ -1515,7 +1515,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name">Route01 AI</span></div><div class="report-card"><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble"><div class="dots"><span></span><span></span><span></span></div></div></div></div>`;
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
 }
@@ -2110,6 +2110,7 @@ function buildExportMetaLine(){
 
 /*보내기(DOCX/PDF) 공통 HTML — Word altChunk / 인쇄 미리보기 겸용 */
 const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:11pt;line-height:1.7;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
+.brand{font-weight:700;letter-spacing:-0.03em;font-style:normal}
 .page{padding:1.8cm 2cm}
 .card{background:#fff;border:none;border-radius:12px;padding:26px 30px;box-shadow:none}
 .title{font-size:22px;color:#1d1d1f;margin:0 0 6px;font-weight:700;letter-spacing:-.028em;line-height:1.25}
@@ -2154,7 +2155,11 @@ pre code{font-family:inherit;font-style:normal;font-size:inherit;font-weight:400
 
 function buildExportDocumentHtml(title,meta,bodyHtml,extraCss){
   const x=extraCss?String(extraCss):'';
-  return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)}</title><style>${EXPORT_DOC_STYLES}${x}</style></head><body><div class="page"><div class="card"><div class="title">${esc(title)}</div><div class="meta">${esc(meta)}</div><div class="content">${bodyHtml}</div></div></div></body></html>`;
+  /* 'Route01' 텍스트를 .brand 스팬으로 감싸 폰트 통일 — esc() 이후에 치환해야 안전 */
+  const brandify = (s) => String(s||'').replace(/Route01/g,'<span class="brand">Route01</span>');
+  const titleHtml = brandify(esc(title));
+  const metaHtml = brandify(esc(meta));
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)}</title><style>${EXPORT_DOC_STYLES}${x}</style></head><body><div class="page"><div class="card"><div class="title">${titleHtml}</div><div class="meta">${metaHtml}</div><div class="content">${bodyHtml}</div></div></div></body></html>`;
 }
 
 /* Word altChunk: style 속성에 남은 border-left / mso-border-* 는 목록·중첩 태그에만 번지며 세로선(색 깨짐)으로 보일 수 있음 */
@@ -2326,12 +2331,13 @@ function buildWordDocHtml(title, meta, bodyHtml, cssText){
     'a{color:#1d1d1f;text-decoration:underline;}'
   ].join('\n');
 
+  const brandify = (s) => String(s||'').replace(/Route01/g,'<span class="brand">Route01</span>');
   const wrapperStart=[
     '<div class="Section1">',
     '<div class="wrap">',
     '<div class="header">',
-    `<div class="header-title">${esc(docTitle)}</div>`,
-    `<p class="header-meta">${esc(meta)}</p>`,
+    `<div class="header-title">${brandify(esc(docTitle))}</div>`,
+    `<p class="header-meta">${brandify(esc(meta))}</p>`,
     '</div>'
   ].join('');
   const wrapperEnd='</div></div>';
@@ -2805,6 +2811,7 @@ async function exportAnswer(type, id /*, btn */){
       'h4{font-size:11pt;font-weight:700;color:#3d3d3f;margin:11pt 0 5pt 0;}',
       'strong{font-weight:700;color:#1d1d1f;}',
       'em{font-style:italic;color:#424245;}',
+      '.brand{font-weight:700;letter-spacing:-0.3pt;}',
       'ul,ol{padding-left:24pt;margin:7pt 0 11pt 0;}',
       'li{margin-bottom:4pt;line-height:1.65;}',
       'ul li::marker{color:#1a3a6e;font-weight:700;}',
@@ -3080,8 +3087,8 @@ async function exportAnswer(type, id /*, btn */){
       '<body>',
       '<div class="wrap">',
       '<div class="header">',
-      `<div class="header-title">${esc(docTitle)}</div>`,
-      `<p class="header-meta">${esc(meta)}</p>`,
+      `<div class="header-title">${String(esc(docTitle)||'').replace(/Route01/g,'<span class="brand">Route01</span>')}</div>`,
+      `<p class="header-meta">${String(esc(meta)||'').replace(/Route01/g,'<span class="brand">Route01</span>')}</p>`,
       '</div>',
       String(bodyHtml||''),
       '</div>',
@@ -3411,7 +3418,7 @@ function syncAllCheck() {
 
 /* ── 약관 모달 ── */
 const R01_TERMS = {
-  terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 Route01이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p>Route01은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li>Route01 AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 20회 무료</li><li>Starter: 9,900원/월 (100회)</li><li>Pro: 29,900원/월 (무제한)</li><li>Team: 99,000원/월 (5인)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
+  terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 <span class="brand">Route01</span>이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p><span class="brand">Route01</span>은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li><span class="brand">Route01</span> AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 20회 무료</li><li>Starter: 9,900원/월 (100회)</li><li>Pro: 29,900원/월 (무제한)</li><li>Team: 99,000원/월 (5인)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
   privacy:{title:'개인정보처리방침',html:`<h3>1. 수집 항목</h3><ul><li><strong>필수:</strong> 이메일, 소셜 로그인 식별자</li><li><strong>선택:</strong> 스타트업명, 업종, 단계, 팀 규모</li></ul><h3>2. 수집 목적</h3><ul><li>서비스 제공 및 회원 관리</li><li>맞춤형 AI 자문 제공</li><li>마케팅 정보 발송 (동의 시)</li></ul><h3>3. 보유 기간</h3><p>회원 탈퇴 시 즉시 삭제</p><h3>4. 처리 위탁</h3><ul><li>Anthropic: AI 답변 생성</li><li>Auth0(Okta): 로그인 인증</li><li>토스페이먼츠: 결제 처리</li></ul><h3>5. 이용자 권리</h3><p>열람·수정·삭제 요청: privacy@route01.kr</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`}
 };
 function openTermsModal(type) {
