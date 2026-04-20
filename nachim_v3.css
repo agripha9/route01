@@ -591,16 +591,18 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   letter-spacing:-0.024em;
 }
 .report-card .report-bubble h2:first-child{margin-top:0.35rem}
-/* H3 — 소제목. 네이비 + 좌측에 작은 점으로 시각 신호 */
+/* H3 — 소제목. 네이비 + 좌측에 작은 점으로 시각 신호.
+   !important 로 본문·리스트 관련 다른 규칙과 섞이지 않게 잠금. */
 .report-card .report-bubble h3{
-  font-size:18px;
-  font-weight:700;
-  margin:2rem 0 .85rem;
-  color:#1a3a6e;
-  letter-spacing:-0.02em;
-  line-height:1.4;
+  font-size:19px !important;
+  font-weight:700 !important;
+  margin:2.2rem 0 .9rem !important;
+  color:#1a3a6e !important;
+  letter-spacing:-0.02em !important;
+  line-height:1.4 !important;
   position:relative;
   padding-left:14px;
+  display:block !important;
 }
 .report-card .report-bubble h3::before{
   content:"";
@@ -613,19 +615,31 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:#1a3a6e;
 }
 /* 제목이 이미 숫자로 시작하는 경우(예: "1. 단계별 KPI 전체 맵") 파란 점 숨김.
-   JS의 normalizeOrderedListNumbering 에서 data-numbered 속성을 달아줌. */
+   단, 폰트 크기·굵기·색은 일반 H3와 동일하게 유지. */
 .report-card .report-bubble h3[data-numbered]{
   padding-left:0;
+  font-size:19px !important;
+  font-weight:700 !important;
+  color:#1a3a6e !important;
 }
 .report-card .report-bubble h3[data-numbered]::before{
   display:none !important;
   content:none !important;
 }
 .report-card .report-bubble h4{
-  font-size:17px;
-  font-weight:700;
-  margin:1.6rem 0 .65rem;
-  color:#3d3d3f;
+  font-size:17px !important;
+  font-weight:700 !important;
+  margin:1.6rem 0 .65rem !important;
+  color:#3d3d3f !important;
+  letter-spacing:-0.015em !important;
+  display:block !important;
+}
+.report-card .report-bubble h4[data-numbered]{
+  font-size:17px !important;
+}
+.report-card .report-bubble h2{
+  font-size:22px !important;
+  font-weight:800 !important;
 }
 
 /* AI 답변에서 볼드 단독 단락을 비공식 섹션 제목처럼 처리:
