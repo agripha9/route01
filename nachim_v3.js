@@ -2957,14 +2957,29 @@ async function exportAnswer(type, id /*, btn */){
       doc.querySelectorAll('blockquote').forEach(bq => {
         const innerHTML = bq.innerHTML;
 
+        /* 상단 간격 확보용 빈 단락 — Word는 테이블들 사이 기본 margin을 무시하는 경향이 있어
+           빈 <p>를 spacer로 삽입하면 확실히 세로 여백이 생김. */
+        const spacerTop = doc.createElement('p');
+        spacerTop.style.margin = '0';
+        spacerTop.style.padding = '0';
+        spacerTop.style.fontSize = '6pt';
+        spacerTop.style.lineHeight = '1';
+        spacerTop.innerHTML = '&nbsp;';
+
+        const spacerBottom = spacerTop.cloneNode(true);
+
         const tbl = doc.createElement('table');
         tbl.setAttribute('cellspacing', '0');
         tbl.setAttribute('cellpadding', '0');
         tbl.setAttribute('border', '0');
         tbl.setAttribute('data-from', 'blockquote');
+        /* 일반 본문 표와 동일한 폭 — 100%. 좌우 margin 0으로 표들과 좌우 정렬 일치 */
         tbl.style.width = '100%';
+        tbl.style.marginLeft = '0';
+        tbl.style.marginRight = '0';
+        tbl.style.marginTop = '0';
+        tbl.style.marginBottom = '0';
         tbl.style.borderCollapse = 'collapse';
-        tbl.style.margin = '11pt 0';
         tbl.style.border = 'none';
         tbl.setAttribute('role', 'presentation');
 
@@ -2984,7 +2999,7 @@ async function exportAnswer(type, id /*, btn */){
         bar.style.lineHeight = '1';
 
         const body = doc.createElement('td');
-        body.style.padding = '9pt 13pt';
+        body.style.padding = '10pt 13pt';
         body.style.backgroundColor = '#f7f8fb';
         body.style.border = 'none';
         body.style.color = '#1d1d1f';
@@ -3004,7 +3019,13 @@ async function exportAnswer(type, id /*, btn */){
         tr.appendChild(bar);
         tr.appendChild(body);
         tbl.appendChild(tr);
-        bq.replaceWith(tbl);
+
+        /* blockquote를 spacerTop + table + spacerBottom 순으로 교체 */
+        const parent = bq.parentNode;
+        parent.insertBefore(spacerTop, bq);
+        parent.insertBefore(tbl, bq);
+        parent.insertBefore(spacerBottom, bq);
+        parent.removeChild(bq);
       });
 
       // 2. 표(Table) 완벽 제어 (blockquote를 table로 변환한 것은 제외)
