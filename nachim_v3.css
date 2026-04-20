@@ -831,22 +831,22 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   border-color:#8B1A1A;
   padding:12px 16px;
 }
-/* 첫 열은 라벨 역할 — 좌측 정렬 유지, 굵기만 강조 */
+/* 첫 열 — 좌측 정렬과 굵기만 강조 (행 단위 스트라이프로 구분하므로 배경색은 없음) */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td:first-child{
   font-weight:600;
   color:#1d1d1f;
-  background:#fafafa;
   text-align:left !important;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) td{
   color:#2c2c2e;
-  /* 기본 배경 없음 — table의 #fff 상속. 첫 열/짝수 행 규칙이 필요 시 덮어씀. */
 }
+/* 홀수 행 — 옅은 브랜드 레드 톤 (전 열 균일) */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(odd) td{
+  background:#fdf5f5;
+}
+/* 짝수 행 — 흰색 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td{
-  background:#fafafa;
-}
-:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td:first-child{
-  background:#f5f5f7;
+  background:#ffffff;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:hover td{
   background:#f0f0f3 !important;
@@ -890,9 +890,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble th{background:#8B1A1A;color:#fff;font-size:14px;font-weight:700;text-align:center;letter-spacing:-0.005em;padding:12px 16px;border-color:#8B1A1A}
 .m-bubble caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;margin:0 0 .5rem;font-size:14px}
 .m-bubble td{font-size:14px;color:#2c2c2e;line-height:1.55;letter-spacing:-0.01em}
-.m-bubble tbody td:first-child{font-weight:600;color:#1d1d1f;background:#fafafa}
-.m-bubble tbody tr:nth-child(even) td{background:#fafafa}
-.m-bubble tbody tr:nth-child(even) td:first-child{background:#f5f5f7}
+.m-bubble tbody td:first-child{font-weight:600;color:#1d1d1f}
+.m-bubble tbody tr:nth-child(odd) td{background:#fdf5f5}
+.m-bubble tbody tr:nth-child(even) td{background:#ffffff}
 .m-bubble tbody tr:hover td{background:#f0f0f3}
 .m-bubble blockquote{margin:1.5rem 0;padding:.9rem 1.25rem;border-left:3px solid #d2d2d7;background:#f7f8fb;border-radius:0 6px 6px 0;color:#1d1d1f;font-size:14px;line-height:1.65;font-style:italic}
 .dots{display:flex;gap:4px;padding:4px 0}
@@ -2369,21 +2369,21 @@ header .style-btn.danger:hover {
   /* background는 아래 first-child / nth-child(even) 규칙이 결정하도록 비움 —
      지정 없는 td는 table의 기본 배경(#fff)을 상속 */
 }
-/* 첫 열 — 라벨 강조 */
+/* 첫 열 — 굵기만 강조, 배경은 행 단위 스트라이프에서 결정 */
 .report-bubble tbody td:first-child,
 .m-bubble tbody td:first-child {
   font-weight: 600 !important;
   color: #1d1d1f !important;
-  background: #fafafa !important;
 }
-/* 짝수 행 — 옅은 중성 회색 (네이비 톤 제거) */
+/* 홀수 행 — 옅은 브랜드 레드 톤 */
+.report-bubble tbody tr:nth-child(odd) td,
+.m-bubble tbody tr:nth-child(odd) td {
+  background: #fdf5f5 !important;
+}
+/* 짝수 행 — 흰색 */
 .report-bubble tbody tr:nth-child(even) td,
 .m-bubble tbody tr:nth-child(even) td {
-  background: #fafafa !important;
-}
-.report-bubble tbody tr:nth-child(even) td:first-child,
-.m-bubble tbody tr:nth-child(even) td:first-child {
-  background: #f5f5f7 !important;
+  background: #ffffff !important;
 }
 
 /* ── blockquote (최종 override — 위 규칙과 일치시켜 캐스케이드 충돌 방지) */
