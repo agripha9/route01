@@ -1112,9 +1112,19 @@ let currentHistItem=null;
 
 function saveHistory(q,a,domainTitle){
   try{
+    /* 방어: 답변 본문 자리에 답변 ID('a' + 13자리 epoch + 랜덤)가 들어오는 경우 저장 거부 */
+    const aStr=String(a||'').trim();
+    if(/^a\d{13}[a-z0-9]{5,}$/.test(aStr)){
+      console.warn('[saveHistory] rejected: answer payload looks like an ID, not markdown', aStr);
+      return;
+    }
+    if(!aStr){
+      console.warn('[saveHistory] rejected: empty answer payload');
+      return;
+    }
     const raw=localStorage.getItem('vd_history');
     const log=raw?JSON.parse(raw):[];
-    log.unshift({q,a,domain:domainTitle,domainKey:domain,ts:Date.now()});
+    log.unshift({q,a:aStr,domain:domainTitle,domainKey:domain,ts:Date.now()});
     localStorage.setItem('vd_history',JSON.stringify(log.slice(0,200)));
   }catch(e){localStorage.removeItem('vd_history');}
   renderHistory();
@@ -1157,8 +1167,17 @@ function openHistConversation(h){
   addMsg('user', h.q, []);
   messages.push({role:'user', content:h.q});
 
-  addMsg('ai', h.a || '');
-  messages.push({role:'assistant', content:h.a || ''});
+  /* 방어: 저장된 답변이 ID 패턴(구 데이터)이거나 비어있으면 안내 메시지로 대체 */
+  const aStr=String(h.a||'').trim();
+  const looksLikeId=/^a\d{13}[a-z0-9]{5,}$/.test(aStr);
+  if(!aStr || looksLikeId){
+    console.warn('[openHistConversation] stored answer is empty or id-like — showing notice', aStr);
+    addMsg('ai','> 저장된 답변을 불러올 수 없습니다. (기록 손상으로 추정)\n\n이 질문은 **위 입력창에 다시 입력**하여 새로 물어봐 주세요.');
+    messages.push({role:'assistant', content:''});
+  } else {
+    addMsg('ai', aStr);
+    messages.push({role:'assistant', content:aStr});
+  }
 
   // 스크롤 하단으로
   setTimeout(()=>{
@@ -1731,6 +1750,17 @@ async function doSend(text){
     hideLoad();
     const finalText=(fullTextAll||'').trim();
     if(finalText){
+      /* DEBUG: trace what goes into saveHistory to catch id-as-content bug */
+      try{
+        const looksLikeId=/^a\d{13}[a-z0-9]{5,}$/.test(finalText);
+        if(looksLikeId || finalText.length < 30){
+          console.warn('[doSend] suspicious finalText before saveHistory', {
+            length: finalText.length,
+            looksLikeId,
+            first80: finalText.slice(0,80)
+          });
+        }
+      }catch(e){}
       addMsg('ai',finalText);
       messages.push({role:'assistant',content:finalText});
       saveHistory(text,finalText,DOMAINS[domain].title);
