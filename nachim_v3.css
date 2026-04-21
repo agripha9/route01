@@ -1129,6 +1129,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .modal-wide{width:640px}
 .modal-title{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1.14;letter-spacing:0.196px;color:var(--ink);margin-bottom:.35rem}
 .modal-sub{font-size:14px;color:var(--gray-80);margin-bottom:1.25rem;line-height:1.43;letter-spacing:-0.224px}
+/* 스타일(멘토) 모달 — 제목·부제 가운데 정렬 (온보딩 카드와 톤 일관) */
+#style-modal .modal-title,
+#style-modal .modal-sub{text-align:center}
 .modal-close{
   float:right;background:rgba(0,0,0,0.06);border:none;width:28px;height:28px;border-radius:50%;
   font-size:18px;line-height:1;cursor:pointer;color:var(--ink3);margin:-4px -4px 0 0;
@@ -2226,25 +2229,40 @@ main {
   gap: 7px !important;
 }
 .ob-mentor-row {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 16px 18px;
   border: 2px solid var(--border);
   border-radius: 12px;
   background: var(--bg2);
   cursor: pointer;
-  transition: border-color .15s, background .15s, box-shadow .15s;
+  transition: border-color .15s, background .15s, box-shadow .15s, color .15s;
 }
 .ob-mentor-row:hover {
   border-color: rgba(26,58,110,.3);
   box-shadow: 0 2px 10px rgba(0,0,0,.07);
 }
+/* 선택된 상태 — 로고 크림슨 배경 + 흰 글씨 반전 (내보내기 버튼과 동일 톤) */
 .ob-mentor-row.sel {
   border-color: var(--cta);
-  background: #fffbf8;
-  box-shadow: 0 0 0 3px rgba(139,26,26,.07);
+  background: var(--cta);
+  box-shadow: 0 2px 12px rgba(139,26,26,.25);
+}
+.ob-mentor-row.sel .ob-mentor-row-name,
+.ob-mentor-row.sel .ob-mentor-row-line,
+.ob-mentor-row.sel .ob-mentor-row-line--fit,
+.ob-mentor-row.sel .ob-mentor-row-selected {
+  color: #fff;
+}
+.ob-mentor-row.sel .ob-mentor-row-tag {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.ob-mentor-row.sel .ob-mentor-row-line--fit {
+  border-top-color: rgba(255,255,255,0.25);
 }
 .ob-mentor-row--locked {
   opacity: .72;
@@ -2328,22 +2346,27 @@ main {
   line-height: 1.55;
   letter-spacing: -0.1px;
 }
+/* FREE/PRO 배지 — row 박스 우측 상단 바깥으로 돌출. 전체 pill 스타일과 통일. */
 .ob-mentor-row-badge {
-  flex-shrink: 0;
+  position: absolute;
+  top: -9px;
+  right: 14px;
   font-size: 10px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 6px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 980px;
   letter-spacing: 0.04em;
-  align-self: flex-start;
+  border: 1px solid var(--border);
+  background: #fff;
+  z-index: 1;
 }
 .free-badge {
-  background: rgba(26,58,110,.1);
   color: var(--brand-point);
+  border-color: rgba(26,58,110,.3);
 }
 .pro-badge {
-  background: rgba(139,26,26,.1);
   color: var(--cta);
+  border-color: rgba(139,26,26,.3);
 }
 
 /* 파일 업로드 잠금 */

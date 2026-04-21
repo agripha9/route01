@@ -2885,7 +2885,7 @@ function openStyleModal(){
     return `<div class="ob-mentor-row ${isSel?'sel':''} ${isLocked?'ob-mentor-row--locked':''}" data-style="${esc(k)}" style="cursor:pointer">
       <div class="ob-mentor-row-left">
         <div class="ob-mentor-row-info">
-          <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag">${esc(m.tag)}</span>${isSel?'<span class="ob-mentor-row-selected">✓ 선택됨</span>':''}</div>
+          <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag">${esc(m.tag)}</span></div>
           <div class="ob-mentor-row-line">${esc(m.intro)}</div>
           <div class="ob-mentor-row-line">${esc(m.style)}</div>
           <div class="ob-mentor-row-line ob-mentor-row-line--fit">${esc(m.fit)}</div>
