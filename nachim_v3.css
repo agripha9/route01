@@ -1108,7 +1108,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .domain-banner .db-btn.ghost{background:transparent}
 .input-row{display:flex;gap:8px;align-items:flex-end}
 .chat-in{
-  flex:1;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);
+  flex:1;border:1px solid var(--border);border-radius:var(--r);background:var(--filter-bg);
   min-height:44px;padding:10px 14px;font-size:17px;color:var(--ink);resize:none;outline:none;
   line-height:22px;max-height:120px;transition:border-color .15s var(--ease),box-shadow .15s var(--ease);
   pointer-events:auto;letter-spacing:-0.374px
@@ -1534,7 +1534,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--bg);
+  background: var(--filter-bg);
   border: 1px solid rgba(0,0,0,.07);
   border-radius: 8px;
   padding: 6px 10px;
