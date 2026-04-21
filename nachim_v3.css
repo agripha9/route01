@@ -1133,7 +1133,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .modal-bg.open{display:flex}
 .modal{
   position:relative;
-  background:var(--bg2);border-radius:var(--r-lg);padding:1.75rem 2rem;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;
+  background:var(--bg);border-radius:var(--r-lg);padding:1.75rem 2rem;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;
   box-shadow:var(--shadow-md);border:1px solid rgba(0,0,0,0.06)
 }
 .modal-wide{width:640px}
