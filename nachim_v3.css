@@ -908,12 +908,18 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
    - 3.15 ~ 3.85s: 전원 그대로 (완성 상태 보여주기, 0.7s)
    - 3.85 ~ 4.4s: 전원 동시 fade-out (0.55s)
    - 4.4 ~ 5.5s: 공백 (모두 opacity:0) → 사이클 반복 */
+
+/* 로딩 중인 버블은 로더가 온전한 300px로 그려질 수 있도록 최소 폭 확보.
+   .m-bubble 자체는 content-fit이라 로더 SVG가 축소될 수 있음 → 로더 존재 시 min-width 강제. */
+.m-bubble:has(> .route-loader){
+  min-width:340px !important;
+  width:auto;
+}
 .route-loader{
-  display:inline-flex;
-  align-items:center;
+  display:block;
+  width:300px !important;
+  min-width:300px !important;
   padding:2px 0;
-  width:300px;
-  max-width:100%;
 }
 .route-loader svg{
   width:300px !important;
