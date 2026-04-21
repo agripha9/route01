@@ -2023,39 +2023,44 @@ function normalizeOrderedListNumbering(html){
 
     const BLOCK_TAGS = new Set(['P','TABLE','UL','OL','BLOCKQUOTE','DIV','PRE','H1','H2','H3','H4','H5','H6']);
 
-    tmp.querySelectorAll('li').forEach(li=>{
-      const kids=[...li.children];
-      const blockKids = kids.filter(el=>BLOCK_TAGS.has(el.tagName));
-      if(blockKids.length < 2 && kids.length < 2) return;
-      let firstLine = '';
-      for(const node of li.childNodes){
-        if(node.nodeType===3){
-          firstLine += node.nodeValue;
-        } else if(node.nodeType===1){
-          if(BLOCK_TAGS.has(node.tagName) && firstLine.trim()) break;
-          if(node.tagName==='BR') break;
-          if(node.tagName==='P' || node.tagName==='STRONG' || node.tagName==='EM' || node.tagName==='CODE' || node.tagName==='SPAN' || node.tagName==='A'){
-            firstLine += node.textContent || '';
-            if(node.tagName==='P') break;
-          } else if(BLOCK_TAGS.has(node.tagName)){
-            break;
-          }
-        }
+    /* AI가 리스트 항목 아래에 4공백 들여쓰기로 "새 섹션 제목(**...**)" 이나
+       "2주 후 판단 기준" 같은 heading을 박아놓으면 marked는 그것들을 해당 li 안에 중첩시킴.
+       의미·내보내기가 어긋나므로, li 안의 "명백한 새 섹션 시작점"과
+       그 뒤에 이어지는 블록(ul/ol/p/blockquote)을 ol/ul 형제 뒤로 꺼내 루트 레벨로 승격.
+       승격 시작점 판정:
+         - <p><strong>...</strong></p> 단독 (AI가 쓰는 비공식 제목)
+         - <h1>~<h6>
+       이 시작점을 못 찾으면 li는 건드리지 않음 (→ 본문 설명/예시 blockquote 보존). */
+    function isHoistStart(el){
+      const tag = el.tagName;
+      if(['H1','H2','H3','H4','H5','H6'].includes(tag)) return true;
+      if(tag==='P'){
+        const children = [...el.childNodes].filter(n=>{
+          if(n.nodeType===3) return (n.nodeValue||'').trim().length>0;
+          return true;
+        });
+        if(children.length===1 && children[0].nodeType===1 && children[0].tagName==='STRONG') return true;
       }
-      firstLine = firstLine.trim();
-      if(!firstLine) return;
-      if(firstLine.length > 70) return;
-      if(firstLine.length < 2) return;
-
-      const hasFollowingBlock = blockKids.length > 0
-        || kids.filter(el=>el.tagName!=='P' && BLOCK_TAGS.has(el.tagName)).length > 0;
-      if(!hasFollowingBlock && blockKids.length < 1) return;
-
-      li.setAttribute('data-section-heading','1');
-      const parent=li.parentElement;
-      if(parent && (parent.tagName==='OL'||parent.tagName==='UL')){
-        parent.setAttribute('data-has-heading','1');
-      }
+      return false;
+    }
+    const liList = [...tmp.querySelectorAll('li')];
+    liList.forEach(li=>{
+      const parent = li.parentElement;
+      if(!parent || (parent.tagName!=='OL' && parent.tagName!=='UL')) return;
+      if(parent.parentElement && parent.parentElement.tagName==='LI') return;
+      const children = [...li.children].filter(c=>BLOCK_TAGS.has(c.tagName));
+      if(children.length < 2) return;
+      /* 첫 블록 이후에서 첫 번째 "섹션 시작점" 찾음 */
+      let startIdx = 1;
+      while(startIdx < children.length && !isHoistStart(children[startIdx])) startIdx++;
+      if(startIdx >= children.length) return;
+      /* startIdx부터 li 끝까지 전부 꺼내서 순서를 유지한 채 ol/ul 뒤에 삽입 */
+      const toHoist = children.slice(startIdx);
+      const refNode = parent.nextSibling;
+      toHoist.forEach(el=>{
+        li.removeChild(el);
+        parent.parentElement.insertBefore(el, refNode);
+      });
     });
 
     return tmp.innerHTML;

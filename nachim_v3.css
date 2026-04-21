@@ -640,27 +640,27 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-weight:700;
 }
 
-/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우에도 시각적 위계 보정.
-   JS의 normalizeOrderedListNumbering 이 li[data-section-heading] 속성을 달아주면
-   그 li는 "섹션 제목"처럼 렌더: 번호/불릿 마커 숨김 + 첫 줄 크기 up. */
+/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우 시각적 위계 보정.
+   기본 방침은 JS에서 DOM을 들어올려 루트 레벨로 승격하는 것(normalizeOrderedListNumbering).
+   이 규칙은 승격이 실패한 예외 케이스에만 동작하는 fallback. 색은 본문 ink 유지. */
 .report-card .report-bubble li[data-section-heading]{
   list-style:none !important;
   padding-left:0 !important;
-  margin-left:-2.5rem; /* 부모 ol/ul padding-left(2.5rem) 상쇄 → 제목이 카드 좌측으로 복귀 */
-  margin-top:1.8rem;
-  margin-bottom:.7rem;
+  margin-left:0;
+  margin-top:1.2rem;
+  margin-bottom:.5rem;
 }
 .report-card .report-bubble li[data-section-heading]::marker{
   content:"" !important;
 }
 .report-card .report-bubble li[data-section-heading] > p:first-child,
 .report-card .report-bubble li[data-section-heading] > strong:first-child{
-  font-size:17.5px;
+  font-size:16px;
   font-weight:700;
-  color:#1a3a6e;
-  letter-spacing:-0.018em;
-  line-height:1.4;
-  margin-bottom:.6rem;
+  color:#1d1d1f;
+  letter-spacing:-0.015em;
+  line-height:1.45;
+  margin-bottom:.4rem;
 }
 .report-card .report-bubble li[data-section-heading] > p:first-child > strong{
   font-size:inherit;
