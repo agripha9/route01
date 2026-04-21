@@ -733,33 +733,38 @@ const DOMAIN_EXPERT_PERSONAS = {
 
 const MENTOR_META = {
   'Paul Graham (YC)': {
-    tag:'YC', tagColor:'#F26522', emoji:'🔶',
-    headline:'초기 생존 · PMF · 직설적 실행',
-    desc:'"Do things that don\'t scale." 지금 당장 할 수 있는 것에 집중. 수치와 사례로 직설적 피드백.',
+    tag:'YC',
+    intro:'YC 공동창업자. 수천 개 초기 스타트업을 배출한 인큐베이터의 철학을 만든 에세이스트.',
+    style:'결론 먼저, 짧고 단호한 문장. "Do things that don\'t scale"로 당장 실행 가능한 액션 제시.',
+    fit:'PMF 직전·직후, 초기 생존과 첫 고객 확보가 최우선인 창업팀에 적합.',
     free: true
   },
   'Peter Thiel (Founders Fund)': {
-    tag:'Founders Fund', tagColor:'#1a3a8a', emoji:'♟️',
-    headline:'독점 · 역발상 · 0→1 전략',
-    desc:'"경쟁은 패자의 것." 아무도 가지 않는 길, 10배 이상의 차별화, 독점 가능한 시장을 찾아라.',
+    tag:'Founders Fund',
+    intro:'PayPal 공동창업자, Palantir·Facebook 초기 투자자. 《Zero to One》 저자.',
+    style:'역발상 질문으로 프레임을 뒤집음. 10배 차별화·독점·비밀(secrets)을 기준으로 냉정하게 검증.',
+    fit:'시장 진입 전략, 차별화·포지셔닝, 근본 재설계가 필요한 팀. 점진적 개선엔 부적합.',
     free: true
   },
   'Brian Chesky (Airbnb)': {
-    tag:'Airbnb', tagColor:'#FF5A5F', emoji:'🏠',
-    headline:'위기관리 · 브랜드 · 고객 경험',
-    desc:'"11성급 경험을 설계하라." 위기를 기회로, 진짜 팬 1000명부터 만드는 브랜드 전략.',
+    tag:'Airbnb',
+    intro:'Airbnb 공동창업자·CEO. 디자이너 출신으로 고객 경험 설계의 대가.',
+    style:'"11성급 경험" 사고실험으로 이상적 고객 경험부터 역산. 위기를 브랜드 자산으로 전환하는 프레임.',
+    fit:'D2C·브랜드 중심 서비스, 위기 대응, 고객 충성도 설계가 핵심인 팀에 적합.',
     free: false
   },
   'Jensen Huang (NVIDIA)': {
-    tag:'NVIDIA', tagColor:'#76b900', emoji:'💚',
-    headline:'장기 비전 · 플랫폼 · 집념',
-    desc:'"고통은 선물이다." 30년 관점으로 역산, 생태계·락인 구조 설계, 기술 깊이에 투자.',
+    tag:'NVIDIA',
+    intro:'NVIDIA 창업자·CEO. CUDA에 10년 적자 베팅으로 AI 시대 기반을 만든 집념의 창업자.',
+    style:'30년 관점에서 현재를 역산. 플랫폼·생태계·기술 해자 설계 중심. 실패를 학습으로 치환.',
+    fit:'기술 기반 스타트업, 장기 R&D 투자, 플랫폼·생태계 락인이 핵심 전략인 팀.',
     free: false
   },
   'Naval Ravikant': {
-    tag:'AngelList', tagColor:'#1a1a2e', emoji:'🎯',
-    headline:'사고방식 · 레버리지 · 철학적 기반',
-    desc:'사고 프레임부터 재설정. 레버리지 원칙과 판단력. 다른 4인의 멘토링을 소화하는 기반.',
+    tag:'AngelList',
+    intro:'AngelList 창업자. 레버리지·판단력·부의 원리에 대한 통찰로 유명한 사상가 겸 투자자.',
+    style:'첫 원리 사고로 질문 자체를 재정의. 격언 같은 한 문장과 레버리지(코드·미디어·자본·노동) 프레임.',
+    fit:'사업 방향 재검토, 창업자 마인드셋 정비, 근본부터 다시 설계하고 싶을 때 적합.',
     free: false
   }
 };
@@ -2879,11 +2884,11 @@ function openStyleModal(){
     const isLocked = !m.free && !isPaid;
     return `<div class="ob-mentor-row ${isSel?'sel':''} ${isLocked?'ob-mentor-row--locked':''}" data-style="${esc(k)}" style="cursor:pointer">
       <div class="ob-mentor-row-left">
-        <span class="ob-mentor-row-emoji">${m.emoji}</span>
         <div class="ob-mentor-row-info">
-          <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag" style="background:${m.tagColor}18;color:${m.tagColor}">${m.tag}</span>${isSel?'<span style="margin-left:6px;font-size:11px;color:var(--cta);font-weight:700">✓ 선택됨</span>':''}</div>
-          <div class="ob-mentor-row-kw">${esc(m.headline)}</div>
-          <div class="ob-mentor-row-desc">${esc(m.desc)}</div>
+          <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag">${esc(m.tag)}</span>${isSel?'<span class="ob-mentor-row-selected">✓ 선택됨</span>':''}</div>
+          <div class="ob-mentor-row-line">${esc(m.intro)}</div>
+          <div class="ob-mentor-row-line">${esc(m.style)}</div>
+          <div class="ob-mentor-row-line ob-mentor-row-line--fit">${esc(m.fit)}</div>
         </div>
       </div>
       ${PROTOTYPE_MODE ? '' : `<div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>`}
