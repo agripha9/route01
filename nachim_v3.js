@@ -1986,9 +1986,27 @@ function normalizeOrderedListNumbering(html){
     tmp.innerHTML=String(html||'');
 
     tmp.querySelectorAll('ol').forEach(ol=>{
-      ol.removeAttribute('start');
       const liCount=[...ol.children].filter(c=>c.tagName==='LI').length;
-      if(liCount<=1) ol.setAttribute('data-single','1');
+      if(liCount<=1){
+        /* 단일 항목 ol이라도, 앞뒤에 blockquote/표/hr 등으로 쪼개진 다른 ol이 있어서
+           리스트가 연속되는 경우엔 data-single을 붙이지 않는다.
+           marked는 이런 경우 start="2" 같이 번호 연속성을 이미 주므로 그대로 유지. */
+        const hasStart = ol.hasAttribute('start') && parseInt(ol.getAttribute('start'),10) > 1;
+        /* 인접 sibling 중 (공백/단순 p/blockquote/table/hr을 건너뛴 후) 또 다른 ol이 있으면 연속. */
+        const SKIP=new Set(['BLOCKQUOTE','TABLE','HR','P']);
+        let prev=ol.previousElementSibling;
+        while(prev && SKIP.has(prev.tagName)) prev=prev.previousElementSibling;
+        let next=ol.nextElementSibling;
+        while(next && SKIP.has(next.tagName)) next=next.nextElementSibling;
+        const partOfChain = hasStart || (prev && prev.tagName==='OL') || (next && next.tagName==='OL');
+        if(partOfChain){
+          /* 체인의 일부 — start는 유지, data-single 금지 */
+          return;
+        }
+        ol.removeAttribute('start');
+        ol.setAttribute('data-single','1');
+      }
+      /* 다항목 ol은 start 속성 유지 — 번호 연속성 보장. */
     });
 
     /* H3/H4 제목이 이미 숫자로 시작하면(예: "1. 단계별 KPI", "3~4주차: IR") 
@@ -2057,12 +2075,13 @@ function neutralizeAsciiTildesOutsideCodeFences(md){
   }).join('');
 }
 
-/* `**3. 제목**나머지` 처럼 번호가 굵게로 감싸이면 목록이 아니라 <p>로만 파싱됨 → `3. **제목**나머지` 로 바꿔 번호 목록으로 인식 */
+/* `**3. 제목**나머지` 처럼 번호가 굵게로 감싸이면 목록이 아니라 <p>로만 파싱됨 → `3. **제목**나머지` 로 바꿔 번호 목록으로 인식.
+   주의: 마지막 캡처는 같은 줄만(개행 제외). 이전에 [\s\S]*로 greedy 매칭해서 문서 전체를 집어삼켜 첫 매치 이후 두번째 "**2. ...**" 라인이 처리되지 않는 버그가 있었음. */
 function fixBoldWrappedOrderedListLines(md){
   const chunks=String(md||'').split(/(```[\s\S]*?```)/g);
   return chunks.map((chunk,i)=>{
     if(i%2===1) return chunk;
-    return chunk.replace(/^(\s*)\*\*(\d{1,3}\.\s+)((?:[^*]|\*(?!\*))+?)\*\*([\s\S]*)$/gm,(m,sp,num,emb,rest)=>{
+    return chunk.replace(/^(\s*)\*\*(\d{1,3}\.\s+)((?:[^*\n]|\*(?!\*))+?)\*\*([^\n]*)$/gm,(m,sp,num,emb,rest)=>{
       const tail=rest||'';
       return `${sp}${num}**${emb}**${tail}`;
     });
