@@ -1123,6 +1123,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 #terms-modal{z-index:3000;}
 .modal-bg.open{display:flex}
 .modal{
+  position:relative;
   background:var(--bg2);border-radius:var(--r-lg);padding:1.75rem 2rem;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;
   box-shadow:var(--shadow-md);border:1px solid rgba(0,0,0,0.06)
 }
@@ -1132,12 +1133,24 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 스타일(멘토) 모달 — 제목·부제 가운데 정렬 (온보딩 카드와 톤 일관) */
 #style-modal .modal-title,
 #style-modal .modal-sub{text-align:center}
+/* 닫기(×) 버튼 — 스크롤해도 모달 우측 상단에 고정.
+   sticky는 원래 자기 자리(float:right 에 위치한 행)를 기준으로 상단에 붙음.
+   top:-6px로 모달 padding-top 안쪽으로 살짝 들어가게, 위로는 넘지 않게 고정. */
 .modal-close{
-  float:right;background:rgba(0,0,0,0.06);border:none;width:28px;height:28px;border-radius:50%;
-  font-size:18px;line-height:1;cursor:pointer;color:var(--ink3);margin:-4px -4px 0 0;
-  display:flex;align-items:center;justify-content:center;transition:background .15s
+  position:sticky;top:-6px;float:right;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(0,0,0,0.08);
+  width:28px;height:28px;border-radius:50%;
+  font-size:18px;line-height:1;cursor:pointer;color:var(--ink3);
+  margin:-4px -4px 0 0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s, border-color .15s;
+  z-index:10;
+  /* 스크롤 시 뒤에 컨텐츠가 비치지 않도록 박스 그림자로 레이어 분리 */
+  box-shadow:0 0 0 4px rgba(255,255,255,0.6);
 }
-.modal-close:hover{background:rgba(0,0,0,0.1)}
+.modal-close:hover{background:#fff;border-color:rgba(0,0,0,0.18);color:var(--ink)}
 .modal-row{margin-bottom:.85rem}
 .m-label{font-size:12px;font-weight:600;text-transform:none;letter-spacing:-0.12px;color:var(--ink3);margin-bottom:6px;display:block}
 .m-val{font-size:14px;color:var(--ink);font-weight:400;letter-spacing:-0.224px}
