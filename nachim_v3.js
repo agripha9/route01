@@ -2891,7 +2891,7 @@ function openStyleModal(){
           <div class="ob-mentor-row-line ob-mentor-row-line--fit">${esc(m.fit)}</div>
         </div>
       </div>
-      ${PROTOTYPE_MODE ? '' : `<div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>`}
+      ${`<div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>`}
     </div>`;
   }).join('');
 

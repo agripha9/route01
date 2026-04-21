@@ -248,7 +248,7 @@ body{
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .ob-card{
   background:var(--white);border:1px solid rgba(0,0,0,0.06);border-radius:var(--r-panel);
-  padding:2.5rem 2.75rem;width:100%;max-width:560px;
+  padding:2.5rem 2.75rem;width:100%;max-width:720px;
   box-shadow:var(--shadow-md);max-height:calc(100vh - 4rem);overflow:auto
 }
 .ob-logo{font-family:var(--font-display);font-size:21px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:1.75rem;letter-spacing:-0.02em}
@@ -2302,6 +2302,8 @@ main {
   line-height: 1.55;
   letter-spacing: -0.1px;
   margin-top: 2px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .ob-mentor-row-line--fit {
   color: var(--ink3);
@@ -2309,6 +2311,8 @@ main {
   margin-top: 4px;
   padding-top: 4px;
   border-top: 1px dashed rgba(0,0,0,.08);
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 /* 구 클래스(kw, desc, emoji) — 하위호환용, 지금은 미사용 */
 .ob-mentor-row-kw {
