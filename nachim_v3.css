@@ -2359,12 +2359,12 @@ main {
   border-top-color: rgba(255,255,255,0.25);
 }
 .ob-mentor-row--locked {
-  opacity: .72;
-  background: var(--bg);
+  opacity: .88;
+  background: var(--filter-bg);
 }
 .ob-mentor-row--locked:hover {
   border-color: rgba(139,26,26,.25);
-  background: rgba(139,26,26,.03);
+  opacity: 1;
 }
 .ob-mentor-row-left {
   display: flex;
