@@ -1194,18 +1194,94 @@ function renderHistory(){
     const all=JSON.parse(raw);
     historyLog=all;
     if(!historyLog.length){el.innerHTML='<div class="pop-empty">아직 질문 기록이 없어요.</div>';return;}
-    el.innerHTML=historyLog.map((h,i)=>{
+
+    /* 시간대별 그룹핑 — Claude/Gemini 스타일 */
+    const now = new Date();
+    const startOfDay = (d)=>{const x=new Date(d); x.setHours(0,0,0,0); return x.getTime();};
+    const today0    = startOfDay(now);
+    const yesterday0= today0 - 86400000;
+    const last7_0   = today0 - 7*86400000;
+    const last30_0  = today0 - 30*86400000;
+    const thisMonth0= new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+    const buckets = { today:[], yesterday:[], last7:[], last30:[], month:[], older:{} };
+    historyLog.forEach((h,i)=>{
+      const ts = h.ts;
+      const entry = {...h, _idx:i};
+      if(ts >= today0)          buckets.today.push(entry);
+      else if(ts >= yesterday0) buckets.yesterday.push(entry);
+      else if(ts >= last7_0)    buckets.last7.push(entry);
+      else if(ts >= last30_0)   buckets.last30.push(entry);
+      else if(ts >= thisMonth0) buckets.month.push(entry);
+      else {
+        /* 그 이전은 연·월 단위 */
+        const d=new Date(ts);
+        const key = `${d.getFullYear()}년 ${d.getMonth()+1}월`;
+        (buckets.older[key] = buckets.older[key] || []).push(entry);
+      }
+    });
+
+    const renderItem = (h)=>{
       const d=new Date(h.ts);
-      const ts=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-      return `<div class="hist-item" data-hidx="${i}">
-        <div class="hist-q">${esc(h.q)}</div>
-        <div class="hist-time">${ts}</div>
+      const hm=`${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+      return `<div class="hist-item" data-hidx="${h._idx}">
+        <div class="hist-item-body">
+          <div class="hist-q">${esc(h.q)}</div>
+          <div class="hist-time">${hm}</div>
+        </div>
+        <button class="hist-del" data-delidx="${h._idx}" title="이 기록 삭제" aria-label="삭제">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        </button>
       </div>`;
-    }).join('');
+    };
+
+    const renderGroup = (label, items)=>{
+      if(!items.length) return '';
+      return `<div class="hist-group">
+        <div class="hist-group-label">${esc(label)}</div>
+        ${items.map(renderItem).join('')}
+      </div>`;
+    };
+
+    let html = '';
+    html += renderGroup('오늘',       buckets.today);
+    html += renderGroup('어제',       buckets.yesterday);
+    html += renderGroup('지난 7일',   buckets.last7);
+    html += renderGroup('지난 30일',  buckets.last30);
+    html += renderGroup('이번 달',    buckets.month);
+    Object.keys(buckets.older).forEach(k=>{
+      html += renderGroup(k, buckets.older[k]);
+    });
+
+    el.innerHTML = html;
+
     el.querySelectorAll('[data-hidx]').forEach(item=>{
-      item.addEventListener('click',()=>openHistConversation(historyLog[+item.dataset.hidx]));
+      item.addEventListener('click',(e)=>{
+        /* 삭제 버튼 클릭은 전파 차단 */
+        if(e.target.closest('[data-delidx]')) return;
+        openHistConversation(historyLog[+item.dataset.hidx]);
+      });
+    });
+    el.querySelectorAll('[data-delidx]').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        deleteHistoryItem(+btn.dataset.delidx);
+      });
     });
   }catch(e){localStorage.removeItem('vd_history');}
+}
+
+/* 개별 히스토리 항목 삭제 */
+function deleteHistoryItem(idx){
+  try{
+    const raw=localStorage.getItem('vd_history');
+    if(!raw) return;
+    const log=JSON.parse(raw);
+    if(idx<0||idx>=log.length) return;
+    log.splice(idx,1);
+    localStorage.setItem('vd_history',JSON.stringify(log));
+  }catch(e){}
+  renderHistory();
 }
 
 function openHistConversation(h){

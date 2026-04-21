@@ -1209,11 +1209,49 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hist-domain-bar .hdb-ico .domain-svg{width:20px;height:20px;display:block}
 .hist-domain-bar .hdb-main{min-width:0;flex:1}
 .hist-domain-bar .hdb-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;line-height:1.25}
-.hist-item{padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+/* 질문 기록 항목 — 본문 + hover 시 우측 삭제 버튼 노출 */
+.hist-item{
+  display:flex;align-items:flex-start;gap:6px;
+  padding:9px 12px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;position:relative;
+}
 .hist-item:hover{background:var(--bg)}
 .hist-domain{display:none}
+.hist-item-body{flex:1;min-width:0;}
 .hist-q{font-size:12px;color:var(--ink2);line-height:1.4;display:-webkit-box;line-clamp:2;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-0.12px}
 .hist-time{font-size:10px;color:var(--ink3);margin-top:3px}
+.hist-del{
+  flex-shrink:0;
+  opacity:0;
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;border-radius:6px;
+  color:var(--ink3);cursor:pointer;
+  transition:opacity .12s, background .12s, color .12s;
+  padding:0;margin-top:-2px;
+}
+.hist-item:hover .hist-del{opacity:1;}
+.hist-del:hover{
+  background:rgba(139,26,26,.1);
+  color:var(--cta);
+}
+@media (hover:none){
+  .hist-del{opacity:0.55;}
+}
+
+/* 시간대 그룹 라벨 — "오늘", "어제", "지난 7일" 등 */
+.hist-group{margin-bottom:2px;}
+.hist-group-label{
+  font-size:10.5px;font-weight:600;
+  color:var(--ink3);
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  padding:14px 12px 6px;
+  border-bottom:1px solid var(--border);
+}
+.hist-group:first-child .hist-group-label{
+  padding-top:10px;
+}
 .hist-filter-btn{font-size:10px;font-weight:600;padding:3px 8px;border-radius:980px;border:1px solid var(--border);background:var(--white);color:var(--ink3);cursor:pointer;font-family:var(--font-text);transition:all .12s}
 .hist-filter-btn:hover{border-color:#86868b;color:var(--ink)}
 .hist-filter-btn.active{background:rgba(26,58,110,0.08);border-color:rgba(26,58,110,0.35);color:var(--ink);font-weight:600}
