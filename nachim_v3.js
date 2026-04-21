@@ -2869,10 +2869,14 @@ function resize(el){
   }
 }
 
+/* 스타일 모달 — 선택 즉시 적용하지 않고 닫기 버튼을 눌러야 확정. */
+let pendingMentor = null;
+
 function openStyleModal(){
   const grid=document.getElementById('style-modal-grid');
   if(!grid) return;
   const cur=profile.style||'Paul Graham (YC)';
+  pendingMentor = cur; // 모달 열 때 현재 멘토로 초기화
   /* 프로토타입 단계: 전체 멘토 개방 */
   const PROTOTYPE_MODE = true;
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
@@ -2898,39 +2902,56 @@ function openStyleModal(){
   grid.querySelectorAll('[data-style]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const s = btn.getAttribute('data-style');
-      /* 프로토타입 단계: 무조건 선택 허용 */
-      if(PROTOTYPE_MODE){ setMentorStyle(s); return; }
       const meta = MENTOR_META[s];
-      const pl = getCurrentPlan ? getCurrentPlan() : 'free';
-      const paid = (pl === 'starter' || pl === 'pro' || pl === 'team');
-      if(meta && !meta.free && !paid){
-        closeStyleModal();
-        openPricingModal();
-        return;
+      /* 유료 플랜 검증 (프로토타입 단계엔 우회) */
+      if(!PROTOTYPE_MODE){
+        const pl = getCurrentPlan ? getCurrentPlan() : 'free';
+        const paid = (pl === 'starter' || pl === 'pro' || pl === 'team');
+        if(meta && !meta.free && !paid){
+          closeStyleModal(true /* cancel */);
+          openPricingModal();
+          return;
+        }
       }
-      setMentorStyle(s);
+      /* 선택만 업데이트 — 실제 적용은 닫기 버튼 */
+      pendingMentor = s;
+      grid.querySelectorAll('.ob-mentor-row').forEach(r=>r.classList.remove('sel'));
+      btn.classList.add('sel');
     });
   });
   document.getElementById('style-modal').classList.add('open');
 }
-function closeStyleModal(){document.getElementById('style-modal').classList.remove('open');}
+
+/* 닫기 — cancel=true이면 선택 반영 없이 닫기만. 아니면 pendingMentor를 확정. */
+function closeStyleModal(cancel){
+  const modal = document.getElementById('style-modal');
+  if(modal) modal.classList.remove('open');
+  if(cancel){ pendingMentor = null; return; }
+  if(pendingMentor && pendingMentor !== profile.style){
+    applyMentorChange(pendingMentor);
+  }
+  pendingMentor = null;
+}
+
+/* 실제 적용 — profile 저장 + 토스트 */
+function applyMentorChange(s){
+  if(!MENTOR_STYLES[s]) return;
+  profile.style = s;
+  try{localStorage.setItem('vd_profile',JSON.stringify(profile));}catch(e){}
+  applyProfile();
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s';
+  toast.textContent = `${s} 스타일로 변경됐습니다`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(()=>{ toast.style.opacity='1'; });
+  setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),300); }, 2000);
+}
+
+/* 구 API 호환 — 다른 곳에서 setMentorStyle을 직접 부르는 경로 유지 */
 function setMentorStyle(style){
   const s=String(style||'').trim();
   if(!MENTOR_STYLES[s]) return;
-  profile.style=s;
-  try{localStorage.setItem('vd_profile',JSON.stringify(profile));}catch(e){}
-  applyProfile();
-  closeStyleModal();
-  // 멘토 변경 피드백
-  const m = MENTOR_META[s];
-  if(m){
-    const toast = document.createElement('div');
-    toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s';
-    toast.textContent = `${m.emoji} ${s} 스타일로 변경됐습니다`;
-    document.body.appendChild(toast);
-    requestAnimationFrame(()=>{ toast.style.opacity='1'; });
-    setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),300); }, 2000);
-  }
+  applyMentorChange(s);
 }
 
 /* ─── 초기화 ────────────────────────── */
@@ -2960,7 +2981,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const safeClick = (id, fn) => { const el=document.getElementById(id); if(el) el.addEventListener('click', e=>{ if(e.target===el) fn(); }); };
   safeClick('modal',          closeModal);
   safeClick('key-modal',      closeKeyModal);
-  safeClick('style-modal',    closeStyleModal);
+  safeClick('style-modal',    ()=>closeStyleModal(true));
   safeClick('auth0-modal',    closeAuth0Settings);
   safeClick('grant-modal',    closeGrantModal);
   safeClick('confirm-modal',  closeConfirm);
