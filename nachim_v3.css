@@ -455,7 +455,7 @@ header{
 .app-body{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-aside{width:272px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+aside{width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
 .s-top{flex:1;overflow-y:auto;padding:1rem 1rem 1.25rem}
 .s-label{font-size:11px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:var(--gray-48);padding:0 10px;margin-bottom:8px;display:block}
 .d-btn{
@@ -1209,11 +1209,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hist-domain-bar .hdb-ico .domain-svg{width:20px;height:20px;display:block}
 .hist-domain-bar .hdb-main{min-width:0;flex:1}
 .hist-domain-bar .hdb-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;line-height:1.25}
-/* 질문 기록 항목 — 한 줄 말줄임, hover 시 우측 삭제 버튼 노출 */
+/* 질문 기록 항목 — 한 줄 말줄임, 좌측 정렬. hover 시 우측 kebab(⋯) 노출 */
 .hist-item{
   display:flex;align-items:center;gap:6px;
-  padding:7px 12px;
+  padding:7px 10px 7px 12px;
   cursor:pointer;transition:background .12s;position:relative;
+  text-align:left;
 }
 .hist-item:hover{background:var(--bg)}
 .hist-domain{display:none}
@@ -1221,9 +1222,10 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   flex:1;min-width:0;
   font-size:12.5px;color:var(--ink);line-height:1.4;
   letter-spacing:-0.12px;
+  text-align:left;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.hist-del{
+.hist-kebab{
   flex-shrink:0;
   opacity:0;
   width:22px;height:22px;
@@ -1233,14 +1235,41 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   transition:opacity .12s, background .12s, color .12s;
   padding:0;
 }
-.hist-item:hover .hist-del{opacity:1;}
-.hist-del:hover{
-  background:rgba(139,26,26,.1);
-  color:var(--cta);
+.hist-item:hover .hist-kebab{opacity:1;}
+.hist-kebab:hover{
+  background:rgba(0,0,0,.08);
+  color:var(--ink);
 }
 @media (hover:none){
-  .hist-del{opacity:0.55;}
+  .hist-kebab{opacity:0.55;}
 }
+
+/* 팝오버 메뉴 — kebab 클릭 시 body 에 fixed 로 띄움 */
+.hist-menu{
+  z-index:10000;
+  min-width:140px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 4px 18px rgba(0,0,0,.12);
+  padding:4px;
+  animation:histMenuIn .12s ease-out;
+}
+@keyframes histMenuIn{
+  from{opacity:0;transform:translateY(-4px);}
+  to{opacity:1;transform:none;}
+}
+.hist-menu-item{
+  width:100%;display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:6px;
+  background:transparent;border:none;cursor:pointer;
+  font-family:var(--font-text);font-size:13px;color:var(--ink);
+  letter-spacing:-0.12px;text-align:left;
+  transition:background .12s, color .12s;
+}
+.hist-menu-item:hover{background:var(--bg);}
+.hist-menu-item--danger{color:var(--cta);}
+.hist-menu-item--danger:hover{background:rgba(139,26,26,.08);}
 
 /* 시간대 그룹 라벨 — "오늘", "어제", "지난 7일" 등 */
 .hist-group{margin-bottom:2px;}

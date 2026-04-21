@@ -1224,8 +1224,8 @@ function renderHistory(){
     const renderItem = (h)=>{
       return `<div class="hist-item" data-hidx="${h._idx}">
         <div class="hist-q">${esc(h.q)}</div>
-        <button class="hist-del" data-delidx="${h._idx}" title="이 기록 삭제" aria-label="삭제">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        <button class="hist-kebab" data-kebab="${h._idx}" title="더보기" aria-label="더보기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
         </button>
       </div>`;
     };
@@ -1252,18 +1252,63 @@ function renderHistory(){
 
     el.querySelectorAll('[data-hidx]').forEach(item=>{
       item.addEventListener('click',(e)=>{
-        /* 삭제 버튼 클릭은 전파 차단 */
-        if(e.target.closest('[data-delidx]')) return;
+        /* kebab 또는 menu 클릭은 전파 차단 */
+        if(e.target.closest('[data-kebab]') || e.target.closest('.hist-menu')) return;
         openHistConversation(historyLog[+item.dataset.hidx]);
       });
     });
-    el.querySelectorAll('[data-delidx]').forEach(btn=>{
+    el.querySelectorAll('[data-kebab]').forEach(btn=>{
       btn.addEventListener('click',(e)=>{
         e.stopPropagation();
-        deleteHistoryItem(+btn.dataset.delidx);
+        openHistMenu(+btn.dataset.kebab, btn);
       });
     });
   }catch(e){localStorage.removeItem('vd_history');}
+}
+
+/* kebab 팝오버 메뉴 — 한 번에 하나만 열리고, 바깥 클릭/ESC로 닫힘 */
+let _histMenuEl = null;
+function closeHistMenu(){
+  if(_histMenuEl){ _histMenuEl.remove(); _histMenuEl = null; }
+  document.removeEventListener('click', closeHistMenu, true);
+  document.removeEventListener('keydown', _histMenuEsc, true);
+}
+function _histMenuEsc(e){ if(e.key==='Escape') closeHistMenu(); }
+
+function openHistMenu(idx, anchorBtn){
+  closeHistMenu();
+  const menu = document.createElement('div');
+  menu.className = 'hist-menu';
+  menu.innerHTML = `
+    <button class="hist-menu-item hist-menu-item--danger" data-action="delete">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+      <span>삭제</span>
+    </button>
+  `;
+  /* 앵커(점3개 버튼) 바로 아래에 띄움 */
+  const rect = anchorBtn.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.top  = `${rect.bottom + 4}px`;
+  menu.style.left = `${rect.right - 140}px`; /* 우측 정렬, 메뉴 폭 140 */
+  document.body.appendChild(menu);
+  _histMenuEl = menu;
+
+  menu.addEventListener('click', (e)=>{
+    const act = e.target.closest('[data-action]');
+    if(!act) return;
+    e.stopPropagation();
+    if(act.dataset.action === 'delete'){
+      closeHistMenu();
+      deleteHistoryItem(idx);
+    }
+    /* 추후 'pin', 'rename' 등 추가 지점 */
+  });
+
+  /* 바깥 클릭·ESC 로 닫기 (다음 tick에 등록해서 이번 click 이벤트와 충돌 방지) */
+  setTimeout(()=>{
+    document.addEventListener('click', closeHistMenu, true);
+    document.addEventListener('keydown', _histMenuEsc, true);
+  }, 0);
 }
 
 /* 개별 히스토리 항목 삭제 */
