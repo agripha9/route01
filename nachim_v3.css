@@ -2246,11 +2246,17 @@ main {
   border-color: rgba(26,58,110,.3);
   box-shadow: 0 2px 10px rgba(0,0,0,.07);
 }
-/* 선택된 상태 — 로고 네이비 배경 + 흰 글씨 반전 */
+/* 선택된 상태 — 로고 네이비 배경 + 흰 글씨 반전 (FREE 멘토 기본) */
 .ob-mentor-row.sel {
   border-color: var(--brand-point);
   background: var(--brand-point);
   box-shadow: 0 2px 12px rgba(26,58,110,.25);
+}
+/* PRO 멘토 선택 시 — 크림슨 배경 (FREE와 시각적으로 대비) */
+.ob-mentor-row.sel:has(.pro-badge) {
+  border-color: var(--cta);
+  background: var(--cta);
+  box-shadow: 0 2px 12px rgba(139,26,26,.25);
 }
 .ob-mentor-row.sel .ob-mentor-row-name,
 .ob-mentor-row.sel .ob-mentor-row-line,
