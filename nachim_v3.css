@@ -1209,9 +1209,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hist-domain-bar .hdb-ico .domain-svg{width:20px;height:20px;display:block}
 .hist-domain-bar .hdb-main{min-width:0;flex:1}
 .hist-domain-bar .hdb-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;line-height:1.25}
-/* 질문 기록 항목 — 한 줄 말줄임, 좌측 정렬. hover 시 우측 kebab(⋯) 노출 */
+/* 질문 기록 항목 — 좌측 정렬, 여러 줄 허용. hover 시 우측 kebab(⋯) 노출 */
 .hist-item{
-  display:flex;flex-direction:row;align-items:center;gap:6px;
+  display:flex;flex-direction:row;align-items:flex-start;gap:6px;
   padding:5px 8px 5px 10px;margin:0;
   cursor:pointer;transition:background .12s;position:relative;
   text-align:left;border-radius:6px;
@@ -1223,12 +1223,14 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-size:12.5px;color:var(--ink);line-height:1.4;
   letter-spacing:-0.12px;
   text-align:left;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 .hist-kebab{
   flex-shrink:0;
   opacity:0;
-  width:22px;height:22px;
+  width:22px;height:22px;margin-top:-1px;
   display:flex;align-items:center;justify-content:center;
   background:transparent;border:none;border-radius:5px;
   color:var(--ink3);cursor:pointer;
