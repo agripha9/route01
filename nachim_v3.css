@@ -901,48 +901,55 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .dots span:nth-child(3){animation-delay:.36s}
 
 /* Route01 로딩 — 0에서 1까지 일직선.
-   모든 요소가 동일 5.5s 사이클을 공유.
-   각 요소별 @keyframes에서 자기 등장 시점만 다르게 지정 → 끝나는 시점은 전원 동일 → 깔끔 리셋.
-   21개 요소 = 0(숫자) + 15점 + 4노드 + 1(숫자). s0 ~ s20.
-   - 0 ~ 3.15s: 21개 요소가 차례로 부드럽게 fade-in (요소당 150ms 간격)
-   - 3.15 ~ 3.85s: 전원 그대로 (완성 상태 보여주기, 0.7s)
-   - 3.85 ~ 4.4s: 전원 동시 fade-out (0.55s)
-   - 4.4 ~ 5.5s: 공백 (모두 opacity:0) → 사이클 반복 */
-
-/* 로딩 중인 버블은 로더가 온전한 300px로 그려질 수 있도록 최소 폭 확보.
-   .m-bubble 자체는 content-fit이라 로더 SVG가 축소될 수 있음 → 로더 존재 시 min-width 강제. */
-.m-bubble:has(> .route-loader){
-  min-width:340px !important;
-  width:auto;
-}
+   SVG 대신 flex 레이아웃. justify-content:space-between으로 0·1이 양끝에 고정.
+   점·노드는 flex-grow:1 없이 자연폭이므로 원 모양 유지. 사이 공간이 균등 분배됨.
+   21개 요소 = 0(숫자) + 15점 + 4노드 + 1(숫자).
+   모든 요소가 동일 5.5s 사이클을 공유하며, 각 요소별 @keyframes에서 자기 등장 시점만 다르게 지정. */
 .route-loader{
-  display:block;
-  width:300px !important;
-  min-width:300px !important;
-  padding:2px 0;
-}
-.route-loader svg{
-  width:300px !important;
-  height:24px !important;
-  display:block;
-  overflow:visible;
-  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  min-height:24px;
+  padding:4px 0;
+  gap:0;
 }
 
-/* 양 끝 숫자 0, 1 — 조금 더 크고 굵게 */
+/* 로더를 담는 버블은 답변 카드처럼 넓게 펼쳐 양끝 간격 살리기 */
+.m-bubble:has(> .route-loader){
+  width:100%;
+  max-width:560px;
+}
+
+/* 양 끝 숫자 0, 1 */
 .route-loader .rl-end{
   font-family:var(--font-display);
   font-weight:900;
   font-size:18px;
   letter-spacing:-0.02em;
-  dominant-baseline:central;
+  line-height:1;
+  flex-shrink:0;
 }
-.route-loader .rl-end-0{fill:#1a3a6e;}
-.route-loader .rl-end-1{fill:#8B1A1A;}
+.route-loader .rl-end-0{color:#1a3a6e;}
+.route-loader .rl-end-1{color:#8B1A1A;}
 
-/* 점·노드 — 회색 계열 통일, 노드는 조금 더 진하고 큼 */
-.route-loader .rl-dot{ r:1.8; fill:#b0b0b5; }
-.route-loader .rl-node{ r:2.8; fill:#8e8e93; }
+/* 점·노드 — 회색 계열 통일. 원형 유지(가로 stretch 없음) */
+.route-loader .rl-dot,
+.route-loader .rl-node{
+  display:block;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.route-loader .rl-dot{
+  width:4px;
+  height:4px;
+  background:#b0b0b5;
+}
+.route-loader .rl-node{
+  width:7px;
+  height:7px;
+  background:#8e8e93;
+}
 
 /* 모든 등장 요소 공통 — 5.5s 사이클 */
 .route-loader .rl-step{
