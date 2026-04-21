@@ -1222,13 +1222,8 @@ function renderHistory(){
     });
 
     const renderItem = (h)=>{
-      const d=new Date(h.ts);
-      const hm=`${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
       return `<div class="hist-item" data-hidx="${h._idx}">
-        <div class="hist-item-body">
-          <div class="hist-q">${esc(h.q)}</div>
-          <div class="hist-time">${hm}</div>
-        </div>
+        <div class="hist-q">${esc(h.q)}</div>
         <button class="hist-del" data-delidx="${h._idx}" title="이 기록 삭제" aria-label="삭제">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
         </button>
