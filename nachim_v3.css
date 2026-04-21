@@ -971,13 +971,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .route-loader .rl-dot{ fill:#3a5a9e; }
 
 /* 등장 키프레임 — 22단계라서 각 요소는 자기 delay 뒤에 빠르게 나타나 다음 리셋 전까지 유지.
-   마지막 끝나고 reset 되는 순간에는 전원 opacity:0로 돌아감. */
+   마지막 끝나고 reset 되는 순간에는 전원 opacity:0로 돌아감.
+   SVG 요소의 transform 원점 이슈를 피하기 위해 opacity만 전환. */
 @keyframes rl-step{
-  0%     { opacity:0; transform:scale(0.4); }
-  2%     { opacity:1; transform:scale(1.2); }
-  5%     { opacity:1; transform:scale(1);   }
-  92%    { opacity:1; transform:scale(1);   }
-  96%,100%{ opacity:0; transform:scale(0.6); }
+  0%     { opacity:0; }
+  3%     { opacity:1; }
+  92%    { opacity:1; }
+  96%,100%{ opacity:0; }
 }
 
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
