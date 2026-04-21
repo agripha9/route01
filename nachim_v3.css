@@ -901,84 +901,99 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .dots span:nth-child(3){animation-delay:.36s}
 
 /* Route01 로딩 — 0에서 1까지 일직선.
-   0 → 점 → 점 → 점 → 노드 → (반복) → 1 순차 누적 등장 후 리셋하여 반복.
-   일반 텍스트 한 줄 높이. 창 폭을 차지하지 않도록 inline-block. */
+   모든 요소가 동일 4s 사이클을 공유.
+   각 요소별 @keyframes에서 자기 등장 시점만 다르게 지정 → 끝나는 시점은 전원 동일 → 깔끔 리셋.
+   - 0 ~ 2.64s: 22개 요소가 차례로 부드럽게 fade-in (요소당 120ms 간격)
+   - 2.64 ~ 3.0s: 전원 그대로 (완성된 상태 보여주기)
+   - 3.0 ~ 3.4s: 전원 동시 fade-out
+   - 3.4 ~ 4.0s: 공백 (모두 opacity:0, 숨 고르기) → 사이클 반복 */
 .route-loader{
   display:inline-flex;
   align-items:center;
   padding:2px 0;
 }
 .route-loader svg{
-  width:260px;
-  height:20px;
+  width:300px;
+  height:24px;
   display:block;
   overflow:visible;
 }
 
-/* 양 끝 숫자 0, 1 */
+/* 양 끝 숫자 0, 1 — 조금 더 크고 굵게 */
 .route-loader .rl-end{
   font-family:var(--font-display);
-  font-weight:800;
-  font-size:15px;
+  font-weight:900;
+  font-size:18px;
   letter-spacing:-0.02em;
   dominant-baseline:central;
 }
 .route-loader .rl-end-0{fill:#1a3a6e;}
 .route-loader .rl-end-1{fill:#8B1A1A;}
 
-/* 순차 등장 요소 공통. 22 step 중 각 요소의 인덱스에 맞춰 opacity 전환. */
+/* 점·노드 — 회색 계열 통일, 노드는 조금 더 진하고 큼 */
+.route-loader .rl-dot{ r:1.8; fill:#b0b0b5; }
+.route-loader .rl-node{ r:2.8; fill:#8e8e93; }
+
+/* 모든 등장 요소 공통 — 4s 사이클, 자기 delay는 keyframes 안에 담겨있어 외부 delay 불필요 */
 .route-loader .rl-step{
   opacity:0;
-  animation:rl-step 2.64s linear infinite;
+  animation-duration:4s;
+  animation-iteration-count:infinite;
+  animation-timing-function:ease-in-out;
 }
 
-/* 인덱스 0 = 0숫자, 1..15 = 점들과 노드 섞여서, 16.. = 1숫자 */
-/* 전체 22 step: 각 step = 1/22 ≈ 4.545% */
-.route-loader .rl-s0 { animation-delay: 0s;    }
-.route-loader .rl-s1 { animation-delay: 0.12s; }
-.route-loader .rl-s2 { animation-delay: 0.24s; }
-.route-loader .rl-s3 { animation-delay: 0.36s; }
-.route-loader .rl-s4 { animation-delay: 0.48s; }
-.route-loader .rl-s5 { animation-delay: 0.60s; }
-.route-loader .rl-s6 { animation-delay: 0.72s; }
-.route-loader .rl-s7 { animation-delay: 0.84s; }
-.route-loader .rl-s8 { animation-delay: 0.96s; }
-.route-loader .rl-s9 { animation-delay: 1.08s; }
-.route-loader .rl-s10{ animation-delay: 1.20s; }
-.route-loader .rl-s11{ animation-delay: 1.32s; }
-.route-loader .rl-s12{ animation-delay: 1.44s; }
-.route-loader .rl-s13{ animation-delay: 1.56s; }
-.route-loader .rl-s14{ animation-delay: 1.68s; }
-.route-loader .rl-s15{ animation-delay: 1.80s; }
-.route-loader .rl-s16{ animation-delay: 1.92s; }
-.route-loader .rl-s17{ animation-delay: 2.04s; }
-.route-loader .rl-s18{ animation-delay: 2.16s; }
-.route-loader .rl-s19{ animation-delay: 2.28s; }
-.route-loader .rl-s20{ animation-delay: 2.40s; }
-.route-loader .rl-s21{ animation-delay: 2.52s; }
+/* 22개 요소별 keyframes. 공식:
+   등장 시작 % = (i × 120ms) / 4000ms × 100 = i × 3%
+   등장 완료 % = 등장 시작 % + 1.5%
+   Hold → 전원 동일 구간: 66% ~ 75% (2.64s ~ 3.0s)
+   전원 fade-out:         75% → 85% (3.0s ~ 3.4s) opacity 1 → 0
+   이후는 opacity 0 유지 → 사이클 반복 시 자기 등장 시점에서 다시 fade-in */
+.route-loader .rl-s0  { animation-name: rl-s0;  }
+.route-loader .rl-s1  { animation-name: rl-s1;  }
+.route-loader .rl-s2  { animation-name: rl-s2;  }
+.route-loader .rl-s3  { animation-name: rl-s3;  }
+.route-loader .rl-s4  { animation-name: rl-s4;  }
+.route-loader .rl-s5  { animation-name: rl-s5;  }
+.route-loader .rl-s6  { animation-name: rl-s6;  }
+.route-loader .rl-s7  { animation-name: rl-s7;  }
+.route-loader .rl-s8  { animation-name: rl-s8;  }
+.route-loader .rl-s9  { animation-name: rl-s9;  }
+.route-loader .rl-s10 { animation-name: rl-s10; }
+.route-loader .rl-s11 { animation-name: rl-s11; }
+.route-loader .rl-s12 { animation-name: rl-s12; }
+.route-loader .rl-s13 { animation-name: rl-s13; }
+.route-loader .rl-s14 { animation-name: rl-s14; }
+.route-loader .rl-s15 { animation-name: rl-s15; }
+.route-loader .rl-s16 { animation-name: rl-s16; }
+.route-loader .rl-s17 { animation-name: rl-s17; }
+.route-loader .rl-s18 { animation-name: rl-s18; }
+.route-loader .rl-s19 { animation-name: rl-s19; }
+.route-loader .rl-s20 { animation-name: rl-s20; }
+.route-loader .rl-s21 { animation-name: rl-s21; }
 
-/* 점 스타일: 작은 원, 0→1 그라디언트에 맞춰 fill 색 각기 설정 */
-.route-loader .rl-dot{ r:1.8; }
-.route-loader .rl-node{ r:3; }
-
-/* 노드 4개 — 좌→우 파랑→빨강 그라디언트 */
-.route-loader .rl-node-1{ fill:#2c4f8f; }
-.route-loader .rl-node-2{ fill:#5a3a68; }
-.route-loader .rl-node-3{ fill:#7d2c44; }
-.route-loader .rl-node-4{ fill:#8B1A1A; }
-
-/* 점: 좌→우 진행에 따라 색 점진 변화 */
-.route-loader .rl-dot{ fill:#3a5a9e; }
-
-/* 등장 키프레임 — 22단계라서 각 요소는 자기 delay 뒤에 빠르게 나타나 다음 리셋 전까지 유지.
-   마지막 끝나고 reset 되는 순간에는 전원 opacity:0로 돌아감.
-   SVG 요소의 transform 원점 이슈를 피하기 위해 opacity만 전환. */
-@keyframes rl-step{
-  0%     { opacity:0; }
-  3%     { opacity:1; }
-  92%    { opacity:1; }
-  96%,100%{ opacity:0; }
-}
+/* 각 요소: 0%~자기등장시작 opacity:0 → 자기등장끝 opacity:1 → 75% 끝까지 1 유지 → 85% 0 → 100% 0 */
+@keyframes rl-s0  { 0%,0%     {opacity:0} 1.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s1  { 0%,3%     {opacity:0} 4.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s2  { 0%,6%     {opacity:0} 7.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s3  { 0%,9%     {opacity:0} 10.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s4  { 0%,12%    {opacity:0} 13.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s5  { 0%,15%    {opacity:0} 16.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s6  { 0%,18%    {opacity:0} 19.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s7  { 0%,21%    {opacity:0} 22.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s8  { 0%,24%    {opacity:0} 25.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s9  { 0%,27%    {opacity:0} 28.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s10 { 0%,30%    {opacity:0} 31.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s11 { 0%,33%    {opacity:0} 34.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s12 { 0%,36%    {opacity:0} 37.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s13 { 0%,39%    {opacity:0} 40.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s14 { 0%,42%    {opacity:0} 43.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s15 { 0%,45%    {opacity:0} 46.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s16 { 0%,48%    {opacity:0} 49.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s17 { 0%,51%    {opacity:0} 52.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s18 { 0%,54%    {opacity:0} 55.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s19 { 0%,57%    {opacity:0} 58.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s20 { 0%,60%    {opacity:0} 61.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+@keyframes rl-s21 { 0%,63%    {opacity:0} 64.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
 
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
 
