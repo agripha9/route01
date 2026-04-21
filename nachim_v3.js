@@ -1961,16 +1961,60 @@ function refreshAllReportBubbleMarkdown(){
 
 function renderMD(md){
   const src=preprocessMarkdown(String(md||''));
+  let html;
   if(window.marked && typeof marked.parse==='function'){
     marked.setOptions({gfm:true,breaks:true,headerIds:false,mangle:false});
-    let html=marked.parse(src);
+    html=marked.parse(src);
     html=normalizeParagraphOrderedLists(html);
     html=unwrapListItemSingleParagraph(html);
     html=collapseAdjacentHrs(html);
     html=normalizeOrderedListNumbering(html);
+  } else {
+    html=collapseAdjacentHrs(renderMDFallback(src));
+  }
+  return stripResidualMarkdownSymbols(html);
+}
+
+/* 최종 안전망: 렌더된 HTML의 텍스트 노드에 남아있는 미처리 마크다운 기호 청소.
+   marked가 특정 엣지케이스(예: 헤딩 앞뒤 공백 부족, ** 짝 불일치)에서 원문자를 통과시키는 경우
+   사용자 화면에 ##, **, ### 같은 기호가 그대로 노출될 수 있어 이를 제거·변환한다.
+   HTML 구조(태그)는 건드리지 않고 텍스트 노드만 대상으로 한다. */
+function stripResidualMarkdownSymbols(html){
+  try{
+    const doc = new DOMParser().parseFromString(`<div id="__strip">${html}</div>`, 'text/html');
+    const root = doc.getElementById('__strip');
+    if(!root) return html;
+    const SKIP_TAGS = new Set(['CODE','PRE','SCRIPT','STYLE']);
+    const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        if(!node.parentNode) return NodeFilter.FILTER_REJECT;
+        if(SKIP_TAGS.has(node.parentNode.nodeName)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const toClean = [];
+    let n;
+    while((n = walker.nextNode())) toClean.push(n);
+    for(const node of toClean){
+      let v = node.nodeValue || '';
+      if(!v) continue;
+      /* 줄 시작의 "## ", "###" 같은 헤딩 마커 제거 (렌더 실패한 제목).
+         공백이 없는 "##제목" 형태도 커버. 단 "#ab"(한 글자 해시는 해시태그나 코드리뷰 등 일반 사용 가능)은 2개 이상만 처리. */
+      v = v.replace(/(^|\n)\s*#{2,6}\s*/g, '$1');
+      /* 짝을 이루는 **bold** 는 이미 <strong>으로 변환됐어야 함.
+         렌더 실패로 남은 ** ... ** 은 <strong> 태그로 후변환하면 부작용이 크므로
+         단순히 ** 문자를 제거한다 (텍스트는 유지, 굵게 강조만 포기). */
+      v = v.replace(/\*\*([^*\n]{1,200})\*\*/g, '$1');
+      /* 단독 ** 또는 *** (짝 안 맞는 것) 제거 */
+      v = v.replace(/\*{2,}/g, '');
+      /* __bold__ 처리: 한국어와 섞이면 오탐 위험이 있어 짝을 이루는 경우만 벗김 */
+      v = v.replace(/__([^_\n]{1,200})__/g, '$1');
+      if(v !== node.nodeValue) node.nodeValue = v;
+    }
+    return root.innerHTML;
+  }catch(e){
     return html;
   }
-  return collapseAdjacentHrs(renderMDFallback(src));
 }
 
 /* 연속된 HR(공백·빈 p 사이 포함)을 하나로 줄임 — AI의 --- 와 우리의 NACHIM_TAIL HR 중복 방지 */
@@ -2125,7 +2169,24 @@ function preprocessMarkdown(src){
 function renderMDFallback(src){
   const escHtml = (s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  /* minimal: tables + lists + paragraphs (so |---| never shows raw) */
+  /* 인라인 마크다운 처리: **bold**, *italic*, `code`, [text](url).
+     입력은 이미 escHtml로 HTML-escape 된 상태여야 함. */
+  const renderInline = (s)=>{
+    let t = String(s||'');
+    /* inline code 먼저 처리 (내부의 *, _ 등이 강조로 해석되지 않도록) */
+    t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+    /* bold: **text** 또는 __text__ */
+    t = t.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+    /* italic: *text* 또는 _text_ (앞뒤가 공백/줄 시작/끝이어야 매칭, 단어 중간의 _ 무시) */
+    t = t.replace(/(^|[\s([{])\*([^*\n]+)\*(?=[\s)\]}.,!?:;]|$)/g, '$1<em>$2</em>');
+    t = t.replace(/(^|[\s([{])_([^_\n]+)_(?=[\s)\]}.,!?:;]|$)/g, '$1<em>$2</em>');
+    /* links: [text](url) */
+    t = t.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+    return t;
+  };
+
+  /* minimal: headings + tables + lists + paragraphs (so |---| or ## never shows raw) */
   const lines=String(src||'').split('\n');
   const out=[];
   const isRow=(s)=>/\|/.test(s);
@@ -2133,6 +2194,23 @@ function renderMDFallback(src){
   for(let i=0;i<lines.length;i++){
     const a=lines[i];
     const b=lines[i+1];
+
+    /* 제목 (# ~ ######) — 렌더 전 처리. */
+    const hMatch = a.match(/^(\s*)(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if(hMatch){
+      const level = hMatch[2].length;
+      const content = renderInline(escHtml(hMatch[3]));
+      out.push(`<h${level}>${content}</h${level}>`);
+      continue;
+    }
+
+    /* HR */
+    if(/^\s*[-*_]{3,}\s*$/.test(a)){
+      out.push('<hr>');
+      continue;
+    }
+
+    /* 표 */
     if(isRow(a) && isSep(b)){
       const parseRow=(s)=>s.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
       const head=parseRow(a);
@@ -2141,7 +2219,7 @@ function renderMDFallback(src){
       while(i<lines.length && isRow(lines[i]) && lines[i].trim()!==''){rows.push(parseRow(lines[i]));i++;}
       i--;
       const cols=Math.max(head.length,...rows.map(r=>r.length));
-      const norm=(r)=>Array.from({length:cols},(_,k)=>escHtml((r[k]??'').trim()));
+      const norm=(r)=>Array.from({length:cols},(_,k)=>renderInline(escHtml((r[k]??'').trim())));
       out.push(
         `<table><thead><tr>${norm(head).map(c=>`<th>${c}</th>`).join('')}</tr></thead>`+
         `<tbody>${rows.map(r=>`<tr>${norm(r).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`
@@ -2149,16 +2227,33 @@ function renderMDFallback(src){
       continue;
     }
 
+    /* 불릿 리스트 */
     const m=a.match(/^\s*[-*]\s+(.+)$/);
     if(m){
-      const items=[escHtml(m[1])];
+      const items=[renderInline(escHtml(m[1]))];
       while(i+1<lines.length){
         const n=lines[i+1].match(/^\s*[-*]\s+(.+)$/);
         if(!n) break;
-        items.push(escHtml(n[1]));
+        items.push(renderInline(escHtml(n[1])));
         i++;
       }
       out.push(`<ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul>`);
+      continue;
+    }
+
+    /* 번호 리스트 */
+    const om=a.match(/^\s*(\d{1,3})\.\s+(.+)$/);
+    if(om){
+      const start=parseInt(om[1],10);
+      const items=[renderInline(escHtml(om[2]))];
+      while(i+1<lines.length){
+        const n=lines[i+1].match(/^\s*\d{1,3}\.\s+(.+)$/);
+        if(!n) break;
+        items.push(renderInline(escHtml(n[1])));
+        i++;
+      }
+      const startAttr = start!==1 ? ` start="${start}"` : '';
+      out.push(`<ol${startAttr}>${items.map(t=>`<li>${t}</li>`).join('')}</ol>`);
       continue;
     }
 
@@ -2171,8 +2266,9 @@ function renderMDFallback(src){
     .map(p=>p.trim())
     .filter(Boolean)
     .map(p=>{
-      if(/^<(table|ul|ol|pre|h1|h2|h3|blockquote)\b/i.test(p)) return p;
-      return `<p>${escHtml(p).replace(/\n/g,'<br>')}</p>`;
+      if(/^<(table|ul|ol|pre|h[1-6]|blockquote|hr)\b/i.test(p)) return p;
+      /* 일반 단락에도 인라인 마크다운 적용 */
+      return `<p>${renderInline(escHtml(p)).replace(/\n/g,'<br>')}</p>`;
     })
     .join('');
 }
@@ -3961,6 +4057,22 @@ function clearAllHistory() {
 
 /* ── DOMContentLoaded: launch/send 후킹 ── */
 document.addEventListener('DOMContentLoaded', ()=>{
+  /* marked가 아직 로드 안 됐으면(네트워크 지연 등) 로드 완료 후 모든 답변 버블 재렌더.
+     fallback renderer는 간단하지만 인라인 마크다운을 완전히 처리하진 못할 수 있으므로,
+     정상 marked로 다시 그려서 ##·**·*** 같은 잔존 기호를 제거한다. */
+  if(!window.marked || typeof window.marked.parse !== 'function'){
+    let tries = 0;
+    const maxTries = 30; // 최대 6초 대기 (200ms x 30)
+    const iv = setInterval(()=>{
+      tries++;
+      if(window.marked && typeof window.marked.parse === 'function'){
+        clearInterval(iv);
+        try{ if(typeof refreshAllReportBubbleMarkdown === 'function') refreshAllReportBubbleMarkdown(); }catch(e){}
+      } else if(tries >= maxTries){
+        clearInterval(iv);
+      }
+    }, 200);
+  }
   /* launch 후킹: 원본 실행 후 새 기능 초기화 */
   const _origLaunch = window.launch;
   window.launch = function() {
