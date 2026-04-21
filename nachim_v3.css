@@ -901,22 +901,26 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .dots span:nth-child(3){animation-delay:.36s}
 
 /* Route01 로딩 — 0에서 1까지 일직선.
-   모든 요소가 동일 4s 사이클을 공유.
+   모든 요소가 동일 5.5s 사이클을 공유.
    각 요소별 @keyframes에서 자기 등장 시점만 다르게 지정 → 끝나는 시점은 전원 동일 → 깔끔 리셋.
-   - 0 ~ 2.64s: 22개 요소가 차례로 부드럽게 fade-in (요소당 120ms 간격)
-   - 2.64 ~ 3.0s: 전원 그대로 (완성된 상태 보여주기)
-   - 3.0 ~ 3.4s: 전원 동시 fade-out
-   - 3.4 ~ 4.0s: 공백 (모두 opacity:0, 숨 고르기) → 사이클 반복 */
+   21개 요소 = 0(숫자) + 15점 + 4노드 + 1(숫자). s0 ~ s20.
+   - 0 ~ 3.15s: 21개 요소가 차례로 부드럽게 fade-in (요소당 150ms 간격)
+   - 3.15 ~ 3.85s: 전원 그대로 (완성 상태 보여주기, 0.7s)
+   - 3.85 ~ 4.4s: 전원 동시 fade-out (0.55s)
+   - 4.4 ~ 5.5s: 공백 (모두 opacity:0) → 사이클 반복 */
 .route-loader{
   display:inline-flex;
   align-items:center;
   padding:2px 0;
+  width:300px;
+  max-width:100%;
 }
 .route-loader svg{
-  width:300px;
-  height:24px;
+  width:300px !important;
+  height:24px !important;
   display:block;
   overflow:visible;
+  flex-shrink:0;
 }
 
 /* 양 끝 숫자 0, 1 — 조금 더 크고 굵게 */
@@ -934,20 +938,19 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .route-loader .rl-dot{ r:1.8; fill:#b0b0b5; }
 .route-loader .rl-node{ r:2.8; fill:#8e8e93; }
 
-/* 모든 등장 요소 공통 — 4s 사이클, 자기 delay는 keyframes 안에 담겨있어 외부 delay 불필요 */
+/* 모든 등장 요소 공통 — 5.5s 사이클 */
 .route-loader .rl-step{
   opacity:0;
-  animation-duration:4s;
+  animation-duration:5.5s;
   animation-iteration-count:infinite;
   animation-timing-function:ease-in-out;
 }
 
-/* 22개 요소별 keyframes. 공식:
-   등장 시작 % = (i × 120ms) / 4000ms × 100 = i × 3%
-   등장 완료 % = 등장 시작 % + 1.5%
-   Hold → 전원 동일 구간: 66% ~ 75% (2.64s ~ 3.0s)
-   전원 fade-out:         75% → 85% (3.0s ~ 3.4s) opacity 1 → 0
-   이후는 opacity 0 유지 → 사이클 반복 시 자기 등장 시점에서 다시 fade-in */
+/* 21개 요소별 keyframes. 등장 시작 % = i × 2.727% (i × 150ms / 5500ms)
+   등장 완료 % = 등장 시작 % + 1.5% (약 80ms)
+   Hold 구간: 57.3% ~ 70% (3.15s ~ 3.85s)
+   전원 fade-out: 70% → 80% (3.85s ~ 4.4s) opacity 1 → 0
+   이후 opacity 0 유지 → 리셋 */
 .route-loader .rl-s0  { animation-name: rl-s0;  }
 .route-loader .rl-s1  { animation-name: rl-s1;  }
 .route-loader .rl-s2  { animation-name: rl-s2;  }
@@ -969,31 +972,29 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .route-loader .rl-s18 { animation-name: rl-s18; }
 .route-loader .rl-s19 { animation-name: rl-s19; }
 .route-loader .rl-s20 { animation-name: rl-s20; }
-.route-loader .rl-s21 { animation-name: rl-s21; }
 
-/* 각 요소: 0%~자기등장시작 opacity:0 → 자기등장끝 opacity:1 → 75% 끝까지 1 유지 → 85% 0 → 100% 0 */
-@keyframes rl-s0  { 0%,0%     {opacity:0} 1.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s1  { 0%,3%     {opacity:0} 4.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s2  { 0%,6%     {opacity:0} 7.5%   {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s3  { 0%,9%     {opacity:0} 10.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s4  { 0%,12%    {opacity:0} 13.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s5  { 0%,15%    {opacity:0} 16.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s6  { 0%,18%    {opacity:0} 19.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s7  { 0%,21%    {opacity:0} 22.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s8  { 0%,24%    {opacity:0} 25.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s9  { 0%,27%    {opacity:0} 28.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s10 { 0%,30%    {opacity:0} 31.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s11 { 0%,33%    {opacity:0} 34.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s12 { 0%,36%    {opacity:0} 37.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s13 { 0%,39%    {opacity:0} 40.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s14 { 0%,42%    {opacity:0} 43.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s15 { 0%,45%    {opacity:0} 46.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s16 { 0%,48%    {opacity:0} 49.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s17 { 0%,51%    {opacity:0} 52.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s18 { 0%,54%    {opacity:0} 55.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s19 { 0%,57%    {opacity:0} 58.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s20 { 0%,60%    {opacity:0} 61.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
-@keyframes rl-s21 { 0%,63%    {opacity:0} 64.5%  {opacity:1} 75%{opacity:1} 85%,100%{opacity:0} }
+/* 각 요소: 0%~자기등장시작 opacity:0 → 자기등장끝 opacity:1 → 70% 끝까지 1 유지 → 80% 0 → 100% 0 */
+@keyframes rl-s0  { 0%,0%      {opacity:0} 1.5%   {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s1  { 0%,2.73%   {opacity:0} 4.23%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s2  { 0%,5.46%   {opacity:0} 6.96%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s3  { 0%,8.18%   {opacity:0} 9.68%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s4  { 0%,10.91%  {opacity:0} 12.41% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s5  { 0%,13.64%  {opacity:0} 15.14% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s6  { 0%,16.36%  {opacity:0} 17.86% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s7  { 0%,19.09%  {opacity:0} 20.59% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s8  { 0%,21.82%  {opacity:0} 23.32% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s9  { 0%,24.55%  {opacity:0} 26.05% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s10 { 0%,27.27%  {opacity:0} 28.77% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s11 { 0%,30%     {opacity:0} 31.5%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s12 { 0%,32.73%  {opacity:0} 34.23% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s13 { 0%,35.46%  {opacity:0} 36.96% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s14 { 0%,38.18%  {opacity:0} 39.68% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s15 { 0%,40.91%  {opacity:0} 42.41% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s16 { 0%,43.64%  {opacity:0} 45.14% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s17 { 0%,46.36%  {opacity:0} 47.86% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s18 { 0%,49.09%  {opacity:0} 50.59% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s19 { 0%,51.82%  {opacity:0} 53.32% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
+@keyframes rl-s20 { 0%,54.55%  {opacity:0} 57%    {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
 
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
 
