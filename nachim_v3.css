@@ -2324,7 +2324,7 @@ main {
   padding-right: 52px; /* 우측 상단 배지(FREE/PRO) 공간 — 배지 작아져서 감소 */
   border: 2px solid var(--border);
   border-radius: 12px;
-  background: var(--bg2);
+  background: var(--filter-bg);
   cursor: pointer;
   transition: border-color .15s, background .15s, box-shadow .15s, color .15s;
 }
