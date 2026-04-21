@@ -3998,38 +3998,30 @@ function dismissProfileBanner() {
 
 /* ── unified-area: 프로필 배지 동기화 ── */
 function syncUnifiedBadges() {
-  const ind = document.getElementById('ub-industry');
-  const st  = document.getElementById('ub-stage');
-  const inv = document.getElementById('ub-invest');
+  const biz = document.getElementById('ub-biz');
   const co  = document.getElementById('ub-concern');
-  const sy  = document.getElementById('ub-style');
+  const mentorHdr = document.getElementById('header-mentor-name');
 
-  // 사업 소개
-  const industryText = profile.industry
-    ? (profile.industry.length > 22 ? profile.industry.slice(0,22)+'…' : profile.industry)
-    : '미설정';
-  if(ind) ind.textContent = industryText;
-
-  // 단계 · 타겟
+  /* 사업 요약 — industry + stage + target(B2B/B2C)을 한 줄에 축약 */
   const targetShort = profile.target
     ? profile.target.replace('(기업)','').replace('(소비자)','').replace('(공공/정부)','').trim()
     : '';
-  const stageVal = profile.stage
-    ? (targetShort ? `${profile.stage} · ${targetShort}` : profile.stage)
-    : (targetShort || '미설정');
-  if(st) st.textContent = stageVal;
+  const bizParts = [];
+  if(profile.industry){
+    bizParts.push(profile.industry.length > 18 ? profile.industry.slice(0,18)+'…' : profile.industry);
+  }
+  if(profile.stage) bizParts.push(profile.stage);
+  if(targetShort)   bizParts.push(targetShort);
+  if(biz) biz.textContent = bizParts.length ? bizParts.join(' · ') : '미설정';
 
-  // 투자 상황
-  if(inv) inv.textContent = profile.invest || '미설정';
-
-  // 핵심 고민
+  /* 핵심 고민 */
   const concernText = profile.concern
     ? (profile.concern.length > 22 ? profile.concern.slice(0,22)+'…' : profile.concern)
     : '미설정';
   if(co) co.textContent = concernText;
 
-  // 멘토 스타일
-  if(sy) sy.textContent = profile.style || 'Paul Graham (YC)';
+  /* 상단 멘토 뱃지 */
+  if(mentorHdr) mentorHdr.textContent = profile.style || 'Paul Graham (YC)';
 }
 
 /* ──────────────────────────────────────────────────────────────────

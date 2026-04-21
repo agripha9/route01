@@ -445,8 +445,16 @@
         <span class="logo-slogan-sub">Finding your Route from Zero to One</span>
       </span>
     </div>
-    <div class="header-center" onclick="editProfile()" title="프로필 수정">
-      <span id="pname" class="header-profile-name">프로필 미설정</span>
+    <div class="header-center">
+      <span class="header-profile-pill" onclick="editProfile()" title="프로필 수정">
+        <span id="pname" class="header-profile-name">프로필 미설정</span>
+      </span>
+      <span class="header-divider-dot">·</span>
+      <span class="header-mentor-pill" onclick="openStyleModal()" title="멘토 스타일 변경">
+        <svg class="header-mentor-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="header-mentor-name" class="header-mentor-name">Paul Graham (YC)</span>
+        <svg class="header-mentor-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
     </div>
     <div class="header-actions">
       <button class="home-icon-btn" onclick="goHome()" title="홈으로">
@@ -499,27 +507,15 @@
       <div class="s-top">
         <div id="history-list"><div class="pop-empty">아직 질문 기록이 없어요.</div></div>
       </div>
-      <!-- 사이드바 하단 상태 배지 (4개) -->
+      <!-- 사이드바 하단 상태 배지 (2개로 축소 — 멘토는 상단으로 이동) -->
       <div class="aside-status-badges">
         <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
-          <span class="aside-status-label">사업 소개</span>
-          <span class="aside-status-val" id="ub-industry">미설정</span>
-        </div>
-        <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
-          <span class="aside-status-label">단계 · 타겟</span>
-          <span class="aside-status-val" id="ub-stage">미설정</span>
-        </div>
-        <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
-          <span class="aside-status-label">투자 상황</span>
-          <span class="aside-status-val" id="ub-invest">미설정</span>
+          <span class="aside-status-label">사업 요약</span>
+          <span class="aside-status-val" id="ub-biz">미설정</span>
         </div>
         <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
           <span class="aside-status-label">핵심 고민</span>
           <span class="aside-status-val" id="ub-concern">미설정</span>
-        </div>
-        <div class="aside-status-item" onclick="openStyleModal()" title="멘토 스타일 변경">
-          <span class="aside-status-label">멘토 스타일</span>
-          <span class="aside-status-val" id="ub-style">YC 파트너식 직설</span>
         </div>
       </div>
     </aside>
