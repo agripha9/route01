@@ -834,7 +834,7 @@ let step = 1;
 /* ─── 온보딩 ────────────────────────── */
 function onIndustryInput(val){
   ob.industry=val.trim();
-  document.querySelectorAll('.ind-tag').forEach(t=>t.classList.remove('sel'));
+  /* sector(.ind-tag) 는 별도 필드 — 여기서 초기화하지 않음 */
   validate();
 }
 function setIndustry(val){
@@ -973,10 +973,7 @@ function hydrateOnboardingFromOb(){
   const con=document.getElementById('concern-in');
   if(con){ con.value=ob.concern||''; }
 
-  /* tags */
-  document.querySelectorAll('.ind-tag').forEach(t=>{
-    t.classList.toggle('sel', (t.textContent||'').trim()===(ob.industry||'').trim());
-  });
+  /* 과거 단일-industry 루프 제거 — sector 다중선택(952~960)을 덮어쓰던 버그 원인 */
 
   /* chips */
   const setSel=(gridId, val)=>{
