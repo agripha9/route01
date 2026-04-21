@@ -1211,10 +1211,10 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hist-domain-bar .hdb-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;line-height:1.25}
 /* 질문 기록 항목 — 한 줄 말줄임, 좌측 정렬. hover 시 우측 kebab(⋯) 노출 */
 .hist-item{
-  display:flex;align-items:center;gap:6px;
-  padding:7px 10px 7px 12px;
+  display:flex;flex-direction:row;align-items:center;gap:6px;
+  padding:5px 8px 5px 10px;margin:0;
   cursor:pointer;transition:background .12s;position:relative;
-  text-align:left;
+  text-align:left;border-radius:6px;
 }
 .hist-item:hover{background:var(--bg)}
 .hist-domain{display:none}
@@ -1549,10 +1549,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   line-height: 1.3;
   word-break: keep-all;
 }
-.hist-item{display:flex;flex-direction:column;gap:3px;padding:9px 10px;border-radius:var(--r);cursor:pointer;transition:background .12s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-text);margin-bottom:2px;}
-.hist-item:hover{background:var(--bg);}
-.hist-item-q{font-size:12px;color:var(--ink);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-.hist-item-meta{font-size:11px;color:var(--ink3);}
+/* 구 히스토리 시스템(.hist-item column layout)은 제거 — 1213의 row layout 사용 */
 
 /* ══════════════════════════
    통합 질문 영역
