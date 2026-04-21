@@ -915,12 +915,14 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   gap:0;
 }
 
-/* 로더를 담은 버블: 답변 카드 폭 전체를 쓰도록 max-width 해제. 
-   .report-bubble 기본 스타일(배경 투명, 패딩 2.25rem 2.75rem)을 공유하므로
-   외부 .report-card가 흰색 카드를 그려 답변 화면과 동일한 느낌. */
+/* 로더를 담은 버블: 답변 카드 폭 전체를 쓰되 세로 패딩은 질문 버블 수준으로 축소.
+   가로 패딩은 답변 카드 기본치를 유지해 0·1과 카드 내부 벽 사이 여유 확보.
+   .report-bubble 기본은 padding:2.25rem 2.75rem 이므로 세로만 0.9rem로 덮어씀. */
 .m-bubble.report-bubble:has(> .route-loader){
   width:100% !important;
   max-width:none !important;
+  padding-top:0.9rem !important;
+  padding-bottom:0.9rem !important;
 }
 
 /* 양 끝 숫자 0, 1 */
@@ -953,10 +955,10 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:#8e8e93;
 }
 
-/* 모든 등장 요소 공통 — 5.5s 사이클 */
+/* 모든 등장 요소 공통 — 7.5s 사이클 */
 .route-loader .rl-step{
   opacity:0;
-  animation-duration:5.5s;
+  animation-duration:7.5s;
   animation-iteration-count:infinite;
   animation-timing-function:ease-in-out;
 }
