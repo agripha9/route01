@@ -248,7 +248,7 @@ body{
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .ob-card{
   background:var(--white);border:1px solid rgba(0,0,0,0.06);border-radius:var(--r-panel);
-  padding:2.5rem 2.75rem;width:100%;max-width:640px;
+  padding:2.5rem 2.75rem;width:100%;max-width:740px;
   box-shadow:var(--shadow-md);max-height:calc(100vh - 4rem);overflow:auto
 }
 .ob-logo{font-family:var(--font-display);font-size:21px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:1.75rem;letter-spacing:-0.02em}
@@ -2235,7 +2235,7 @@ main {
   justify-content: flex-start;
   gap: 12px;
   padding: 16px 18px 16px 18px;
-  padding-right: 70px; /* 우측 상단 배지 공간 확보 */
+  padding-right: 52px; /* 우측 상단 배지(FREE/PRO) 공간 — 배지 작아져서 감소 */
   border: 2px solid var(--border);
   border-radius: 12px;
   background: var(--bg2);
@@ -2314,24 +2314,28 @@ main {
   color: var(--cta);
   font-weight: 700;
 }
-/* 멘토 설명 — 3줄 구조(소개/스타일/적합 대상). */
+/* 멘토 설명 — 3줄 구조(소개/스타일/적합 대상). 한 줄 초과 시 말줄임. */
 .ob-mentor-row-line {
   font-size: 12px;
   color: var(--ink2);
   line-height: 1.55;
   letter-spacing: -0.1px;
   margin-top: 2px;
-  word-break: keep-all;
-  overflow-wrap: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ob-mentor-row-line--fit {
-  color: var(--ink3);
+  color: var(--ink);
   font-size: 11.5px;
-  margin-top: 4px;
-  padding-top: 4px;
+  font-weight: 700;
+  font-style: italic;
+  margin-top: 6px;
+  padding-top: 6px;
   border-top: 1px dashed rgba(0,0,0,.08);
-  word-break: keep-all;
-  overflow-wrap: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 /* 구 클래스(kw, desc, emoji) — 하위호환용, 지금은 미사용 */
 .ob-mentor-row-kw {
