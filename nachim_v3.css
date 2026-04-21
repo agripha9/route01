@@ -1079,7 +1079,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
 /* INPUT */
 .input-area{
-  background:var(--bg2);
+  background:var(--bg);
   border-top:1px solid var(--border);
   padding:1rem 1.75rem 1.25rem;flex-shrink:0;
   backdrop-filter:saturate(180%) blur(20px);
@@ -1523,7 +1523,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 사이드바 하단 상태 배지 — 2개 항목(사업 요약·핵심 고민)이라 크기 축소해 공간 확보 */
 .aside-status-badges {
   margin-top: auto;
-  background: var(--bg2);
+  background: var(--filter-bg);
   border-top: 1px solid var(--border);
   padding: 10px;
   display: flex;
@@ -1535,7 +1535,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--filter-bg);
+  background: var(--bg3);
   border: 1px solid rgba(0,0,0,.07);
   border-radius: 8px;
   padding: 6px 10px;
