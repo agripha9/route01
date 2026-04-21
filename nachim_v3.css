@@ -7,19 +7,19 @@
   --ink3:#6e6e73;
   --gray-80:rgba(0,0,0,0.8);
   --gray-48:rgba(0,0,0,0.48);
-  /* ═══ 배경 색상 계층 (2026-04-21 개편)
+  /* ═══ 배경 색상 계층 (2026-04-21 개편 · 2차 darker)
      답변 버블이 가장 밝아서 주목받고, 주변으로 갈수록 약간씩 진해짐.
-     - L1 #fafafa : 답변 버블 (가장 밝음 · 주목 타겟)
-     - L2 #f3f3f5 : 입력창·모달 등 인터랙션 표면
-     - L3 #edeef1 : 메인 채팅 영역 배경
-     - L4 #e4e5ea : 사이드바 (한 단계 더 어둡게 시선 분리)
+     - L1 #f0f0f3 : 답변 버블 (가장 밝음 · 주목 타겟)
+     - L2 #e8e8ec : 입력창·모달 등 인터랙션 표면
+     - L3 #dfdfe4 : 메인 채팅 영역 배경
+     - L4 #d4d4da : 사이드바 (한 단계 더 어둡게 시선 분리)
      - L5 (--nav-glass 유지) : 최상단 헤더
      ═══ */
-  --bg:#edeef1;        /* L3 — body·메인 영역 기본 */
-  --bg2:#f3f3f5;       /* L2 — 카드·모달·입력창 표면 */
-  --bg3:#e4e5ea;       /* L4 — 사이드바·구분 영역 */
-  --filter-bg:#fafafa; /* L1 — 답변 버블 (과거 거의 흰색 대용) */
-  --white:#fafafa;     /* 기존에 흰색으로 쓰던 곳도 L1으로 승격 (온보딩 카드 등) */
+  --bg:#dfdfe4;        /* L3 — body·메인 영역 기본 */
+  --bg2:#e8e8ec;       /* L2 — 카드·모달·입력창 표면 */
+  --bg3:#d4d4da;       /* L4 — 사이드바·구분 영역 */
+  --filter-bg:#f0f0f3; /* L1 — 답변 버블 */
+  --white:#f0f0f3;     /* 기존 흰색 하드코딩도 L1으로 승격 */
   --brand-main:#8B1A1A;
   --brand-main-press:#721616;
   --brand-point:#1a3a6e;
@@ -904,7 +904,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 /* 짝수 행 — L1 기준에서 한 단계 진하게 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(even) td{
-  background:#f4f4f6;
+  background:#e6e6ea;
 }
 /* 홀수 행 — 흰색 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) tbody tr:nth-child(odd) td{
@@ -953,7 +953,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;margin:0 0 .5rem;font-size:14px}
 .m-bubble td{font-size:14px;color:#2c2c2e;line-height:1.55;letter-spacing:-0.01em}
 .m-bubble tbody td:first-child{font-weight:600;color:#1d1d1f}
-.m-bubble tbody tr:nth-child(even) td{background:#f4f4f6}
+.m-bubble tbody tr:nth-child(even) td{background:#e6e6ea}
 .m-bubble tbody tr:nth-child(odd) td{background:var(--filter-bg)}
 .m-bubble tbody tr:hover td{background:#f0f0f3}
 .m-bubble blockquote{margin:1.5rem 0;padding:.9rem 1.25rem;border-left:3px solid #d2d2d7;background:#f7f8fb;border-radius:0 6px 6px 0;color:#1d1d1f;font-size:14px;line-height:1.65;font-style:italic}
@@ -2617,7 +2617,7 @@ main {
 /* 짝수 행 — L1 기준 한 단계 진하게 */
 .report-bubble tbody tr:nth-child(even) td,
 .m-bubble tbody tr:nth-child(even) td {
-  background: #f4f4f6 !important;
+  background: #e6e6ea !important;
 }
 /* 홀수 행 — L1 */
 .report-bubble tbody tr:nth-child(odd) td,
