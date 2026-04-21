@@ -365,6 +365,18 @@ header{
   font-size:12px;font-weight:400;letter-spacing:-0.08px;
   white-space:nowrap;cursor:pointer;
   transition:background .15s, border-color .15s, color .15s;
+  /* <button> 기본 스타일 완전 차단 (Chrome appearance, 기본 font·margin·outline) */
+  -webkit-appearance:none;appearance:none;
+  margin:0;
+  font:inherit;
+  font-size:12px;
+  line-height:1;
+  outline:none;
+  box-sizing:border-box;
+}
+.hb-pill:focus-visible{
+  outline:2px solid rgba(255,255,255,0.45);
+  outline-offset:1px;
 }
 .hb-pill:hover{
   background:rgba(255,255,255,0.2);
