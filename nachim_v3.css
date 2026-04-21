@@ -1523,8 +1523,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 사이드바 하단 상태 배지 — 2개 항목(사업 요약·핵심 고민)이라 크기 축소해 공간 확보 */
 .aside-status-badges {
   margin-top: auto;
+  background: var(--bg2);
   border-top: 1px solid var(--border);
-  padding: 8px 10px 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 5px;
