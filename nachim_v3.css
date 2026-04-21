@@ -2248,25 +2248,26 @@ main {
 }
 /* 선택된 상태 — 로고 네이비 배경 + 흰 글씨 반전 (FREE 멘토 기본) */
 .ob-mentor-row.sel {
-  border-color: var(--brand-point);
-  background: var(--brand-point);
+  border-color: var(--brand-point) !important;
+  background: var(--brand-point) !important;
   box-shadow: 0 2px 12px rgba(26,58,110,.25);
+  opacity: 1 !important;
 }
 /* PRO 멘토 선택 시 — 크림슨 배경 (FREE와 시각적으로 대비) */
-.ob-mentor-row.sel:has(.pro-badge) {
-  border-color: var(--cta);
-  background: var(--cta);
+.ob-mentor-row.sel.is-pro {
+  border-color: var(--cta) !important;
+  background: var(--cta) !important;
   box-shadow: 0 2px 12px rgba(139,26,26,.25);
 }
 .ob-mentor-row.sel .ob-mentor-row-name,
 .ob-mentor-row.sel .ob-mentor-row-line,
 .ob-mentor-row.sel .ob-mentor-row-line--fit,
 .ob-mentor-row.sel .ob-mentor-row-selected {
-  color: #fff;
+  color: #fff !important;
 }
 .ob-mentor-row.sel .ob-mentor-row-tag {
   background: rgba(255,255,255,0.2);
-  color: #fff;
+  color: #fff !important;
 }
 .ob-mentor-row.sel .ob-mentor-row-line--fit {
   border-top-color: rgba(255,255,255,0.25);

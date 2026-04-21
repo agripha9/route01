@@ -2886,7 +2886,7 @@ function openStyleModal(){
     const m = MENTOR_META[k];
     const isSel = k === cur;
     const isLocked = !m.free && !isPaid;
-    return `<div class="ob-mentor-row ${isSel?'sel':''} ${isLocked?'ob-mentor-row--locked':''}" data-style="${esc(k)}" style="cursor:pointer">
+    return `<div class="ob-mentor-row ${isSel?'sel':''} ${isLocked?'ob-mentor-row--locked':''} ${m.free?'':'is-pro'}" data-style="${esc(k)}" style="cursor:pointer">
       <div class="ob-mentor-row-left">
         <div class="ob-mentor-row-info">
           <div class="ob-mentor-row-name">${esc(k.split(' (')[0])} <span class="ob-mentor-row-tag">${esc(m.tag)}</span></div>
