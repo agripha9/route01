@@ -313,13 +313,16 @@ function startAfterLogin(){
 function updateKeyStatus(){
   const dot=document.getElementById('key-status-dot');
   const txt=document.getElementById('key-status-text');
+  const btn=document.getElementById('key-btn');
   if(!dot||!txt) return;
   if(API_KEY){
     dot.className='key-dot key-dot-on';
     txt.textContent='API 연결됨';
+    if(btn){ btn.classList.remove('hb-status-warn'); btn.classList.add('hb-status-ok'); }
   } else {
     dot.className='key-dot key-dot-off';
     txt.textContent='API 키 설정';
+    if(btn){ btn.classList.remove('hb-status-ok'); btn.classList.add('hb-status-warn'); }
   }
 }
 function openKeyModal(){
