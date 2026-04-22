@@ -1695,38 +1695,96 @@ function showLoad(){
 }
 
 /* 로더 빌더: 컨테이너 폭을 측정해 점·노드 개수를 자동 결정하고,
-   각 요소에 등장 시점(animation-delay)을 JS로 주입한다.
-   keyframes는 CSS에 단 하나만 정의되어 있고(rl-step-kf), 모든 요소가 이를 공유하되
-   delay로 등장 순서를 만든다. 창 폭이 바뀌어도 동일 규칙 재적용 가능. */
+   각 요소별로 @keyframes를 JS에서 동적 주입한다.
+
+   핵심 구조:
+   - 모든 요소가 동일한 `animation-duration`(CYCLE_SEC)으로 동기화
+   - delay 없이 모두 동시에 사이클 0%에서 시작
+   - 각 요소의 keyframe 안에서 "자기만의 등장 시점"(stepIdx 기반)을 정의
+   - 등장 완료 후 공통 hold → 공통 fade-out → 리셋 (모두 동일)
+   - 결과: 0부터 순차 등장 → 1까지 전부 보임 → 전원 동시 fade-out → 전원 숨은 채 대기 → 다시 0부터 */
 function buildRouteLoader(loader){
   /* ─── 설정값 ─── */
   const CYCLE_SEC      = 9;      // 총 사이클(초). 기존 7.5 → 9로 소폭 상향(체감 속도 조정)
   const SPACING_PX     = 18;     // 점 1개당 평균 할당 폭. 작을수록 개수 증가.
-  const MIN_DOTS       = 11;     // 모바일 최소 보장 (점+노드 합계가 이 이하로 떨어지지 않도록)
-  const MAX_DOTS       = 45;     // 초광폭 상한 (4K 모니터에서 너무 빽빽해지는 것 방지)
-  const NODES_EVERY    = 4;      // N번째 점마다 노드로 교체 (색 강조 포인트)
+  const MIN_DOTS       = 11;     // 모바일 최소 보장
+  const MAX_DOTS       = 45;     // 초광폭 상한
+  const NODES_EVERY    = 4;      // N번째 점마다 노드로 교체
+
+  /* 사이클 내 구간 비율 (합이 1.0 넘지 않게):
+     [0%  ~ APPEAR_END%] — 순차 등장
+     [APPEAR_END% ~ HOLD_END%] — 전원 hold
+     [HOLD_END% ~ FADE_END%]   — 일괄 fade-out
+     [FADE_END% ~ 100%]        — 전원 숨김 대기 (다음 사이클 전 여백) */
+  const APPEAR_END_PCT = 55;
+  const HOLD_END_PCT   = 75;
+  const FADE_END_PCT   = 85;
 
   /* ─── 1. 폭 측정 → 점+노드 개수 결정 ─── */
   const totalWidth = loader.getBoundingClientRect().width || 0;
-  /* 양 끝 '0', '1' 차지 공간을 대략 50px씩 뺀 내부 폭 */
   const innerWidth = Math.max(0, totalWidth - 100);
   let midCount = Math.round(innerWidth / SPACING_PX);
   midCount = Math.max(MIN_DOTS, Math.min(MAX_DOTS, midCount));
 
-  /* 총 요소 수 = 0 + midCount + 1 */
-  const totalSteps = midCount + 2;
+  const totalSteps = midCount + 2;   // 0 + mid + 1
 
-  /* ─── 2. 등장 타이밍 계산 ─── */
-  /* 전체 사이클 중:
-     - 0% ~ APPEAR_END% : 순차 등장 (각 요소 약간씩 딜레이)
-     - HOLD_END% 까지   : 전체 유지
-     - 이후             : 일괄 fade-out → 리셋
-     사람의 체감에서 '너무 빠르다'는 평을 받았으니 등장 구간을 사이클의 60%까지 늘린다.
-     (기존 54% 등장 + 즉시 hold → 새: 65% 등장 + 75% hold 끝 + 85% fade-out 끝) */
-  const APPEAR_END_PCT = 65;
-  const delayPerStep = (CYCLE_SEC * APPEAR_END_PCT / 100) / totalSteps;
+  /* ─── 2. 각 요소의 등장 시점(% 단위) 계산 ─── */
+  /* stepIdx 0 → 0%에서 등장 시작
+     stepIdx (totalSteps-1) → APPEAR_END_PCT에서 등장 완료
+     요소 하나의 "등장 전환" 구간은 짧게 (1.5% ≈ 135ms). */
+  const APPEAR_TRANSITION_PCT = 1.5;
+  const lastAppearStart = APPEAR_END_PCT - APPEAR_TRANSITION_PCT;
+  const perStepPct = totalSteps > 1 ? (lastAppearStart / (totalSteps - 1)) : 0;
 
-  /* ─── 3. DOM 생성 ─── */
+  /* ─── 3. 동적 keyframe 주입 준비 ─── */
+  /* 이전에 주입했던 keyframe들은 <style id="rl-dynamic-kf"> 하나에 모아 넣고,
+     매번 빌드 시 이 블록의 내용을 통째로 교체한다. */
+  let styleEl = document.getElementById('rl-dynamic-kf');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'rl-dynamic-kf';
+    document.head.appendChild(styleEl);
+  }
+
+  const kfRules = [];
+  const stepKfName = (i) => `rl-kf-${i}`;
+  for (let i = 0; i < totalSteps; i++) {
+    const appearStart = i * perStepPct;
+    const appearEnd   = appearStart + APPEAR_TRANSITION_PCT;
+    /* 한 요소의 생애:
+         0%                  opacity:0  (아직 안 나타남)
+         appearStart%        opacity:0  (마지막 숨김 지점)
+         appearEnd%          opacity:1  (등장 완료)
+         HOLD_END%           opacity:1  (hold 끝)
+         FADE_END%           opacity:0  (일괄 fade-out 완료)
+         100%                opacity:0  (대기)
+       appearStart가 0일 때는 "0%→appearEnd% 등장"으로 단순화. */
+    if (appearStart <= 0.001) {
+      kfRules.push(
+        `@keyframes ${stepKfName(i)}{`
+        + `0%{opacity:0}`
+        + `${appearEnd.toFixed(3)}%{opacity:1}`
+        + `${HOLD_END_PCT}%{opacity:1}`
+        + `${FADE_END_PCT}%{opacity:0}`
+        + `100%{opacity:0}`
+        + `}`
+      );
+    } else {
+      kfRules.push(
+        `@keyframes ${stepKfName(i)}{`
+        + `0%{opacity:0}`
+        + `${appearStart.toFixed(3)}%{opacity:0}`
+        + `${appearEnd.toFixed(3)}%{opacity:1}`
+        + `${HOLD_END_PCT}%{opacity:1}`
+        + `${FADE_END_PCT}%{opacity:0}`
+        + `100%{opacity:0}`
+        + `}`
+      );
+    }
+  }
+  styleEl.textContent = kfRules.join('\n');
+
+  /* ─── 4. DOM 생성 ─── */
   loader.innerHTML = '';
 
   const makeEnd = (ch, cls) => {
@@ -1746,32 +1804,32 @@ function buildRouteLoader(loader){
     return s;
   };
 
-  /* 0 → mid들 → 1 순서로 붙이면서 animationDelay 주입 */
-  const applyDelay = (node, stepIdx) => {
+  /* 각 요소에 자기만의 keyframe 지정. duration·iteration은 공통.
+     delay는 사용하지 않음 — 모든 요소가 사이클 0%를 동시에 시작. */
+  const applyAnim = (node, stepIdx) => {
     node.style.animationDuration = CYCLE_SEC + 's';
-    node.style.animationDelay = (-CYCLE_SEC + stepIdx * delayPerStep).toFixed(3) + 's';
-    /* 음수 delay는 '애니메이션이 이미 과거에 시작됐다'는 뜻 →
-       페이지 로드 직후 곧바로 싱크 맞춘 상태로 재생 시작. */
+    node.style.animationName = stepKfName(stepIdx);
+    node.style.animationIterationCount = 'infinite';
+    node.style.animationTimingFunction = 'ease-in-out';
+    node.style.animationFillMode = 'both';
+    /* 재시작을 위해 기존 애니메이션 리셋: 요소를 다시 추가할 때 브라우저가 새 사이클로 시작 */
   };
 
   const zero = makeEnd('0', '0');
-  applyDelay(zero, 0);
+  applyAnim(zero, 0);
   loader.appendChild(zero);
 
   for (let i = 0; i < midCount; i++) {
-    /* i는 0-based. 노드는 일정 간격마다 배치, 나머지는 점.
-       인덱스가 NODES_EVERY의 정배수(0 제외)가 되는 위치를 노드로. */
     const isNode = (i > 0) && (i % NODES_EVERY === 0);
     const el2 = isNode ? makeNode() : makeDot();
-    applyDelay(el2, i + 1);
+    applyAnim(el2, i + 1);
     loader.appendChild(el2);
   }
 
   const one = makeEnd('1', '1');
-  applyDelay(one, totalSteps - 1);
+  applyAnim(one, totalSteps - 1);
   loader.appendChild(one);
 
-  /* 균등 배치를 위해 컨테이너에 flex 지시 (CSS에 이미 있지만 확실성 차원) */
   loader.style.display = 'flex';
   loader.style.justifyContent = 'space-between';
   loader.style.alignItems = 'center';

@@ -999,48 +999,37 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .route-loader .rl-end-0{color:#1a3a6e;}
 .route-loader .rl-end-1{color:#8B1A1A;}
 
-/* 점·노드 — 회색 계열 통일. 원형 유지(가로 stretch 없음) */
-.route-loader .rl-dot,
-.route-loader .rl-node{
-  display:block;
-  border-radius:50%;
-  flex-shrink:0;
-}
+/* 점 — 작은 원, 회색 */
 .route-loader .rl-dot{
+  display:block;
+  flex-shrink:0;
   width:4px;
   height:4px;
+  border-radius:50%;
   background:#b0b0b5;
 }
+
+/* 노드 — 다이아몬드(45도 회전 정사각형).
+   점과 대비되는 "라우팅 경로의 분기점" 느낌.
+   크기를 점보다 크게(9×9) 잡아 강조. transform-origin은 기본 center. */
 .route-loader .rl-node{
-  width:7px;
-  height:7px;
+  display:block;
+  flex-shrink:0;
+  width:9px;
+  height:9px;
   background:#8e8e93;
+  transform: rotate(45deg);
+  /* border-radius 없음 — 모서리 날카로운 정사각형을 45도 회전 = 다이아몬드 */
 }
 
-/* 모든 등장 요소 공통 — 사이클 시간은 JS에서 animationDuration으로 주입.
-   각 요소의 등장 시점은 JS에서 negative animationDelay로 계산·주입한다.
-   (하드코딩된 21개 요소가 아니라 창 폭 기반 동적 생성이므로 keyframes은 단 1개만) */
+/* 모든 등장 요소 공통 — duration과 animationName은 JS에서 주입.
+   각 요소마다 다른 @keyframes가 JS에서 <style id="rl-dynamic-kf">에 주입됨.
+   여기서는 초기 상태와 공통 속성만 선언. */
 .route-loader .rl-step{
   opacity:0;
-  animation-name: rl-step-kf;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
   animation-fill-mode: both;
-}
-
-/* 한 요소의 생애주기 (delay로 시점만 달라짐):
-     0%              : 미등장 (보이지 않음)
-     빠른 페이드 인 (1.5%) : 등장 완료
-     65% ~ 75%        : hold (전체가 다 보이는 구간)
-     75% → 85%        : fade-out
-     85% ~ 100%       : 다시 미등장 (다음 사이클 대기)
-   등장 타이밍은 JS에서 delay로 분배 — 여기서는 "한 요소의 개별 커브"만 정의. */
-@keyframes rl-step-kf {
-  0%   { opacity: 0; }
-  1.5% { opacity: 1; }
-  75%  { opacity: 1; }
-  85%  { opacity: 0; }
-  100% { opacity: 0; }
 }
 
 
