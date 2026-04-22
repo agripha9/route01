@@ -1009,17 +1009,18 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:#b0b0b5;
 }
 
-/* 노드 — 다이아몬드(45도 회전 정사각형).
-   점과 대비되는 "라우팅 경로의 분기점" 느낌.
-   크기를 점보다 크게(9×9) 잡아 강조. transform-origin은 기본 center. */
+/* 노드 — 육각형(pointy-top, 위아래 꼭짓점).
+   네트워크 토폴로지 다이어그램에서 호스트 노드를 그릴 때 쓰는 관례적 형태.
+   점(4px 원)과 대비되는 "라우팅 경로의 분기점" 느낌을 강조. */
 .route-loader .rl-node{
   display:block;
   flex-shrink:0;
-  width:9px;
-  height:9px;
+  width:10px;
+  height:11px;
   background:#8e8e93;
-  transform: rotate(45deg);
-  /* border-radius 없음 — 모서리 날카로운 정사각형을 45도 회전 = 다이아몬드 */
+  /* pointy-top 육각형: 위 꼭짓점(50%, 0) → 우상(100%, 25%) → 우하(100%, 75%)
+     → 아래 꼭짓점(50%, 100%) → 좌하(0, 75%) → 좌상(0, 25%) */
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
 /* 모든 등장 요소 공통 — duration과 animationName은 JS에서 주입.
