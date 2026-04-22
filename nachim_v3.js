@@ -3263,7 +3263,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;white-space:nowrap;word-break:keep-all;mso-line-height-rule:exactly;mso-para-margin:0;}',
       'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
@@ -3401,6 +3401,12 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
         th.style.fontSize = '10.5pt';
         th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
+        /* 헤더 줄바꿈 방지 — 흰 띠의 근본 원인 차단.
+           헤더 텍스트가 2줄로 줄바꿈되면 Word가 mso-line-height-alt:14pt(1줄)만 배경 칠하고
+           나머지는 흰색으로 남김 → 헤더 아래 흰 띠. 헤더를 항상 1줄로 강제하면 이 문제
+           자체가 발생하지 않음. 컬럼 폭은 Word가 자동으로 더 넓게 할당함. */
+        th.style.whiteSpace = 'nowrap';
+        th.style.wordBreak = 'keep-all';
         /* Word 줄 높이/단락 간격 정확도 강제 */
         const prev = th.getAttribute('style') || '';
         th.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
