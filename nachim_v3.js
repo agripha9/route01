@@ -1705,10 +1705,10 @@ function showLoad(){
    - 결과: 0부터 순차 등장 → 1까지 전부 보임 → 전원 동시 fade-out → 전원 숨은 채 대기 → 다시 0부터 */
 function buildRouteLoader(loader){
   /* ─── 설정값 ─── */
-  const CYCLE_SEC      = 9;      // 총 사이클(초). 기존 7.5 → 9로 소폭 상향(체감 속도 조정)
+  const CYCLE_SEC      = 11;     // 총 사이클(초). 좀 더 느긋한 체감.
   const SPACING_PX     = 18;     // 점 1개당 평균 할당 폭. 작을수록 개수 증가.
   const MIN_DOTS       = 11;     // 모바일 최소 보장
-  const MAX_DOTS       = 45;     // 초광폭 상한
+  const MAX_DOTS       = 43;     // 초광폭 상한 (4k+3 형태 준수 — 양끝 대칭 보장)
   const NODES_EVERY    = 4;      // N번째 점마다 노드로 교체
 
   /* 사이클 내 구간 비율 (합이 1.0 넘지 않게):
@@ -1724,6 +1724,19 @@ function buildRouteLoader(loader){
   const totalWidth = loader.getBoundingClientRect().width || 0;
   const innerWidth = Math.max(0, totalWidth - 100);
   let midCount = Math.round(innerWidth / SPACING_PX);
+  midCount = Math.max(MIN_DOTS, Math.min(MAX_DOTS, midCount));
+
+  /* midCount를 "양끝 대칭" 형태로 정규화.
+     NODES_EVERY=4 기준, 이상적 패턴: 0 ─ 점·점·점·◆ ─ ... ─ ◆·점·점·점 ─ 1
+     즉 midCount = 4k + 3 형태여야 1 앞쪽도 점 3개로 깔끔.
+     가장 가까운 그 형태로 반올림 (아래/위 중 가까운 쪽). */
+  const remainder = (midCount - (NODES_EVERY - 1)) % NODES_EVERY;
+  if (remainder !== 0) {
+    const adjustDown = remainder;
+    const adjustUp = NODES_EVERY - remainder;
+    midCount += (adjustUp <= adjustDown) ? adjustUp : -adjustDown;
+  }
+  /* 경계 재확인 (normalize가 MIN/MAX을 넘을 수 있음) */
   midCount = Math.max(MIN_DOTS, Math.min(MAX_DOTS, midCount));
 
   const totalSteps = midCount + 2;   // 0 + mid + 1
@@ -1820,7 +1833,10 @@ function buildRouteLoader(loader){
   loader.appendChild(zero);
 
   for (let i = 0; i < midCount; i++) {
-    const isNode = (i > 0) && (i % NODES_EVERY === 0);
+    /* i는 0-based. 노드는 '앞쪽에서부터' NODES_EVERY번째마다 배치.
+       (i+1) 기준으로 판정하면 0과 첫 노드 사이도 점 3개로 균일.
+       패턴: 0 ─ 점·점·점·◆ ─ 점·점·점·◆ ─ ... ─ 1 */
+    const isNode = ((i + 1) % NODES_EVERY === 0);
     const el2 = isNode ? makeNode() : makeDot();
     applyAnim(el2, i + 1);
     loader.appendChild(el2);
