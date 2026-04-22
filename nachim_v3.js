@@ -3447,27 +3447,37 @@ function applyMentorChange(s){
     'z-index:9999',
     'pointer-events:none',
     'opacity:0',
-    'transition:opacity .2s ease',
+    /* 등장 시 살짝 위에서 내려오는 바운스 — 커스텀 cubic-bezier로 탄성 표현 */
+    'transition:opacity .22s ease, transform .28s cubic-bezier(.34,1.56,.64,1)',
     'box-shadow:0 4px 14px rgba(0,0,0,.25)',
-    'white-space:nowrap'
+    'white-space:nowrap',
+    '--tx:-50%',
+    '--ty:-6px'
   ].join(';');
+  /* 공통 시작 transform — 위로 6px 올라가있는 상태 */
+  toast.style.transform = 'translate(-50%, -6px)';
 
   if(pill && pill.getBoundingClientRect){
     const r = pill.getBoundingClientRect();
-    toast.style.top  = (r.bottom + 8) + 'px';
+    /* pill 하단 + 14px 여백 (헤더 하단 경계선과 겹치지 않게 여유) */
+    toast.style.top  = (r.bottom + 14) + 'px';
     toast.style.left = (r.left + r.width/2) + 'px';
-    toast.style.transform = 'translateX(-50%)';
   } else {
-    toast.style.top  = '70px';
+    toast.style.top  = '76px';
     toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
   }
 
   document.body.appendChild(toast);
-  requestAnimationFrame(()=>{ toast.style.opacity='1'; });
+  /* 등장: 위에서 내려오며 페이드인 */
+  requestAnimationFrame(()=>{
+    toast.style.opacity   = '1';
+    toast.style.transform = 'translate(-50%, 0)';
+  });
+  /* 퇴장: 다시 위로 올라가며 페이드아웃 */
   setTimeout(()=>{
-    toast.style.opacity='0';
-    setTimeout(()=>toast.remove(), 220);
+    toast.style.opacity   = '0';
+    toast.style.transform = 'translate(-50%, -6px)';
+    setTimeout(()=>toast.remove(), 260);
   }, 2000);
 }
 
