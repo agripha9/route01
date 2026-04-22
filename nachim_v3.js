@@ -3263,8 +3263,8 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;white-space:nowrap;word-break:keep-all;mso-line-height-rule:exactly;mso-para-margin:0;}',
-      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;word-break:keep-all;mso-para-margin:0;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;word-break:keep-all;overflow-wrap:anywhere;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
       'tbody tr:nth-child(odd) td{background:#ffffff;}',
@@ -3399,17 +3399,19 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
         th.style.fontSize = '10.5pt';
-        th.style.lineHeight = '1.25';
+        th.style.lineHeight = '1.4';
         th.style.verticalAlign = 'middle';
-        /* 헤더 줄바꿈 방지 — 흰 띠의 근본 원인 차단.
-           헤더 텍스트가 2줄로 줄바꿈되면 Word가 mso-line-height-alt:14pt(1줄)만 배경 칠하고
-           나머지는 흰색으로 남김 → 헤더 아래 흰 띠. 헤더를 항상 1줄로 강제하면 이 문제
-           자체가 발생하지 않음. 컬럼 폭은 Word가 자동으로 더 넓게 할당함. */
-        th.style.whiteSpace = 'nowrap';
+        /* 헤더 줄바꿈 정책 (옵션 A — 흰 띠보다 표 전체 완성도 우선):
+           - word-break:keep-all — 한국어 단어 단위로만 줄바꿈. "순서" 같은 2글자가
+             세로로 쪼개지는 비전문적 렌더 방지.
+           - nowrap은 쓰지 않음 — 긴 헤더나 컬럼 많은 표에서 본문 셀이 붕괴하는
+             부작용이 더 큼. 헤더가 길면 자연스럽게 단어 경계에서 2줄로.
+           - mso-line-height-alt는 지정하지 않음 — 2줄 헤더에서 둘째 줄 배경이
+             잘리는 흰 띠의 주요 원인. line-height:1.4와 mso-para-margin:0 만으로
+             팽창 방지는 충분. */
         th.style.wordBreak = 'keep-all';
-        /* Word 줄 높이/단락 간격 정확도 강제 */
         const prev = th.getAttribute('style') || '';
-        th.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
+        th.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
         // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
@@ -3419,6 +3421,10 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
         td.style.verticalAlign = 'middle';
         td.style.lineHeight = '1.25';
         td.style.fontSize = '10.5pt';
+        /* 본문도 한국어 단어 단위 줄바꿈 (td는 배경 흰색이라 흰 띠 이슈는 없음).
+           긴 영문 단어·URL은 예외적으로 쪼개서 오버플로 방지. */
+        td.style.wordBreak = 'keep-all';
+        td.style.overflowWrap = 'anywhere';
         /* Word 행 높이 팽창 원인:
            1) <p> 태그의 기본 margin (1em top/bottom)
            2) mso-line-height-rule 미지정 시 큰 줄간격 기본값
