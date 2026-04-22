@@ -2598,6 +2598,10 @@ main {
   text-align: center !important;
   border: 1px solid #8B1A1A !important;
   letter-spacing: -0.005em !important;
+  /* 헤더 줄바꿈 방지: '순서' 같은 2글자가 세로로 쪼개지는 현상 차단.
+     헤더가 길면 해당 열이 자연스럽게 더 넓어지도록 브라우저에 맡김. */
+  white-space: nowrap !important;
+  word-break: keep-all !important;
   -webkit-print-color-adjust: exact;
 }
 .report-bubble td,
@@ -2609,6 +2613,10 @@ main {
   line-height: 1.55 !important;
   color: #2c2c2e !important;
   text-align: left !important;
+  /* 한국어 단어 단위 줄바꿈 — 의미 단위 보존.
+     단, 매우 긴 영문 단어·URL은 어쩔 수 없이 쪼갬(overflow-wrap). */
+  word-break: keep-all !important;
+  overflow-wrap: anywhere !important;
 }
 /* 첫 열 — 굵기만 강조, 배경은 행 단위 스트라이프에서 결정 */
 .report-bubble tbody td:first-child,
