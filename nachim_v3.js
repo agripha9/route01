@@ -3394,24 +3394,22 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       doc.querySelectorAll('table:not([data-from="blockquote"]) th').forEach(th => {
         th.style.setProperty('background-color', '#8B1A1A', 'important');
         th.style.setProperty('color', '#ffffff', 'important');
-        th.style.padding = '4pt 8pt';
+        /* 상하 padding 0, 수평 padding만 유지.
+           이전: padding 4pt 8pt + line-height 1.25 → 셀 내부 총 높이 약 21pt
+                 단, Word altChunk는 padding 영역에 배경색이 전파되지 않아
+                 content-box 위아래로 흰 띠가 남는 현상(시도 3 확인).
+           현재: padding 0 8pt + line-height 2.0 → 셀 내부 총 높이 약 21pt (동등)
+                 배경색이 line-height 영역 전체에 칠해지므로 흰 띠 제거.
+           높이는 기존과 거의 동일하고 시각적 차이 최소화. */
+        th.style.padding = '0 8pt';
         th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
         th.style.fontSize = '10.5pt';
-        th.style.lineHeight = '1.25';
+        th.style.lineHeight = '2.0';
         th.style.verticalAlign = 'middle';
-        /* Word 행 높이 팽창 방지 — td와 동일 처리.
-           marked가 th 내용도 <p>로 감쌀 수 있는데, <p>의 기본 margin이 살아 있으면
-           Word가 "텍스트 높이 + <p> 하단 여백"만큼 셀을 키우고, 배경색은 <p> 영역에만
-           칠해져 아래쪽이 흰 띠로 남는 문제가 있음. td처럼 <p>를 풀어버리고 자식
-           margin/padding을 0으로 잡으면 셀 전체가 배경색으로 균일하게 채워진다. */
-        let inner = th.innerHTML
-          .replace(/<p[^>]*>\s*/gi, '')       // <p> 열기 제거
-          .replace(/\s*<\/p>/gi, '<br>')      // </p> → <br>
-          .replace(/(<br\s*\/?>\s*)+$/gi, '') // 끝 <br> 제거
-          .trim();
-        th.innerHTML = inner || '&nbsp;';
+        /* marked가 th에 <p>를 넣지는 않지만, 안전망으로 내부 자식의 margin/padding 0.
+           Word altChunk HTML 파서가 간혹 빈 <span>이나 다른 래퍼를 삽입하는 경우 대비. */
         th.querySelectorAll('*').forEach(child => {
           child.style.margin = '0';
           child.style.padding = '0';
