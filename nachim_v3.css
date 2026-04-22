@@ -1109,7 +1109,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* INPUT */
 .input-area{
   background:var(--bg);
-  border-top:1px solid var(--border);
+  /* border-top 제거 — 메인 영역과 시각적 경계 없이 자연스럽게 이어지도록 */
   padding:1rem 1.75rem 1.25rem;flex-shrink:0;
   backdrop-filter:saturate(180%) blur(20px);
   -webkit-backdrop-filter:saturate(180%) blur(20px);
@@ -1138,9 +1138,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .input-row{display:flex;gap:8px;align-items:flex-end}
 .chat-in{
   flex:1;border:1px solid var(--border);border-radius:var(--r);background:var(--filter-bg);
-  min-height:44px;padding:10px 14px;font-size:17px;color:var(--ink);resize:none;outline:none;
+  min-height:44px;padding:10px 14px;font-size:14px;color:var(--ink);resize:none;outline:none;
   line-height:22px;max-height:120px;transition:border-color .15s var(--ease),box-shadow .15s var(--ease);
-  pointer-events:auto;letter-spacing:-0.374px
+  pointer-events:auto;letter-spacing:-0.2px
 }
 .chat-in:focus,
 .chat-in:focus-visible{border-color:var(--border);box-shadow:none;outline:none}

@@ -639,7 +639,7 @@
         <div class="chat-files-preview" id="chat-files-preview"></div>
         <div class="input-row">
           <button class="chat-file-btn" title="PDF 첨부 (파일당 최대 20MB)" onclick="document.getElementById('chat-file-input').click()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
           </button>
           <input type="file" id="chat-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
           <textarea class="chat-in" id="input" rows="1" placeholder="자문이 필요한 내용을 입력하세요..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
