@@ -1387,7 +1387,7 @@ function renderHistory(){
       return `<div class="hist-item" data-hidx="${h._idx}">
         <div class="hist-q">${esc(h.q)}</div>
         <button class="hist-kebab" data-kebab="${h._idx}" title="더보기" aria-label="더보기">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
         </button>
       </div>`;
     };
@@ -1870,7 +1870,7 @@ function showLoad(){
    - 결과: 0부터 순차 등장 → 1까지 전부 보임 → 전원 동시 fade-out → 전원 숨은 채 대기 → 다시 0부터 */
 function buildRouteLoader(loader){
   /* ─── 설정값 ─── */
-  const CYCLE_SEC      = 13;     // 총 사이클(초). 좀 더 느긋한 체감.
+  const CYCLE_SEC      = 11;     // 총 사이클(초). 이전에 사용자가 선호했던 값.
   const SPACING_PX     = 18;     // 점 1개당 평균 할당 폭. 작을수록 개수 증가.
   const MIN_DOTS       = 11;     // 모바일 최소 보장
   const MAX_DOTS       = 43;     // 초광폭 상한 (4k+3 형태 준수 — 양끝 대칭 보장)

@@ -1214,8 +1214,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hist-domain-bar .hdb-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;line-height:1.25}
 /* 질문 기록 항목 — 좌측 정렬, 여러 줄 허용. hover 시 우측 kebab(⋯) 노출 */
 .hist-item{
-  display:flex;flex-direction:row;align-items:flex-start;gap:6px;
-  padding:5px 8px 5px 10px;margin:0;
+  display:flex;flex-direction:row;align-items:flex-start;gap:4px;
+  padding:5px 4px 5px 10px;margin:0;
   cursor:pointer;transition:background .12s;position:relative;
   text-align:left;border-radius:6px;
 }
@@ -1530,28 +1530,25 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--filter-bg);
-  border: 1px solid rgba(0,0,0,.07);
+  background: var(--brand-point);
+  border: 1px solid var(--brand-point);
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
-  transition: border-color .12s, background .12s;
-}
-.aside-status-item:hover {
-  border-color: rgba(26,58,110,.25);
-  background: rgba(26,58,110,.04);
+  /* hover 시 색 반전을 하지 않음 — 기본 상태 자체가 반전(네이비 배경)이므로
+     hover에서 추가 색 변화는 오히려 불필요한 혼란을 준다. 커서만 pointer로. */
 }
 .aside-status-label {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: rgba(255,255,255,0.65);
 }
 .aside-status-val {
   font-size: 12px;
   font-weight: 600;
-  color: var(--ink);
+  color: #fff;
   line-height: 1.3;
   word-break: keep-all;
 }
@@ -1799,9 +1796,31 @@ main {
   font-family: var(--font-text);
 }
 .ws-dc:hover { border-color: #86868b; background: var(--filter-bg); }
-.ws-dc.active { background: var(--ink); border-color: var(--ink); color: #fff; }
-.ws-dc-grant { border-color: var(--cta); color: var(--cta); }
-.ws-dc-grant:hover { background: rgba(139,26,26,.06); }
+/* 선택된 도메인 — 네이비 반전 (업종·멘토·칩 선택과 동일한 시각 언어) */
+.ws-dc.active { background: var(--brand-point); border-color: var(--brand-point); color: #fff; }
+/* 지원사업 전용 — 기본 상태부터 붉은 바탕·흰 글씨 (CTA). 아이콘 없음. */
+.ws-dc-grant {
+  background: var(--cta);
+  border-color: var(--cta);
+  color: #fff;
+  font-weight: 600;
+}
+.ws-dc-grant:hover {
+  background: var(--cta-press);
+  border-color: var(--cta-press);
+  color: #fff;
+}
+.ws-dc-grant.active {
+  background: var(--cta);
+  border-color: var(--cta);
+  color: #fff;
+}
+/* 지원사업 버튼 내부 PRO 배지 — 버튼 배경이 CTA색이라 배지도 같으면 보이지 않음.
+   흰 바탕 + CTA 글씨로 반전시켜 대비 확보. */
+.ws-dc-grant .ws-pro-badge {
+  background: #fff;
+  color: var(--cta);
+}
 
 /* 추천 질문 칩 */
 .ws-chips {
@@ -1811,7 +1830,7 @@ main {
 .sug-chip {
   padding: 8px 16px; border-radius: 980px;
   border: 1px solid var(--border);
-  background: var(--bg2); font-size: 13px;
+  background: var(--filter-bg); font-size: 13px;
   color: var(--ink2); cursor: pointer; text-align: left;
   transition: background .12s, border-color .12s, box-shadow .12s;
   font-family: var(--font-text); line-height: 1.4;
