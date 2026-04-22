@@ -911,7 +911,8 @@ function editProfile(){
   closeModal();
   ob={...profile}; step=1;
   document.getElementById('onboarding').classList.remove('hidden');
-  document.getElementById('app').style.display='none';
+  /* app은 숨기지 않음 — 뒤 배경으로 남아 있어야 온보딩 카드 주변의
+     rgba(0,0,0,.4)+blur dim 효과가 일반 모달과 동일하게 보임. */
   ['sec1','sec2'].forEach((s,i)=>document.getElementById(s).classList.toggle('active',i===0));
   for(let i=1;i<=3;i++){
     const dot=document.getElementById('s'+i);

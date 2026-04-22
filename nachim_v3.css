@@ -250,7 +250,7 @@ body{
 #auth0-modal .modal-btn:not(.pri):hover{border-color:#86868b;background:var(--filter-bg)}
 
 /* ONBOARDING */
-#onboarding{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;animation:fadeIn .4s ease}
+#onboarding{position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;animation:fadeIn .4s ease}
 #onboarding .modal-close{color:var(--ink3)}
 #onboarding.hidden{display:none}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
