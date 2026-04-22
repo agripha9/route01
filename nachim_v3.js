@@ -3252,8 +3252,8 @@ async function exportAnswer(type, id /*, btn */){
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
-      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-para-margin:0;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
       'tbody tr:nth-child(odd) td{background:#ffffff;}',
@@ -3390,9 +3390,13 @@ async function exportAnswer(type, id /*, btn */){
         th.style.fontSize = '10.5pt';
         th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
-        /* Word 줄 높이/단락 간격 정확도 강제 */
+        /* Word 단락 간격 제로화 (셀 세로 팽창 방지).
+           과거에 `mso-line-height-rule:exactly;mso-line-height-alt:14pt`를 함께 넣었으나,
+           헤더 문구가 2줄 이상이 되면(좁은 컬럼 등) Word가 "첫 줄만 14pt 높이로 칠하고
+           나머지는 배경 없음"으로 해석하여 th 아래쪽에 흰 띠가 생기는 버그가 있었음.
+           단락 간격 0만으로도 팽창 방지는 충분하므로 line-height 강제 고정은 제거. */
         const prev = th.getAttribute('style') || '';
-        th.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
+        th.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
         // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
@@ -3418,9 +3422,10 @@ async function exportAnswer(type, id /*, btn */){
           child.style.margin = '0';
           child.style.padding = '0';
         });
-        /* Word 줄 높이/단락 간격 정확도 강제 (셀 세로 팽창 방지의 핵심) */
+        /* Word 단락 간격 제로화 (th와 동일 이유 — 상세 주석은 th 블록 참고).
+           line-height 강제 고정은 다줄 셀에서 배경 잘림/콘텐츠 잘림 유발하므로 제외. */
         const prev = td.getAttribute('style') || '';
-        td.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
+        td.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
       });
       // tr에 고정 높이와 cantSplit 유사 힌트 (blockquote 변환 테이블은 제외)
       doc.querySelectorAll('table:not([data-from="blockquote"]) tr').forEach(tr => {
