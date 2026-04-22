@@ -294,6 +294,22 @@ body{
   letter-spacing:-0.3px
 }
 .ob-input:focus{border-color:var(--brand-point);box-shadow:var(--ring-blue)}
+
+/* 브라우저 자동완성(autofill) 시 Chrome/Edge가 기본으로 입히는 연파랑/연노랑 배경
+   제거. 사용자가 입력한 값이 '자동완성으로 채워진 것처럼' 잘못 인식되어 배경이
+   변하는 이슈(id 힌트에 name/mrr 포함 등)를 전역으로 차단.
+   inset box-shadow 트릭: WebKit은 -webkit-autofill 상태에서 background-color를
+   덮어쓰지 못하게 막는 내부 규칙이 있어, 대신 큰 내부 그림자로 원본 색을 위장한다. */
+.ob-input:-webkit-autofill,
+.ob-input:-webkit-autofill:hover,
+.ob-input:-webkit-autofill:focus,
+.ob-input:-webkit-autofill:active{
+  -webkit-box-shadow: 0 0 0 100px var(--white) inset !important;
+  box-shadow: 0 0 0 100px var(--white) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--ink);
+  transition: background-color 9999s ease-out 0s;
+}
 /* textarea도 .ob-input을 함께 가지므로 font는 상속되지만,
    브라우저에 따라 textarea 기본 font-family/size가 다르게 잡히는 경우가 있어 명시 고정.
    일반 input과 동일한 폰트·크기로 시각 일관성 유지. */

@@ -264,7 +264,7 @@
     <div class="ob-sub">맞춤형 자문을 위해 먼저 기본 정보를 알려주세요. (30초)</div>
 
     <label class="ob-label">사업 한 줄 소개 <span class="ob-required">*필수</span> <span class="ob-hint">— 무엇을 만드는 팀인가요?</span></label>
-    <input class="ob-input" id="industry-in" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
+    <input class="ob-input" id="industry-in" autocomplete="off" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
 
     <label class="ob-label">업종 <span class="ob-required">*필수</span> <span class="ob-hint">— 복수 선택 가능 · 없으면 기타 클릭 후 입력</span></label>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="industry-tags">
@@ -289,7 +289,7 @@
       <span class="ind-tag" data-sector="반려동물" onclick="toggleSector(this)">반려동물</span>
       <span class="ind-tag ind-tag-other" data-sector="기타" onclick="toggleSector(this)">기타</span>
     </div>
-    <input class="ob-input" id="sector-other-in" placeholder="업종을 직접 입력하세요" oninput="onSectorOtherInput(this.value)" style="display:none;margin-bottom:10px"/>
+    <input class="ob-input" id="sector-other-in" autocomplete="off" placeholder="업종을 직접 입력하세요" oninput="onSectorOtherInput(this.value)" style="display:none;margin-bottom:10px"/>
 
     <label class="ob-label" style="margin-top:4px">현재 단계 <span class="ob-required">*필수</span></label>
     <div class="ob-grid-3 ob-chip-grid--compact" id="stage-grid">
@@ -322,7 +322,7 @@
     <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">*필수</span>
       <span class="ob-hint">— 자세할수록 답변이 정확해집니다 (현재 고민·과거 시도·원하는 결과)</span>
     </label>
-    <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
+    <textarea class="ob-input ob-textarea" id="concern-in" autocomplete="off" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
     <div class="ob-char-count" id="concern-count">0 / 500</div>
 
     <label class="ob-label">팀 규모 <span class="ob-required">*필수</span>
@@ -338,7 +338,7 @@
     <label class="ob-label" style="margin-top:4px">월 매출(MRR)
       <span class="ob-hint">— 선택 · 런웨이와 PMF 신호 판단에 활용됩니다</span>
     </label>
-    <input class="ob-input" id="mrr-in" type="text" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
+    <input class="ob-input" id="mrr-in" type="text" autocomplete="off" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
 
     <label class="ob-label">투자 상황 <span class="ob-hint">— 선택</span></label>
     <div class="ob-grid ob-chip-grid--compact" id="invest-grid">
@@ -349,7 +349,7 @@
     </div>
 
     <label class="ob-label" style="margin-top:4px">스타트업 이름 <span class="ob-hint">— 선택</span></label>
-    <input class="ob-input" id="name-in" type="text" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
+    <input class="ob-input" id="name-in" type="text" name="startup-name" autocomplete="off" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
 
     <div class="ob-btn-row">
       <button class="ob-btn sec" onclick="goStep(1)">이전</button>
