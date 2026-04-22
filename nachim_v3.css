@@ -2272,14 +2272,15 @@ main {
   font-size: 13px !important;
 }
 
-/* 선택 시 강조 색상 — 업종 태그와 동일한 스타일 */
-/* stage/target 칩 선택 색 — 명시도 높여서 기본 .ob-chip.sel 덮어쓰기 */
+/* stage/target 칩 선택 색 — 업종(.ind-tag.sel)과 동일한 네이비 꽉 찬 반전.
+   !important를 유지하는 이유: 과거 버전들에서 옅은 블루톤으로 덮어쓴 기록이 있어
+   다시 그런 부분 룰이 끼어들어도 이 선언이 이기게 하기 위함. */
 #stage-grid .ob-chip.sel,
 #target-grid .ob-chip.sel {
   border-color: var(--brand-point) !important;
-  background: rgba(26,58,110,0.12) !important;
-  color: var(--brand-point) !important;
-  font-weight: 700 !important;
+  background: var(--brand-point) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
 }
 
 /* ══════════════════════════════════════
@@ -2498,13 +2499,13 @@ main {
   text-transform: none;
 }
 
-/* step2 team/invest 칩 선택 색 */
+/* step2 team/invest 칩 선택 색 — stage/target과 동일한 네이비 반전 */
 #team-grid .ob-chip.sel,
 #invest-grid .ob-chip.sel {
   border-color: var(--brand-point) !important;
-  background: rgba(26,58,110,0.10) !important;
-  color: var(--brand-point) !important;
-  font-weight: 700 !important;
+  background: var(--brand-point) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
 }
 
 /* ══════════════════════════════════════
