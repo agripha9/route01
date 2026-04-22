@@ -3428,12 +3428,47 @@ function applyMentorChange(s){
   profile.style = s;
   try{localStorage.setItem('vd_profile',JSON.stringify(profile));}catch(e){}
   applyProfile();
+
+  /* 토스트: 헤더 멘토 pill 바로 아래에 표시.
+     pill의 bounding rect로 좌표를 계산해 반응형에도 안정적으로 따라붙는다.
+     pill을 못 찾으면 화면 상단 중앙으로 fallback. */
+  const pill = document.querySelector('.header-mentor-pill');
   const toast = document.createElement('div');
-  toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s';
+  toast.className = 'mentor-toast';
   toast.textContent = `${s} 스타일로 변경됐습니다`;
+  toast.style.cssText = [
+    'position:fixed',
+    'background:#1d1d1f',
+    'color:#fff',
+    'padding:8px 16px',
+    'border-radius:12px',
+    'font-size:12.5px',
+    'letter-spacing:-0.12px',
+    'z-index:9999',
+    'pointer-events:none',
+    'opacity:0',
+    'transition:opacity .2s ease',
+    'box-shadow:0 4px 14px rgba(0,0,0,.25)',
+    'white-space:nowrap'
+  ].join(';');
+
+  if(pill && pill.getBoundingClientRect){
+    const r = pill.getBoundingClientRect();
+    toast.style.top  = (r.bottom + 8) + 'px';
+    toast.style.left = (r.left + r.width/2) + 'px';
+    toast.style.transform = 'translateX(-50%)';
+  } else {
+    toast.style.top  = '70px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+  }
+
   document.body.appendChild(toast);
   requestAnimationFrame(()=>{ toast.style.opacity='1'; });
-  setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),300); }, 2000);
+  setTimeout(()=>{
+    toast.style.opacity='0';
+    setTimeout(()=>toast.remove(), 220);
+  }, 2000);
 }
 
 /* 구 API 호환 — 다른 곳에서 setMentorStyle을 직접 부르는 경로 유지 */
