@@ -274,6 +274,11 @@ body{
 .ob-section{display:none;animation:fadeIn .3s ease}
 .ob-section.active{display:block}
 .ob-label{font-size:14px;font-weight:700;letter-spacing:-0.1px;text-transform:none;color:var(--ink);margin-bottom:6px;display:block}
+/* 필드 설명 inline hint — label 안에 쓰는 회색 부가 설명. */
+.ob-label .ob-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3);font-size:13px}
+/* 툴팁 힌트 — ⓘ 아이콘 느낌. 마우스 올리면 title 속성이 브라우저 기본 툴팁으로 표시됨. */
+.ob-label .ob-hint--tooltip{cursor:help;margin-left:2px;color:var(--ink3);border-bottom:1px dotted var(--ink3);padding-bottom:0}
+.ob-label .ob-hint--tooltip:hover{color:var(--ink2);border-bottom-color:var(--ink2)}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-chip{
@@ -2284,6 +2289,25 @@ main {
   background: var(--filter-bg);
   cursor: pointer;
   transition: border-color .15s, background .15s, box-shadow .15s, color .15s;
+}
+/* 추천 멘토 배지 — row 상단에 얇게 표시되는 강조 라벨 */
+.ob-mentor-recommend {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  background: rgba(139, 26, 26, 0.08);
+  color: var(--cta);
+  border: 1px solid rgba(139, 26, 26, 0.25);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+.ob-mentor-row.sel .ob-mentor-recommend {
+  /* 선택된 상태에선 배경이 어두우므로 배지를 흰색 반투명으로 반전 */
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 .ob-mentor-row:hover {
   border-color: rgba(26,58,110,.3);

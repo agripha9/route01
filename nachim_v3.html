@@ -255,18 +255,18 @@
   <div class="ob-steps">
     <div class="ob-step done" id="s1"></div>
     <div class="ob-step" id="s2"></div>
-    <div style="display:none" id="s3"></div>
+    <div class="ob-step" id="s3"></div>
   </div>
 
-  <!-- Step 1: 필수 정보 -->
+  <!-- Step 1: 당신의 스타트업 — 필수 4개 -->
   <div class="ob-section active" id="sec1">
-    <div class="ob-title">스타트업을 소개해 주세요</div>
-    <div class="ob-sub">아래 4가지가 맞춤형 자문의 핵심입니다.</div>
+    <div class="ob-title">당신의 스타트업</div>
+    <div class="ob-sub">맞춤형 자문을 위해 먼저 기본 정보를 알려주세요. (30초)</div>
 
-    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">*필수</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 무엇을 만드는 팀인가요?</span></label>
+    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">*필수</span> <span class="ob-hint">— 무엇을 만드는 팀인가요?</span></label>
     <input class="ob-input" id="industry-in" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
 
-    <label class="ob-label">업종 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 복수 선택 가능 · 해당 업종이 없으면 기타 클릭 후 입력</span></label>
+    <label class="ob-label">업종 <span class="ob-required">*필수</span> <span class="ob-hint">— 복수 선택 가능 · 없으면 기타 클릭 후 입력</span></label>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="industry-tags">
       <span class="ind-tag" data-sector="SaaS" onclick="toggleSector(this)">SaaS</span>
       <span class="ind-tag" data-sector="앱/플랫폼" onclick="toggleSector(this)">앱</span>
@@ -309,20 +309,25 @@
       <div class="ob-chip ob-chip--sm" data-val="B2B+B2C 복합" onclick="pickChip('target',this)">복합</div>
     </div>
 
-    <label class="ob-label" style="margin-top:4px">핵심 고민 또는 목표 <span class="ob-required">*필수</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 지금 가장 급한 것은?</span></label>
-    <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶은데 IR 준비를 어떻게 시작할지 모르겠어요."></textarea>
-
     <div class="ob-btn-row">
       <button class="ob-btn pri" id="btn1" onclick="goStep(2)" disabled>다음 →</button>
     </div>
   </div>
 
-  <!-- Step 2: 선택 정보 -->
+  <!-- Step 2: 지금의 상황 — 필수 2개(concern, team) + 선택 3개 -->
   <div class="ob-section" id="sec2">
-    <div class="ob-title">조금 더 알려주세요</div>
-    <div class="ob-sub">선택사항이지만 입력할수록 자문이 정확해집니다.</div>
+    <div class="ob-title">지금의 상황</div>
+    <div class="ob-sub">자문의 깊이를 결정하는 정보입니다. 선택 항목은 언제든 프로필에서 수정할 수 있어요. (30초)</div>
 
-    <label class="ob-label">팀 규모</label>
+    <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">*필수</span>
+      <span class="ob-hint ob-hint--tooltip" title="이 내용이 답변 개인화의 80%를 결정합니다. 현재 고민·과거 시도·원하는 결과까지 풍부하게 써주세요.">— 자세할수록 자문이 정확해집니다 ⓘ</span>
+    </label>
+    <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
+    <div class="ob-char-count" id="concern-count" style="text-align:right;font-size:11px;color:var(--ink3);margin-top:-4px;margin-bottom:10px">0 / 500</div>
+
+    <label class="ob-label">팀 규모 <span class="ob-required">*필수</span>
+      <span class="ob-hint ob-hint--tooltip" title="솔로 창업자와 10인 팀은 받을 조언이 완전히 다릅니다.">ⓘ</span>
+    </label>
     <div class="ob-grid ob-chip-grid--compact" id="team-grid">
       <div class="ob-chip ob-chip--sm" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
       <div class="ob-chip ob-chip--sm" data-val="2~3명" onclick="pickChip('team',this)">2~3명</div>
@@ -330,10 +335,12 @@
       <div class="ob-chip ob-chip--sm" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
     </div>
 
-    <label class="ob-label">월 매출(MRR) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 없으면 비워두세요</span></label>
+    <label class="ob-label" style="margin-top:4px">월 매출(MRR) <span class="ob-hint">— 선택 · 없으면 비워두세요</span>
+      <span class="ob-hint ob-hint--tooltip" title="투자·성장 조언 시 런웨이와 PMF 신호를 판단하는 기준입니다.">ⓘ</span>
+    </label>
     <input class="ob-input" id="mrr-in" type="text" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
 
-    <label class="ob-label">투자 상황</label>
+    <label class="ob-label">투자 상황 <span class="ob-hint">— 선택</span></label>
     <div class="ob-grid ob-chip-grid--compact" id="invest-grid">
       <div class="ob-chip ob-chip--sm" data-val="미투자" onclick="pickChip('invest',this)">미투자</div>
       <div class="ob-chip ob-chip--sm" data-val="엔젤/시드 완료" onclick="pickChip('invest',this)">엔젤/시드</div>
@@ -341,14 +348,27 @@
       <div class="ob-chip ob-chip--sm" data-val="시리즈B+" onclick="pickChip('invest',this)">시리즈B+</div>
     </div>
 
-    <label class="ob-label">스타트업 이름 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 선택</span></label>
+    <label class="ob-label" style="margin-top:4px">스타트업 이름 <span class="ob-hint">— 선택</span></label>
     <input class="ob-input" id="name-in" type="text" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
 
-    <label class="ob-label">멘토 스타일 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— 기본: Paul Graham · 나머지는 Starter 이상</span></label>
+    <div class="ob-btn-row">
+      <button class="ob-btn sec" onclick="goStep(1)">← 이전</button>
+      <button class="ob-btn pri" id="btn2" onclick="goStep(3)" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 멘토 선택 + 자료 업로드 -->
+  <div class="ob-section" id="sec3">
+    <div class="ob-title">당신의 멘토</div>
+    <div class="ob-sub">5명의 창업 거장 중 답변 스타일을 결정할 멘토를 선택하세요. 상황별 추천을 참고해도 좋습니다. (20초)</div>
+
+    <label class="ob-label">멘토 스타일 <span class="ob-required">*필수</span>
+      <span class="ob-hint">— 상황에 맞는 추천 멘토가 표시됩니다. Paul Graham·Peter Thiel은 무료, 나머지는 Starter 이상</span>
+    </label>
     <div class="ob-mentor-list" id="style-grid">
 
       <!-- 1. Paul Graham — 무료 -->
-      <div class="ob-mentor-row sel" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
+      <div class="ob-mentor-row" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
         <div class="ob-mentor-row-left">
           <div class="ob-mentor-row-info">
             <div class="ob-mentor-row-name">Paul Graham <span class="ob-mentor-row-tag">YC</span></div>
@@ -414,7 +434,7 @@
 
     </div>
 
-    <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드
+    <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드 <span class="ob-hint">— 선택</span>
       <span class="ob-pro-lock">🔒 Starter 이상</span>
     </label>
     <div class="upload-zone upload-zone--locked" id="ob-drop-zone" onclick="checkUploadAccess()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
@@ -426,8 +446,8 @@
     <div class="file-list" id="ob-file-list"></div>
 
     <div class="ob-btn-row">
-      <button class="ob-btn sec" onclick="goStep(1)">← 이전</button>
-      <button class="ob-btn pri" onclick="finishOnboarding()">시작하기 →</button>
+      <button class="ob-btn sec" onclick="goStep(2)">← 이전</button>
+      <button class="ob-btn pri" id="btn3" onclick="finishOnboarding()">시작하기 →</button>
     </div>
   </div>
 </div>

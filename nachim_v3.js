@@ -879,10 +879,114 @@ function pickChip(type, el) {
   validate();
 }
 function validate() {
-  if (step===1) document.getElementById('btn1').disabled=!(ob.industry&&ob.stage&&ob.target&&ob.concern);
-  // Step2는 모두 선택사항이므로 항상 활성화
+  /* Step 1: 필수 — 사업소개·업종(최소 1개)·단계·타겟 */
+  const sectorOk = (ob.sector && ob.sector.length>0) || (ob.sectorOther && ob.sectorOther.trim().length>0);
+  const step1Ok = !!(ob.industry && sectorOk && ob.stage && ob.target);
+  const btn1 = document.getElementById('btn1');
+  if (btn1) btn1.disabled = !step1Ok;
+
+  /* Step 2: 필수 — 핵심 고민 + 팀 규모 */
+  const step2Ok = !!(ob.concern && ob.concern.trim().length>0 && ob.team);
   const btn2 = document.getElementById('btn2');
-  if (btn2) btn2.disabled = false;
+  if (btn2) btn2.disabled = !step2Ok;
+
+  /* Step 3: 필수 — 멘토 스타일 */
+  const step3Ok = !!ob.style;
+  const btn3 = document.getElementById('btn3');
+  if (btn3) btn3.disabled = !step3Ok;
+}
+
+/* 추천 멘토 로직 — Step 1·2 입력 기반 상황별 best-fit 계산.
+   각 멘토마다 점수 계산 후 최고점에 '추천' 배지 부여. 동점이면 우선순위(PG → Thiel → ...). */
+function computeRecommendedMentor(){
+  const stage = ob.stage || '';
+  const concern = (ob.concern || '').toLowerCase();
+  const sectors = Array.isArray(ob.sector) ? ob.sector : [];
+  const invest = ob.invest || '';
+
+  /* 키워드 매칭용 헬퍼 */
+  const has = (keywords) => keywords.some(k => concern.includes(k.toLowerCase()));
+
+  const scores = {
+    'Paul Graham (YC)': 0,
+    'Peter Thiel (Founders Fund)': 0,
+    'Brian Chesky (Airbnb)': 0,
+    'Jensen Huang (NVIDIA)': 0,
+    'Naval Ravikant': 0
+  };
+
+  /* Paul Graham: 초기 단계 + PMF/고객/MVP/실행 고민 */
+  if(stage === '아이디어' || stage === 'MVP 개발중' || stage === '초기 매출') scores['Paul Graham (YC)'] += 3;
+  if(has(['pmf','고객','첫 고객','mvp','실행','생존','런웨이','default alive','사용자','유저'])) scores['Paul Graham (YC)'] += 2;
+  if(has(['작게 시작','수동','직접','만남'])) scores['Paul Graham (YC)'] += 2;
+
+  /* Peter Thiel: 차별화·시장 진입·독점·근본 재설계 */
+  if(has(['차별화','독점','monopoly','10배','10x','포지셔닝','경쟁','시장 진입','재설계','피벗','근본'])) scores['Peter Thiel (Founders Fund)'] += 3;
+  if(stage === '시드 준비' || stage === '시드 완료') scores['Peter Thiel (Founders Fund)'] += 1;
+  if(has(['비밀','secret','틈새','nich'])) scores['Peter Thiel (Founders Fund)'] += 2;
+
+  /* Brian Chesky: 브랜드·고객 경험·D2C·위기 */
+  if(has(['브랜드','고객 경험','cx','ux','디자인','d2c','b2c','충성도','리텐션','리브랜딩','위기','재도약'])) scores['Brian Chesky (Airbnb)'] += 3;
+  if(sectors.some(s => /커머스|콘텐츠|여행|푸드|반려/.test(s))) scores['Brian Chesky (Airbnb)'] += 1;
+
+  /* Jensen Huang: 기술 중심·장기·플랫폼·AI/하드웨어 */
+  if(sectors.some(s => /AI|데이터|제조|하드웨어|바이오|보안/.test(s))) scores['Jensen Huang (NVIDIA)'] += 3;
+  if(has(['플랫폼','해자','moat','장기','r&d','기술','생태계','락인','lock-in','인프라'])) scores['Jensen Huang (NVIDIA)'] += 2;
+  if(stage === '시리즈A+') scores['Jensen Huang (NVIDIA)'] += 1;
+
+  /* Naval Ravikant: 사업 방향 재검토·마인드셋·레버리지·철학 */
+  if(has(['방향','재검토','다시','창업자','마인드셋','본질','원리','why','무엇을','어떻게 살','인생','의사결정'])) scores['Naval Ravikant'] += 3;
+  if(has(['레버리지','코드','미디어','자본','1인','솔로'])) scores['Naval Ravikant'] += 2;
+
+  /* 최고 점수 계산 — 동점이면 우선순위 순 (배열 순서대로) */
+  const priority = [
+    'Paul Graham (YC)',
+    'Peter Thiel (Founders Fund)',
+    'Brian Chesky (Airbnb)',
+    'Jensen Huang (NVIDIA)',
+    'Naval Ravikant'
+  ];
+  let best = priority[0];
+  let bestScore = scores[best];
+  for(const m of priority) {
+    if(scores[m] > bestScore) { best = m; bestScore = scores[m]; }
+  }
+  /* 모든 점수가 0이면 기본값으로 Paul Graham */
+  if(bestScore === 0) best = 'Paul Graham (YC)';
+  return best;
+}
+
+/* Step 3 진입 시 추천 멘토 배지 렌더. 이미 사용자가 멘토를 고른 상태면 추천 표시만 하고 선택은 유지. */
+function applyMentorRecommendation(){
+  const recommended = computeRecommendedMentor();
+  const rows = document.querySelectorAll('#style-grid .ob-mentor-row');
+  rows.forEach(row => {
+    /* 기존 추천 배지 제거 */
+    const oldBadge = row.querySelector('.ob-mentor-recommend');
+    if(oldBadge) oldBadge.remove();
+    /* 추천 멘토에만 배지 추가 */
+    if(row.dataset.val === recommended){
+      const info = row.querySelector('.ob-mentor-row-info');
+      if(info){
+        const tag = document.createElement('div');
+        tag.className = 'ob-mentor-recommend';
+        tag.textContent = '✦ 지금 상황에 추천';
+        info.insertBefore(tag, info.firstChild);
+      }
+    }
+  });
+  /* 아직 멘토 선택 전이면 추천 멘토를 기본 선택 (사용자가 바꾸면 그대로 적용) */
+  if(!ob.style){
+    /* PRO 멘토는 자동 선택하지 않음 — Free 두 명 중 하나만 자동 */
+    const freeRecommended = (recommended === 'Paul Graham (YC)' || recommended === 'Peter Thiel (Founders Fund)')
+      ? recommended : 'Paul Graham (YC)';
+    const row = [...rows].find(r => r.dataset.val === freeRecommended);
+    if(row){
+      row.classList.add('sel');
+      ob.style = freeRecommended;
+      validate();
+    }
+  }
 }
 /* oninput 바인딩은 DOMContentLoaded에서 처리 */
 function goStep(n) {
@@ -893,6 +997,13 @@ function goStep(n) {
     const dot=document.getElementById('s'+i);
     if(dot) dot.classList.toggle('done',i<=n);
   }
+  /* Step 3 진입 시: 추천 멘토 배지 렌더링 + 기본 선택(Free만) */
+  if(n === 3){
+    applyMentorRecommendation();
+  }
+  /* 스크롤을 상단으로 (긴 step들 사이 이동할 때 위에서 시작) */
+  const card = document.querySelector('.ob-card');
+  if(card) card.scrollTop = 0;
   validate();
 }
 function finishOnboarding() {
@@ -921,14 +1032,15 @@ function editProfile(){
   hydrateOnboardingFromOb();
 }
 
-/* 온보딩 닫기(×) — 스마트 동작:
-   1) 기존 저장된 프로필이 있고 Step 1 필수 4개(industry·stage·target·concern)도
-      모두 채워진 '편집 모드'이면: 변경사항은 폐기하고 기존 프로필로 되돌림.
-   2) 첫 가입이거나 Step 1 필수가 비어 있으면: 필수 입력을 요청하고 닫지 않음.
-      (× 버튼으로 필수 항목 회피 불가. 사용자님 요구 — 로드맵 #8)
-   3) Step 2로 넘어와서 Step 1 필수는 이미 채워진 상태에서 닫으면:
-      현재 ob에 있는 내용(Step 1 + Step 2의 선택 입력분)을 저장하고 메인으로 진입.
-      즉 닫기도 '시작하기'처럼 동작 — 사용자님 요구. */
+/* 온보딩 닫기(×) — 스마트 동작 (3단계 구조):
+   1) 기존 저장된 프로필이 '완전한' 편집 모드이면: 변경사항 폐기하고 기존 프로필로 되돌림.
+   2) 현재 ob에 모든 필수(Step1+2+3)가 다 있으면: 저장하고 메인으로 진입 (시작하기와 동일).
+   3) 필수 미입력 상태이면: 가장 가까운 미완성 Step으로 되돌리고 경고.
+
+   필수 항목 전체:
+   - Step 1: industry, sector(1+), stage, target
+   - Step 2: concern, team
+   - Step 3: style (멘토 스타일) */
 function cancelOnboardingEdit(){
   /* 기존 저장된 프로필이 있는지 */
   let saved = null;
@@ -936,10 +1048,18 @@ function cancelOnboardingEdit(){
     const raw = localStorage.getItem('vd_profile');
     if(raw) saved = JSON.parse(raw);
   }catch(e){}
-  const hasSavedRequired = saved && saved.industry && saved.stage && saved.target && saved.concern;
-  const hasCurrentRequired = ob && ob.industry && ob.stage && ob.target && ob.concern;
 
-  if(hasSavedRequired){
+  /* 완전한 프로필 판정 헬퍼 */
+  const isComplete = (p) => !!(
+    p && p.industry
+    && ((p.sector && p.sector.length>0) || (p.sectorOther && p.sectorOther.trim().length>0))
+    && p.stage && p.target
+    && p.concern && p.concern.trim().length>0
+    && p.team
+    && p.style
+  );
+
+  if(isComplete(saved)){
     /* 편집 모드 — 변경사항 폐기하고 기존 프로필로 */
     document.getElementById('onboarding').classList.add('hidden');
     document.getElementById('app').style.display='flex';
@@ -949,25 +1069,34 @@ function cancelOnboardingEdit(){
     return;
   }
 
-  if(hasCurrentRequired){
-    /* 첫 가입인데 Step 1 필수는 다 채운 상태 → 저장 후 진입
-       (시작하기 버튼을 눌렀을 때와 동일 동작) */
+  if(isComplete(ob)){
+    /* 첫 가입 + 모든 필수 입력됨 → 저장 후 진입 (시작하기와 동일) */
     finishOnboarding();
     return;
   }
 
-  /* 첫 가입 + Step 1 필수 미입력 → 닫기 불허. Step 1로 돌려보내고 경고. */
-  if(step !== 1){
-    /* Step 2~3에 있다면 Step 1로 되돌리기 */
-    goStep(1);
+  /* 필수 미입력 — 미완성 Step으로 되돌리고 경고 */
+  const sectorOk = (ob.sector && ob.sector.length>0) || (ob.sectorOther && ob.sectorOther.trim().length>0);
+  const step1Ok = !!(ob.industry && sectorOk && ob.stage && ob.target);
+  const step2Ok = !!(ob.concern && ob.concern.trim().length>0 && ob.team);
+
+  let target = 1;
+  let msg = '먼저 기본 정보(사업 소개·업종·단계·타겟)를 입력해주세요.';
+  if(step1Ok && !step2Ok){
+    target = 2;
+    msg = '핵심 고민과 팀 규모를 입력해주세요. 맞춤 자문을 위해 필요합니다.';
+  } else if(step1Ok && step2Ok){
+    target = 3;
+    msg = '답변 스타일을 결정할 멘토를 선택해주세요.';
   }
-  alert('먼저 업종·단계·타겟·핵심 고민을 입력해주세요. 맞춤 자문을 위해 필요합니다.');
+  if(step !== target) goStep(target);
+  alert(msg);
 }
 
 function hydrateOnboardingFromOb(){
-  /* step reset */
+  /* step reset — 3단계 구조 */
   step=1;
-  ['sec1','sec2'].forEach((s,i)=>{
+  ['sec1','sec2','sec3'].forEach((s,i)=>{
     const el=document.getElementById(s);
     if(el) el.classList.toggle('active', i===0);
   });
@@ -1002,9 +1131,15 @@ function hydrateOnboardingFromOb(){
   const name=document.getElementById('name-in');
   if(name){ name.value=ob.name||''; }
   const con=document.getElementById('concern-in');
-  if(con){ con.value=ob.concern||''; }
-
-  /* 과거 단일-industry 루프 제거 — sector 다중선택(952~960)을 덮어쓰던 버그 원인 */
+  if(con){
+    con.value=ob.concern||'';
+    /* 글자수 카운터 동기화 */
+    const counter=document.getElementById('concern-count');
+    if(counter){
+      counter.textContent = `${(ob.concern||'').length} / 500`;
+      counter.style.color = (ob.concern||'').length > 450 ? 'var(--brand-point)' : 'var(--ink3)';
+    }
+  }
 
   /* chips */
   const setSel=(gridId, val)=>{
@@ -1014,12 +1149,11 @@ function hydrateOnboardingFromOb(){
   };
   setSel('stage-grid', ob.stage||'');
   setSel('team-grid',  ob.team||'');
-  // style-grid는 ob-mentor-row 구조 — data-val로 sel 클래스 복원
+  // style-grid는 ob-mentor-row 구조 — 기존 프로필에 style이 있으면 복원, 없으면 sel 제거
   const styleGrid = document.getElementById('style-grid');
   if(styleGrid){
-    const curStyle = ob.style || 'Paul Graham (YC)';
     styleGrid.querySelectorAll('[data-val]').forEach(c=>{
-      c.classList.toggle('sel', c.dataset.val === curStyle);
+      c.classList.toggle('sel', !!ob.style && c.dataset.val === ob.style);
     });
   }
 
@@ -1912,7 +2046,7 @@ function buildProfileJson(){
   if(profile.invest) p.invest = profile.invest;
   if(profile.mrr) p.mrr = profile.mrr;
   if(profile.name) p.name = profile.name;
-  if(profile.concern) p.concern = profile.concern.slice(0,200);
+  if(profile.concern) p.concern = profile.concern.slice(0,500);
   return JSON.stringify(p);
 }
 
@@ -3299,7 +3433,18 @@ document.addEventListener('DOMContentLoaded', function(){
   const safeOn = (id, ev, fn) => { const el=document.getElementById(id); if(el) el[ev]=fn; };
   safeOn('mrr-in',     'oninput', e => ob.mrr=e.target.value);
   safeOn('name-in',    'oninput', e => ob.name=e.target.value);
-  safeOn('concern-in', 'oninput', e => { ob.concern=e.target.value.trim(); validate(); });
+  safeOn('concern-in', 'oninput', e => {
+    const v = e.target.value;
+    ob.concern = v.trim();
+    /* 글자수 카운터 업데이트 */
+    const counter = document.getElementById('concern-count');
+    if(counter){
+      const len = v.length;
+      counter.textContent = `${len} / 500`;
+      counter.style.color = len > 450 ? 'var(--brand-point)' : 'var(--ink3)';
+    }
+    validate();
+  });
 
   /* 모달 배경 클릭 닫기 */
   const safeClick = (id, fn) => { const el=document.getElementById(id); if(el) el.addEventListener('click', e=>{ if(e.target===el) fn(); }); };
