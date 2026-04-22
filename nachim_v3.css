@@ -304,8 +304,6 @@ body{
 .ob-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta);flex:1}
 .ob-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
 .ob-btn:disabled{opacity:.4;cursor:not-allowed}
-.ob-skip{font-size:12px;color:var(--link-blue);text-align:center;margin-top:1rem;cursor:pointer;text-decoration:none}
-.ob-skip:hover{text-decoration:underline}
 .ind-tag{
   display:inline-flex;align-items:center;padding:6px 12px;border-radius:980px;border:1px solid var(--border);
   background:var(--white);font-size:12px;color:var(--ink2);cursor:pointer;

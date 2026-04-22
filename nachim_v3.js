@@ -907,7 +907,6 @@ function finishOnboarding() {
   localStorage.setItem('vd_profile',JSON.stringify(profile));
   launch();
 }
-function skipOnboarding(){profile={};launch();}
 function editProfile(){
   closeModal();
   ob={...profile}; step=1;
@@ -921,16 +920,47 @@ function editProfile(){
   hydrateOnboardingFromOb();
 }
 
+/* 온보딩 닫기(×) — 스마트 동작:
+   1) 기존 저장된 프로필이 있고 Step 1 필수 4개(industry·stage·target·concern)도
+      모두 채워진 '편집 모드'이면: 변경사항은 폐기하고 기존 프로필로 되돌림.
+   2) 첫 가입이거나 Step 1 필수가 비어 있으면: 필수 입력을 요청하고 닫지 않음.
+      (× 버튼으로 필수 항목 회피 불가. 사용자님 요구 — 로드맵 #8)
+   3) Step 2로 넘어와서 Step 1 필수는 이미 채워진 상태에서 닫으면:
+      현재 ob에 있는 내용(Step 1 + Step 2의 선택 입력분)을 저장하고 메인으로 진입.
+      즉 닫기도 '시작하기'처럼 동작 — 사용자님 요구. */
 function cancelOnboardingEdit(){
-  document.getElementById('onboarding').classList.add('hidden');
-  document.getElementById('app').style.display='flex';
-  /* discard unsaved changes */
+  /* 기존 저장된 프로필이 있는지 */
+  let saved = null;
   try{
-    const saved = localStorage.getItem('vd_profile');
-    if(saved) profile = JSON.parse(saved);
+    const raw = localStorage.getItem('vd_profile');
+    if(raw) saved = JSON.parse(raw);
   }catch(e){}
-  ob={...profile};
-  applyProfile();
+  const hasSavedRequired = saved && saved.industry && saved.stage && saved.target && saved.concern;
+  const hasCurrentRequired = ob && ob.industry && ob.stage && ob.target && ob.concern;
+
+  if(hasSavedRequired){
+    /* 편집 모드 — 변경사항 폐기하고 기존 프로필로 */
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('app').style.display='flex';
+    profile = saved;
+    ob={...profile};
+    applyProfile();
+    return;
+  }
+
+  if(hasCurrentRequired){
+    /* 첫 가입인데 Step 1 필수는 다 채운 상태 → 저장 후 진입
+       (시작하기 버튼을 눌렀을 때와 동일 동작) */
+    finishOnboarding();
+    return;
+  }
+
+  /* 첫 가입 + Step 1 필수 미입력 → 닫기 불허. Step 1로 돌려보내고 경고. */
+  if(step !== 1){
+    /* Step 2~3에 있다면 Step 1로 되돌리기 */
+    goStep(1);
+  }
+  alert('먼저 업종·단계·타겟·핵심 고민을 입력해주세요. 맞춤 자문을 위해 필요합니다.');
 }
 
 function hydrateOnboardingFromOb(){
@@ -5019,7 +5049,6 @@ function checkUploadAccess(){
     grantRemoveFile: grantRemoveFile,
     cancelOnboardingEdit: cancelOnboardingEdit,
     finishOnboarding: finishOnboarding,
-    skipOnboarding: skipOnboarding,
     goStep: goStep,
     setIndustry: setIndustry,
     toggleSector: toggleSector,
