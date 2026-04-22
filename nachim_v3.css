@@ -498,7 +498,36 @@ header{
 .app-body{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-aside{width:240px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+aside{width:240px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s var(--ease), border-color .22s var(--ease)}
+/* 접힌 상태: 폭 0, 우측 경계선 숨김. 내부 내용은 overflow:hidden으로 자연스럽게 가려짐. */
+aside.collapsed{width:0;border-right-color:transparent}
+/* 사이드바 상단 '접기' 버튼 — aside-hdr 우측에 작게 배치 */
+.aside-toggle{
+  background:transparent;border:none;padding:2px 4px;cursor:pointer;
+  color:var(--ink3);border-radius:4px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:color .12s, background .12s;
+}
+.aside-toggle:hover{color:var(--ink);background:rgba(0,0,0,.06)}
+/* '다시 열기' 부동 버튼 — 사이드바가 닫혔을 때만 노출. main 좌측 상단에 떠 있음. */
+.aside-open-fab{
+  position:absolute;
+  top:calc(var(--header-h, 64px) + 10px);
+  left:10px;
+  z-index:500;
+  width:28px;height:28px;
+  display:none;align-items:center;justify-content:center;
+  background:var(--filter-bg);
+  border:1px solid var(--border);
+  border-radius:6px;
+  color:var(--ink2);
+  cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+  transition:background .12s, color .12s, border-color .12s;
+}
+.aside-open-fab:hover{background:var(--bg);color:var(--ink);border-color:#86868b}
+/* 사이드바가 collapsed일 때만 부동 버튼 표시 */
+body.sidebar-collapsed .aside-open-fab{display:flex}
 .s-top{flex:1;overflow-y:auto;padding:1rem 1rem 1.25rem}
 .s-label{font-size:11px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:var(--gray-48);padding:0 10px;margin-bottom:8px;display:block}
 .d-btn{

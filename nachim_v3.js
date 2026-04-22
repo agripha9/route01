@@ -1173,7 +1173,29 @@ function launch(){
   showWelcome();
   const inp=document.getElementById('input');
   if(inp){inp.disabled=false;inp.readOnly=false;inp.focus();}
+  /* 저장된 사이드바 접힘 상태 복원 — localStorage에 r01_sidebar_closed='1'이면 접힘 */
+  try{
+    if(localStorage.getItem('r01_sidebar_closed')==='1') applySidebarCollapsed(true);
+  }catch(e){}
   queueMicrotask(()=>refreshAllReportBubbleMarkdown());
+}
+
+/* 사이드바 접기/펼치기 — 상태는 body.sidebar-collapsed + aside.collapsed로 동기화,
+   localStorage에 저장해 새로고침·재로그인 시 유지. */
+function applySidebarCollapsed(closed){
+  const aside = document.getElementById('sidebar');
+  if(aside) aside.classList.toggle('collapsed', !!closed);
+  document.body.classList.toggle('sidebar-collapsed', !!closed);
+  try{
+    if(closed) localStorage.setItem('r01_sidebar_closed','1');
+    else localStorage.removeItem('r01_sidebar_closed');
+  }catch(e){}
+}
+function toggleSidebar(){
+  const aside = document.getElementById('sidebar');
+  if(!aside) return;
+  const currentlyClosed = aside.classList.contains('collapsed');
+  applySidebarCollapsed(!currentlyClosed);
 }
 function applyProfile(){
   const name=profile.name||profile.industry||null;
@@ -5208,6 +5230,7 @@ function checkUploadAccess(){
     refreshAllReportBubbleMarkdown: refreshAllReportBubbleMarkdown,
     startAfterLogin: startAfterLogin,
     goHome: goHome,
+    toggleSidebar: toggleSidebar,
     // 마이페이지
     openMyPage: openMyPage,
     closeMyPage: closeMyPage,

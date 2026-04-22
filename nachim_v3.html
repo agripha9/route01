@@ -517,25 +517,32 @@
     </div>
 
     <!-- 실제 사이드바: 질문 기록 전용 -->
-    <aside>
+    <aside id="sidebar">
       <div class="aside-hdr">
         <span class="aside-hdr-title">질문 기록</span>
+        <button class="aside-toggle" id="aside-toggle-close" onclick="toggleSidebar()" aria-label="사이드바 접기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
       </div>
       <div class="s-top">
         <div id="history-list"><div class="pop-empty">아직 질문 기록이 없어요.</div></div>
       </div>
       <!-- 사이드바 하단 상태 배지 (2개로 축소 — 멘토는 상단으로 이동) -->
       <div class="aside-status-badges">
-        <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
+        <div class="aside-status-item" onclick="editProfile()">
           <span class="aside-status-label">사업 요약</span>
           <span class="aside-status-val" id="ub-biz">미설정</span>
         </div>
-        <div class="aside-status-item" onclick="editProfile()" title="프로필 수정">
+        <div class="aside-status-item" onclick="editProfile()">
           <span class="aside-status-label">핵심 고민</span>
           <span class="aside-status-val" id="ub-concern">미설정</span>
         </div>
       </div>
     </aside>
+    <!-- 사이드바가 닫혔을 때만 보이는 "다시 열기" 부동 버튼 -->
+    <button class="aside-open-fab" id="aside-toggle-open" onclick="toggleSidebar()" aria-label="사이드바 열기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
 
     <main>
       <!-- JS 호환용 숨김 요소들 -->
