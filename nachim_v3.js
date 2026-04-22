@@ -1970,36 +1970,33 @@ ${styleGuide}
   return sys;
 }
 
-/* ─── 프로필 없으면 질문 전 안내 ─── */
+/* ─── 프로필 없으면 질문 전 설정 강제 ─── */
+/* Legacy 정리: 이전 버전에서 저장되던 'r01_profile_skip' 키를 제거.
+   이제는 스킵이 불가능하므로 해당 키를 사용하지 않는다. */
+try { localStorage.removeItem('r01_profile_skip'); } catch(e) {}
+
 function checkProfileBeforeSend(text){
   if(profile.industry) return true; // 프로필 있으면 통과
-  // 프로필 없는 경우 — 안내 모달 표시
+  // 프로필 없는 경우 — 설정 강제 모달. 스킵 없음. 프로필 저장해야 진행 가능.
   const m = document.createElement('div');
   m.className = 'modal-bg open';
-    m.style.zIndex = '9999';
+  m.style.zIndex = '9999';
   m.id = 'no-profile-modal';
   m.innerHTML = `
-    <div class="modal" style="max-width:400px;text-align:center">
+    <div class="modal" style="max-width:420px;text-align:center">
       <div style="font-size:36px;margin-bottom:12px">👤</div>
-      <div class="modal-title">프로필을 설정하면 더 정확한 자문을 받을 수 있어요</div>
+      <div class="modal-title">먼저 프로필을 설정해주세요</div>
       <div class="modal-sub" style="text-align:left;line-height:1.7;margin-bottom:1rem">
-        스타트업 단계, 업종, 핵심 고민을 입력하면:<br>
+        맞춤형 자문을 위해 업종·단계·핵심 고민이 필요합니다.<br>
+        <br>
         ✅ <strong>맞춤형</strong> 자문 (일반론 → 나만의 조언)<br>
         ✅ <strong>멘토 스타일</strong>에 맞는 피드백 톤<br>
         ✅ <strong>도메인별</strong> 구체적 수치와 사례
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="modal-btn" id="no-profile-skip" style="flex:1">일단 질문하기</button>
-        <button class="modal-btn pri" onclick="document.getElementById('no-profile-modal').remove();editProfile();" style="flex:1">프로필 설정 →</button>
-      </div>
+      <button class="modal-btn pri" onclick="document.getElementById('no-profile-modal').remove();editProfile();" style="width:100%">프로필 설정 →</button>
     </div>`;
   document.body.appendChild(m);
-  document.getElementById('no-profile-skip').onclick = () => {
-    m.remove();
-    localStorage.setItem('r01_profile_skip','1'); // 이번 세션은 스킵
-    doSend(text);
-  };
-  m.addEventListener('click', e => { if(e.target===m) m.remove(); });
+  /* 백드롭 클릭으로 닫기 비활성 — 닫으려면 반드시 프로필 설정을 거쳐야 함 */
   return false;
 }
 
@@ -2009,10 +2006,10 @@ async function send(){
   const el=document.getElementById('input');
   const t=el.value.trim();
   if(!t && !chatPendingFiles.length)return;
-  /* 프로필 미설정 체크 (이번 세션 스킵이면 통과) */
-  if(!profile.industry && !localStorage.getItem('r01_profile_skip')){
-    const blocked = checkProfileBeforeSend(t);
-    if(!blocked){ el.value='';resize(el); return; }
+  /* 프로필 미설정 시 차단 — 설정해야만 질문 가능 */
+  if(!profile.industry){
+    const ok = checkProfileBeforeSend(t);
+    if(!ok){ el.value='';resize(el); return; }
   }
   el.value='';resize(el);
   await doSend(t);
@@ -4894,7 +4891,7 @@ function submitWithdraw(){
     const accounts = _r01Accounts().filter(a=>a.email!==email);
     _saveR01Accounts(accounts);
   }
-  ['nachim_auth','vd_profile','vd_history','r01_hist_v1','r01_plan','r01_banner_x','r01_profile_skip',
+  ['nachim_auth','vd_profile','vd_history','r01_hist_v1','r01_plan','r01_banner_x',
    'nachim_api_key','r01_accs'].forEach(k=>localStorage.removeItem(k));
   // 접두사 기반 키 삭제
   Object.keys(localStorage).filter(k=>k.startsWith('r01_usage_')).forEach(k=>localStorage.removeItem(k));
