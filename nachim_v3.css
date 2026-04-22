@@ -1015,8 +1015,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .route-loader .rl-node{
   display:block;
   flex-shrink:0;
-  width:12px;
-  height:13px;
+  width:6px;
+  height:7px;
   background:#8e8e93;
   /* pointy-top 육각형: 위 꼭짓점(50%, 0) → 우상(100%, 25%) → 우하(100%, 75%)
      → 아래 꼭짓점(50%, 100%) → 좌하(0, 75%) → 좌상(0, 25%) */
