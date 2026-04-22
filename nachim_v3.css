@@ -288,13 +288,14 @@ body{
   transition:border-color .15s,background .15s;user-select:none;letter-spacing:-0.224px
 }
 .ob-chip:hover{border-color:#86868b;background:var(--filter-bg)}
-.ob-chip.sel{border-color:var(--brand-point);background:rgba(26,58,110,0.08);color:var(--ink);font-weight:600}
+/* 선택됨: 업종(.ind-tag.sel)·멘토(.ob-mentor-row.sel)와 동일한 네이비 꽉 찬 반전 */
+.ob-chip.sel{border-color:var(--brand-point);background:var(--brand-point);color:#fff;font-weight:600}
 .ob-chip .em{display:block;font-size:18px;margin-bottom:4px}
 .ob-input{
   width:100%;border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;
-  font-size:17px;font-family:var(--font-text);background:var(--white);color:var(--ink);
+  font-size:15px;font-family:var(--font-text);background:var(--white);color:var(--ink);
   outline:none;transition:border-color .15s,box-shadow .15s;margin-bottom:1.25rem;
-  letter-spacing:-0.374px
+  letter-spacing:-0.3px
 }
 .ob-input:focus{border-color:var(--brand-point);box-shadow:var(--ring-blue)}
 /* textarea도 .ob-input을 함께 가지므로 font는 상속되지만,
@@ -304,9 +305,9 @@ body{
   height:96px;
   resize:none;
   line-height:1.5;
-  font-size:17px;
+  font-size:15px;
   font-family:var(--font-text);
-  letter-spacing:-0.374px;
+  letter-spacing:-0.3px;
 }
 /* textarea 아래 글자수 카운터 */
 .ob-char-count{
@@ -316,16 +317,16 @@ body{
   margin-top:-4px;
   margin-bottom:10px;
 }
-.ob-btn-row{display:flex;gap:8px;margin-top:1rem}
+.ob-btn-row{display:flex;gap:8px;margin-top:1rem;justify-content:center;align-items:center}
 .ob-btn{
-  padding:10px 22px;border-radius:var(--r);border:1px solid var(--border);
-  font-size:17px;font-weight:400;cursor:pointer;
+  padding:9px 22px;border-radius:var(--r);border:1px solid var(--border);
+  font-size:14px;font-weight:500;cursor:pointer;min-width:120px;
   transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease)
 }
 .ob-btn:hover{opacity:.92}
 .ob-btn.sec{background:var(--white);color:var(--ink2)}
 .ob-btn.sec:hover{border-color:#86868b;background:var(--filter-bg)}
-.ob-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta);flex:1}
+.ob-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta)}
 .ob-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
 .ob-btn:disabled{opacity:.4;cursor:not-allowed}
 .ind-tag{
