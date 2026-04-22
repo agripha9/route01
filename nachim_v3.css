@@ -276,9 +276,10 @@ body{
 .ob-label{font-size:14px;font-weight:700;letter-spacing:-0.1px;text-transform:none;color:var(--ink);margin-bottom:6px;display:block}
 /* 필드 설명 inline hint — label 안에 쓰는 회색 부가 설명. */
 .ob-label .ob-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3);font-size:13px}
-/* 툴팁 힌트 — ⓘ 아이콘 느낌. 마우스 올리면 title 속성이 브라우저 기본 툴팁으로 표시됨. */
-.ob-label .ob-hint--tooltip{cursor:help;margin-left:2px;color:var(--ink3);border-bottom:1px dotted var(--ink3);padding-bottom:0}
-.ob-label .ob-hint--tooltip:hover{color:var(--ink2);border-bottom-color:var(--ink2)}
+/* 툴팁 힌트 — ⓘ 아이콘. 마우스 올리면 title 속성이 브라우저 기본 툴팁으로 표시됨.
+   점선 밑줄은 의도적으로 사용하지 않음 (전체 디자인과 일관성 유지). */
+.ob-label .ob-hint--tooltip{cursor:help;margin-left:2px;color:var(--ink3)}
+.ob-label .ob-hint--tooltip:hover{color:var(--ink2)}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-chip{
@@ -296,7 +297,25 @@ body{
   letter-spacing:-0.374px
 }
 .ob-input:focus{border-color:var(--brand-point);box-shadow:var(--ring-blue)}
-.ob-textarea{height:80px;resize:none;line-height:1.47}
+/* textarea도 .ob-input을 함께 가지므로 font는 상속되지만,
+   브라우저에 따라 textarea 기본 font-family/size가 다르게 잡히는 경우가 있어 명시 고정.
+   일반 input과 동일한 폰트·크기로 시각 일관성 유지. */
+.ob-textarea{
+  height:96px;
+  resize:none;
+  line-height:1.5;
+  font-size:17px;
+  font-family:var(--font-text);
+  letter-spacing:-0.374px;
+}
+/* textarea 아래 글자수 카운터 */
+.ob-char-count{
+  text-align:right;
+  font-size:11px;
+  color:var(--ink3);
+  margin-top:-4px;
+  margin-bottom:10px;
+}
 .ob-btn-row{display:flex;gap:8px;margin-top:1rem}
 .ob-btn{
   padding:10px 22px;border-radius:var(--r);border:1px solid var(--border);

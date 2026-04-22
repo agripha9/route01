@@ -320,13 +320,13 @@
     <div class="ob-sub">자문의 깊이를 결정하는 정보입니다. 선택 항목은 언제든 프로필에서 수정할 수 있어요. (30초)</div>
 
     <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">*필수</span>
-      <span class="ob-hint ob-hint--tooltip" title="이 내용이 답변 개인화의 80%를 결정합니다. 현재 고민·과거 시도·원하는 결과까지 풍부하게 써주세요.">— 자세할수록 자문이 정확해집니다 ⓘ</span>
+      <span class="ob-hint ob-hint--tooltip" title="이 내용이 답변 개인화의 80%를 결정합니다. 현재 고민·과거 시도·원하는 결과까지 풍부하게 써주세요.">— 자세할수록 자문이 정확해집니다</span>
     </label>
     <textarea class="ob-input ob-textarea" id="concern-in" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
-    <div class="ob-char-count" id="concern-count" style="text-align:right;font-size:11px;color:var(--ink3);margin-top:-4px;margin-bottom:10px">0 / 500</div>
+    <div class="ob-char-count" id="concern-count">0 / 500</div>
 
     <label class="ob-label">팀 규모 <span class="ob-required">*필수</span>
-      <span class="ob-hint ob-hint--tooltip" title="솔로 창업자와 10인 팀은 받을 조언이 완전히 다릅니다.">ⓘ</span>
+      <span class="ob-hint ob-hint--tooltip" title="솔로 창업자와 10인 팀은 받을 조언이 완전히 다릅니다.">— 규모에 따라 조언 방향이 달라집니다</span>
     </label>
     <div class="ob-grid ob-chip-grid--compact" id="team-grid">
       <div class="ob-chip ob-chip--sm" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
@@ -335,8 +335,8 @@
       <div class="ob-chip ob-chip--sm" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
     </div>
 
-    <label class="ob-label" style="margin-top:4px">월 매출(MRR) <span class="ob-hint">— 선택 · 없으면 비워두세요</span>
-      <span class="ob-hint ob-hint--tooltip" title="투자·성장 조언 시 런웨이와 PMF 신호를 판단하는 기준입니다.">ⓘ</span>
+    <label class="ob-label" style="margin-top:4px">월 매출(MRR)
+      <span class="ob-hint ob-hint--tooltip" title="투자·성장 조언 시 런웨이와 PMF 신호를 판단하는 기준입니다.">— 선택 · 없으면 비워두세요</span>
     </label>
     <input class="ob-input" id="mrr-in" type="text" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
 
@@ -363,7 +363,7 @@
     <div class="ob-sub">5명의 창업 거장 중 답변 스타일을 결정할 멘토를 선택하세요. 상황별 추천을 참고해도 좋습니다. (20초)</div>
 
     <label class="ob-label">멘토 스타일 <span class="ob-required">*필수</span>
-      <span class="ob-hint">— 상황에 맞는 추천 멘토가 표시됩니다. Paul Graham·Peter Thiel은 무료, 나머지는 Starter 이상</span>
+      <span class="ob-hint">— 상황에 맞는 추천 멘토가 표시됩니다. Paul Graham·Peter Thiel은 무료, 나머지는 PRO 플랜 이상 · 멘토는 언제든 프로필에서 변경할 수 있어요.</span>
     </label>
     <div class="ob-mentor-list" id="style-grid">
 
@@ -435,12 +435,12 @@
     </div>
 
     <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드 <span class="ob-hint">— 선택</span>
-      <span class="ob-pro-lock">🔒 Starter 이상</span>
+      <span class="ob-pro-lock">🔒 PRO 이상</span>
     </label>
     <div class="upload-zone upload-zone--locked" id="ob-drop-zone" onclick="checkUploadAccess()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
       <div class="upload-zone-icon">📎</div>
       <div class="upload-zone-text">파일을 끌어다 놓거나 클릭하여 업로드</div>
-      <div class="upload-zone-sub">회사소개서 · IR 자료 · 재무제표 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> · 파일당 최대 20MB · <strong>Starter 플랜 이상</strong></div>
+      <div class="upload-zone-sub">회사소개서 · IR 자료 · 재무제표 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> · 파일당 최대 20MB · <strong>PRO 플랜 이상</strong></div>
     </div>
     <input type="file" id="ob-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="obFileSelect(this.files)"/>
     <div class="file-list" id="ob-file-list"></div>
