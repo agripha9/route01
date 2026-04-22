@@ -1017,63 +1017,32 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:#8e8e93;
 }
 
-/* 모든 등장 요소 공통 — 7.5s 사이클 */
+/* 모든 등장 요소 공통 — 사이클 시간은 JS에서 animationDuration으로 주입.
+   각 요소의 등장 시점은 JS에서 negative animationDelay로 계산·주입한다.
+   (하드코딩된 21개 요소가 아니라 창 폭 기반 동적 생성이므로 keyframes은 단 1개만) */
 .route-loader .rl-step{
   opacity:0;
-  animation-duration:7.5s;
-  animation-iteration-count:infinite;
-  animation-timing-function:ease-in-out;
+  animation-name: rl-step-kf;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
 }
 
-/* 21개 요소별 keyframes. 등장 시작 % = i × 2.727% (i × 150ms / 5500ms)
-   등장 완료 % = 등장 시작 % + 1.5% (약 80ms)
-   Hold 구간: 57.3% ~ 70% (3.15s ~ 3.85s)
-   전원 fade-out: 70% → 80% (3.85s ~ 4.4s) opacity 1 → 0
-   이후 opacity 0 유지 → 리셋 */
-.route-loader .rl-s0  { animation-name: rl-s0;  }
-.route-loader .rl-s1  { animation-name: rl-s1;  }
-.route-loader .rl-s2  { animation-name: rl-s2;  }
-.route-loader .rl-s3  { animation-name: rl-s3;  }
-.route-loader .rl-s4  { animation-name: rl-s4;  }
-.route-loader .rl-s5  { animation-name: rl-s5;  }
-.route-loader .rl-s6  { animation-name: rl-s6;  }
-.route-loader .rl-s7  { animation-name: rl-s7;  }
-.route-loader .rl-s8  { animation-name: rl-s8;  }
-.route-loader .rl-s9  { animation-name: rl-s9;  }
-.route-loader .rl-s10 { animation-name: rl-s10; }
-.route-loader .rl-s11 { animation-name: rl-s11; }
-.route-loader .rl-s12 { animation-name: rl-s12; }
-.route-loader .rl-s13 { animation-name: rl-s13; }
-.route-loader .rl-s14 { animation-name: rl-s14; }
-.route-loader .rl-s15 { animation-name: rl-s15; }
-.route-loader .rl-s16 { animation-name: rl-s16; }
-.route-loader .rl-s17 { animation-name: rl-s17; }
-.route-loader .rl-s18 { animation-name: rl-s18; }
-.route-loader .rl-s19 { animation-name: rl-s19; }
-.route-loader .rl-s20 { animation-name: rl-s20; }
+/* 한 요소의 생애주기 (delay로 시점만 달라짐):
+     0%              : 미등장 (보이지 않음)
+     빠른 페이드 인 (1.5%) : 등장 완료
+     65% ~ 75%        : hold (전체가 다 보이는 구간)
+     75% → 85%        : fade-out
+     85% ~ 100%       : 다시 미등장 (다음 사이클 대기)
+   등장 타이밍은 JS에서 delay로 분배 — 여기서는 "한 요소의 개별 커브"만 정의. */
+@keyframes rl-step-kf {
+  0%   { opacity: 0; }
+  1.5% { opacity: 1; }
+  75%  { opacity: 1; }
+  85%  { opacity: 0; }
+  100% { opacity: 0; }
+}
 
-/* 각 요소: 0%~자기등장시작 opacity:0 → 자기등장끝 opacity:1 → 70% 끝까지 1 유지 → 80% 0 → 100% 0 */
-@keyframes rl-s0  { 0%,0%      {opacity:0} 1.5%   {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s1  { 0%,2.73%   {opacity:0} 4.23%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s2  { 0%,5.46%   {opacity:0} 6.96%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s3  { 0%,8.18%   {opacity:0} 9.68%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s4  { 0%,10.91%  {opacity:0} 12.41% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s5  { 0%,13.64%  {opacity:0} 15.14% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s6  { 0%,16.36%  {opacity:0} 17.86% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s7  { 0%,19.09%  {opacity:0} 20.59% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s8  { 0%,21.82%  {opacity:0} 23.32% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s9  { 0%,24.55%  {opacity:0} 26.05% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s10 { 0%,27.27%  {opacity:0} 28.77% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s11 { 0%,30%     {opacity:0} 31.5%  {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s12 { 0%,32.73%  {opacity:0} 34.23% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s13 { 0%,35.46%  {opacity:0} 36.96% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s14 { 0%,38.18%  {opacity:0} 39.68% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s15 { 0%,40.91%  {opacity:0} 42.41% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s16 { 0%,43.64%  {opacity:0} 45.14% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s17 { 0%,46.36%  {opacity:0} 47.86% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s18 { 0%,49.09%  {opacity:0} 50.59% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s19 { 0%,51.82%  {opacity:0} 53.32% {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
-@keyframes rl-s20 { 0%,54.55%  {opacity:0} 57%    {opacity:1} 70%{opacity:1} 80%,100%{opacity:0} }
 
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-5px);opacity:1}}
 

@@ -1684,10 +1684,106 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"><span class="rl-end rl-end-0 rl-step rl-s0">0</span><span class="rl-dot rl-step rl-s1"></span><span class="rl-dot rl-step rl-s2"></span><span class="rl-dot rl-step rl-s3"></span><span class="rl-node rl-step rl-s4"></span><span class="rl-dot rl-step rl-s5"></span><span class="rl-dot rl-step rl-s6"></span><span class="rl-dot rl-step rl-s7"></span><span class="rl-node rl-step rl-s8"></span><span class="rl-dot rl-step rl-s9"></span><span class="rl-dot rl-step rl-s10"></span><span class="rl-dot rl-step rl-s11"></span><span class="rl-node rl-step rl-s12"></span><span class="rl-dot rl-step rl-s13"></span><span class="rl-dot rl-step rl-s14"></span><span class="rl-dot rl-step rl-s15"></span><span class="rl-node rl-step rl-s16"></span><span class="rl-dot rl-step rl-s17"></span><span class="rl-dot rl-step rl-s18"></span><span class="rl-dot rl-step rl-s19"></span><span class="rl-end rl-end-1 rl-step rl-s20">1</span></div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div></div></div></div>`;
   chat.appendChild(el);
+  /* 로더 내용은 폭 측정 후 동적으로 채움 — appendChild 직후 DOM 렌더가 끝나야 폭을 잴 수 있음 */
+  requestAnimationFrame(()=>{
+    const loader = el.querySelector('.route-loader');
+    if(loader) buildRouteLoader(loader);
+  });
   chat.scrollTop=chat.scrollHeight;
 }
+
+/* 로더 빌더: 컨테이너 폭을 측정해 점·노드 개수를 자동 결정하고,
+   각 요소에 등장 시점(animation-delay)을 JS로 주입한다.
+   keyframes는 CSS에 단 하나만 정의되어 있고(rl-step-kf), 모든 요소가 이를 공유하되
+   delay로 등장 순서를 만든다. 창 폭이 바뀌어도 동일 규칙 재적용 가능. */
+function buildRouteLoader(loader){
+  /* ─── 설정값 ─── */
+  const CYCLE_SEC      = 9;      // 총 사이클(초). 기존 7.5 → 9로 소폭 상향(체감 속도 조정)
+  const SPACING_PX     = 18;     // 점 1개당 평균 할당 폭. 작을수록 개수 증가.
+  const MIN_DOTS       = 11;     // 모바일 최소 보장 (점+노드 합계가 이 이하로 떨어지지 않도록)
+  const MAX_DOTS       = 45;     // 초광폭 상한 (4K 모니터에서 너무 빽빽해지는 것 방지)
+  const NODES_EVERY    = 4;      // N번째 점마다 노드로 교체 (색 강조 포인트)
+
+  /* ─── 1. 폭 측정 → 점+노드 개수 결정 ─── */
+  const totalWidth = loader.getBoundingClientRect().width || 0;
+  /* 양 끝 '0', '1' 차지 공간을 대략 50px씩 뺀 내부 폭 */
+  const innerWidth = Math.max(0, totalWidth - 100);
+  let midCount = Math.round(innerWidth / SPACING_PX);
+  midCount = Math.max(MIN_DOTS, Math.min(MAX_DOTS, midCount));
+
+  /* 총 요소 수 = 0 + midCount + 1 */
+  const totalSteps = midCount + 2;
+
+  /* ─── 2. 등장 타이밍 계산 ─── */
+  /* 전체 사이클 중:
+     - 0% ~ APPEAR_END% : 순차 등장 (각 요소 약간씩 딜레이)
+     - HOLD_END% 까지   : 전체 유지
+     - 이후             : 일괄 fade-out → 리셋
+     사람의 체감에서 '너무 빠르다'는 평을 받았으니 등장 구간을 사이클의 60%까지 늘린다.
+     (기존 54% 등장 + 즉시 hold → 새: 65% 등장 + 75% hold 끝 + 85% fade-out 끝) */
+  const APPEAR_END_PCT = 65;
+  const delayPerStep = (CYCLE_SEC * APPEAR_END_PCT / 100) / totalSteps;
+
+  /* ─── 3. DOM 생성 ─── */
+  loader.innerHTML = '';
+
+  const makeEnd = (ch, cls) => {
+    const s = document.createElement('span');
+    s.className = `rl-end rl-end-${cls} rl-step`;
+    s.textContent = ch;
+    return s;
+  };
+  const makeDot = () => {
+    const s = document.createElement('span');
+    s.className = 'rl-dot rl-step';
+    return s;
+  };
+  const makeNode = () => {
+    const s = document.createElement('span');
+    s.className = 'rl-node rl-step';
+    return s;
+  };
+
+  /* 0 → mid들 → 1 순서로 붙이면서 animationDelay 주입 */
+  const applyDelay = (node, stepIdx) => {
+    node.style.animationDuration = CYCLE_SEC + 's';
+    node.style.animationDelay = (-CYCLE_SEC + stepIdx * delayPerStep).toFixed(3) + 's';
+    /* 음수 delay는 '애니메이션이 이미 과거에 시작됐다'는 뜻 →
+       페이지 로드 직후 곧바로 싱크 맞춘 상태로 재생 시작. */
+  };
+
+  const zero = makeEnd('0', '0');
+  applyDelay(zero, 0);
+  loader.appendChild(zero);
+
+  for (let i = 0; i < midCount; i++) {
+    /* i는 0-based. 노드는 일정 간격마다 배치, 나머지는 점.
+       인덱스가 NODES_EVERY의 정배수(0 제외)가 되는 위치를 노드로. */
+    const isNode = (i > 0) && (i % NODES_EVERY === 0);
+    const el2 = isNode ? makeNode() : makeDot();
+    applyDelay(el2, i + 1);
+    loader.appendChild(el2);
+  }
+
+  const one = makeEnd('1', '1');
+  applyDelay(one, totalSteps - 1);
+  loader.appendChild(one);
+
+  /* 균등 배치를 위해 컨테이너에 flex 지시 (CSS에 이미 있지만 확실성 차원) */
+  loader.style.display = 'flex';
+  loader.style.justifyContent = 'space-between';
+  loader.style.alignItems = 'center';
+}
+
+/* 창 리사이즈 시 로더가 떠 있으면 다시 빌드 (개수 자동 조절) */
+window.addEventListener('resize', () => {
+  const loader = document.querySelector('#load-msg .route-loader');
+  if (loader) buildRouteLoader(loader);
+});
+
+
 function hideLoad(){const e=document.getElementById('load-msg');if(e)e.remove();}
 
 /* fmt() kept for backward compatibility (use renderMD instead) */
