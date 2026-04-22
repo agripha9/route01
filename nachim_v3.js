@@ -1647,6 +1647,15 @@ function showWelcome(){
     }
   }
 
+  /* 추천 질문 렌더 — 새로고침/첫 진입 시에도 비어있지 않도록.
+     도메인 버튼의 active 상태에 맞춰 해당 도메인의 추천질문 그리드를 그린다.
+     기본값: HTML에 'active'로 찍혀있는 '투자/IR'(investment). */
+  if(typeof renderSugChips === 'function'){
+    const activeBtn = document.querySelector('.ws-dc.active[data-domain]');
+    const defaultKey = activeBtn?.dataset?.domain || 'investment';
+    renderSugChips(defaultKey);
+  }
+
   // ws-input 포커스
   setTimeout(()=>{ document.getElementById('ws-input')?.focus(); }, 100);
 }
@@ -4355,6 +4364,16 @@ const R01_SUG_POOL = {
     'Post-money 밸류에이션 협상 전략은?',
     '공동창업자 지분 구조 어떻게 설계할까요?',
     '시리즈A를 위한 KPI 목표치는 어느 정도?',
+    'IR 미팅 직후 팔로우업 이메일 작성법은?',
+    'Down round를 피하는 현실적 방법은?',
+    'Convertible Note vs SAFE 장단점 비교는?',
+    '리드 투자자를 먼저 확보해야 하는 이유는?',
+    'Bridge round 시점과 규모 판단 기준은?',
+    '보통주·우선주·전환우선주 차이와 선택은?',
+    '투자 유치 후 보드 미팅 운영 방법은?',
+    'Cap table을 클린하게 유지하는 법은?',
+    'Term sheet 제안 받은 후 검토 프로세스는?',
+    '매출 없이도 투자 받을 수 있는 조건은?',
   ],
   strategy: [
     'PMF(제품-시장 적합성)를 검증하는 방법은?',
@@ -4377,6 +4396,16 @@ const R01_SUG_POOL = {
     '스타트업이 대기업과 경쟁할 수 있는 전략?',
     '초기 고객 100명을 확보하는 전략은?',
     '제품 방향성이 흔들릴 때 기준 잡는 법?',
+    'Aha moment를 설계적으로 만드는 방법은?',
+    'D/W/M 리텐션 곡선을 읽고 개선하는 법?',
+    '고객이 진짜 돈을 내는 이유를 찾는 법?',
+    '파괴적 혁신 vs 존속적 혁신 어떻게 판단?',
+    '초기 시장 진입 시 좁게 vs 넓게 공략?',
+    '네트워크 효과 없는 B2B에서 해자 만들기?',
+    'Value proposition canvas를 실제로 쓰는 법?',
+    '고객 세분화(segmentation) 실무 방법은?',
+    '경쟁 우위를 오래 지속시키는 3가지 원칙?',
+    '스타트업의 전략적 포기(kill decisions) 기준?',
   ],
   marketing: [
     'CAC(고객 획득 비용)를 낮추는 방법은?',
@@ -4399,6 +4428,16 @@ const R01_SUG_POOL = {
     'ABM(계정 기반 마케팅)이란 무엇인가요?',
     '그로스 해킹 실험을 설계하는 방법은?',
     '유료 광고 없이 첫 1000명 확보하는 법?',
+    '콜드 이메일 응답률을 높이는 템플릿은?',
+    '랜딩페이지 전환율 올리는 A/B 테스트 항목?',
+    '제품 출시일 기획(launch day)을 극대화하는 법?',
+    'PMF 후 본격 스케일 단계 마케팅 전환 시점?',
+    '브랜드 스토리로 광고비를 줄이는 전략은?',
+    '고객 레퍼런스·후기를 체계적으로 수집하는 법?',
+    '전시회·컨퍼런스에서 리드 확보하는 방법은?',
+    '무료 체험(Free trial) 전환율 개선 방법은?',
+    '경쟁사 고객을 유치하는 윤리적 접근법은?',
+    '마케팅 팀 1명으로 최대 효과 내는 우선순위?',
   ],
   finance: [
     '스타트업 런웨이를 계산하는 방법은?',
@@ -4421,6 +4460,16 @@ const R01_SUG_POOL = {
     '직원 급여 지급 시 세금 처리 방법은?',
     '재무 예측 모델에서 가장 중요한 가정은?',
     '내부 회계 시스템 언제 구축해야 하나요?',
+    '투자 유치 후 재무팀 구성 시점은?',
+    '창업 초기 법인카드·개인카드 분리 원칙은?',
+    '매출채권 회수 관리 실무 방법은?',
+    '창업기업 부가세 환급 활용 전략은?',
+    '연구개발비 자산화 vs 비용화 기준은?',
+    '스타트업에 맞는 원가 관리 체계는?',
+    '외부 감사 대상 기준과 준비 사항은?',
+    '현금흐름표 작성 시 자주 실수하는 항목?',
+    '투자자 대상 월간/분기 재무보고 포맷은?',
+    '창업자 급여 책정 적정 수준은?',
   ],
   hr: [
     '초기 팀에서 가장 먼저 채용할 직군은?',
@@ -4443,6 +4492,16 @@ const R01_SUG_POOL = {
     '팀 빌딩 이벤트 효과적인 방법은?',
     'CTO 없이 개발팀을 운영하는 방법은?',
     '해외 인재 고용 시 주의사항은?',
+    '핵심 인재 이직 방어를 위한 리텐션 패키지?',
+    '1:1 미팅을 효과적으로 운영하는 법?',
+    '업무 분장이 모호해질 때 정리하는 방법은?',
+    '실적 부진 팀원을 관리하는 단계적 접근?',
+    '리더십 공백 시 임시 운영 체제 구성법?',
+    '글로벌 팀 타임존 관리 실무 팁은?',
+    '해고·권고사직 시 법적·윤리적 가이드?',
+    '신뢰 기반 조직문화 구축 순서는?',
+    '시니어 vs 주니어 채용 비중 조절 전략?',
+    '초기 스타트업의 인사평가 피드백 설계는?',
   ],
   legal: [
     '서비스 출시 전 법적으로 준비할 것들은?',
@@ -4465,37 +4524,63 @@ const R01_SUG_POOL = {
     '특허 침해 대응 방법과 절차는?',
     '법인 설립 시 주의해야 할 사항은?',
     '공정거래법에서 스타트업이 주의할 점은?',
+    'AI 서비스의 저작권·학습데이터 리스크는?',
+    '플랫폼 사업 중개 책임 범위 어디까지?',
+    '개인정보 국외이전 절차와 동의 사항은?',
+    '정보보안 사고 발생 시 대응 단계는?',
+    '스타트업 M&A 실사에서 자주 지적되는 법적 이슈?',
+    '지분 매각 시 세무·법률 체크리스트는?',
+    '광고법·표시광고법 관련 주의 문구 작성법?',
+    '서비스 약관 변경 시 고지·동의 절차는?',
+    '영업비밀·경쟁금지 조항 유효 범위는?',
+    '분쟁 예방을 위한 계약서 핵심 조항 5가지?',
   ],
 };
 
-/* 도메인별 현재 페이지 인덱스 */
+/* 도메인별 현재 페이지 인덱스 (0-based) */
 const _sugPage = {};
+const SUG_PAGE_SIZE = 10;
 
 function renderSugChips(key) {
   const wrap = document.getElementById('sug-chips'); if(!wrap) return;
   const pool = R01_SUG_POOL[key] || R01_SUG_POOL['investment'];
+  const totalPages = Math.max(1, Math.ceil(pool.length / SUG_PAGE_SIZE));
 
-  // 페이지 인덱스 순환 (클릭마다 다른 10개)
-  if(_sugPage[key] === undefined) _sugPage[key] = 0;
-  const start = (_sugPage[key] * 10) % pool.length;
-  // 10개 슬라이싱 (배열 끝에서 감싸기)
-  let qs = [];
-  for(let i = 0; i < 10; i++) {
-    qs.push(pool[(start + i) % pool.length]);
+  /* 현재 페이지 인덱스 보정 — 범위 바깥이면 0으로 */
+  if(_sugPage[key] === undefined || _sugPage[key] < 0 || _sugPage[key] >= totalPages){
+    _sugPage[key] = 0;
   }
+  const page = _sugPage[key];
+  const start = page * SUG_PAGE_SIZE;
+  const qs = pool.slice(start, start + SUG_PAGE_SIZE);
 
-  wrap.innerHTML = qs.map(q =>
+  /* 칩 + 하단 dot indicator */
+  const chipsHtml = qs.map(q =>
     `<button class="sug-chip" onclick="useSugChip(this)">${esc(q)}</button>`
   ).join('');
+
+  const dotsHtml = totalPages > 1
+    ? `<div class="sug-pager" role="tablist" aria-label="추천 질문 페이지">
+        ${Array.from({length: totalPages}, (_, i) =>
+          `<button class="sug-dot${i===page?' active':''}" data-page="${i}" onclick="gotoSugPage('${key}',${i})" aria-label="${i+1}페이지" aria-selected="${i===page?'true':'false'}"></button>`
+        ).join('')}
+      </div>`
+    : '';
+
+  wrap.innerHTML = chipsHtml + dotsHtml;
+}
+
+function gotoSugPage(key, pageIdx){
+  _sugPage[key] = pageIdx;
+  renderSugChips(key);
 }
 
 function filterSugDomain(key, btn) {
   document.querySelectorAll('.ws-dc').forEach(c => c.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  // 같은 도메인 재클릭 시 다음 페이지 보여주기
   const currentKey = btn?.dataset?.domain || key;
-  if(_sugPage[currentKey] === undefined) _sugPage[currentKey] = 0;
-  else _sugPage[currentKey]++;
+  /* 도메인 전환 시 항상 1페이지로 리셋 (사용자 요청) */
+  _sugPage[currentKey] = 0;
   renderSugChips(currentKey);
 }
 function useSugChip(btn) {
@@ -5194,6 +5279,7 @@ function checkUploadAccess(){
     followUpFromHist: followUpFromHist,
     editProfile: editProfile,
     filterSugDomain: filterSugDomain,
+    gotoSugPage: gotoSugPage,
     checkGrantAccess: checkGrantAccess,
     useSugChip: useSugChip,
     dismissProfileBanner: dismissProfileBanner,

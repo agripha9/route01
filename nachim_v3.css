@@ -501,14 +501,18 @@ header{
 aside{width:240px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s var(--ease), border-color .22s var(--ease)}
 /* 접힌 상태: 폭 0, 우측 경계선 숨김. 내부 내용은 overflow:hidden으로 자연스럽게 가려짐. */
 aside.collapsed{width:0;border-right-color:transparent}
-/* 사이드바 상단 '접기' 버튼 — aside-hdr 우측에 작게 배치 */
+/* 사이드바 상단 '접기' 버튼 — aside-hdr 우측. 살짝 시각적 무게감을 실어 클릭 가능해 보이게. */
 .aside-toggle{
-  background:transparent;border:none;padding:2px 4px;cursor:pointer;
-  color:var(--ink3);border-radius:4px;
+  width:26px;height:26px;
+  background:var(--filter-bg);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0;cursor:pointer;
+  color:var(--ink2);
   display:inline-flex;align-items:center;justify-content:center;
-  transition:color .12s, background .12s;
+  transition:color .12s, background .12s, border-color .12s;
 }
-.aside-toggle:hover{color:var(--ink);background:rgba(0,0,0,.06)}
+.aside-toggle:hover{color:var(--ink);background:var(--bg);border-color:#86868b}
 /* '다시 열기' 부동 버튼 — 사이드바가 닫혔을 때만 노출. main 좌측 상단에 떠 있음. */
 .aside-open-fab{
   position:absolute;
@@ -1559,20 +1563,22 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display: flex;
   flex-direction: column;
   gap: 1px;
-  background: var(--brand-point);
-  border: 1px solid var(--brand-point);
+  /* 사이드바 배경(#d4d4da, L4)보다 한 단계 진한 중립 회색.
+     네이비가 아닌 회색 톤으로 가는 이유: 사이드바는 기능적 보조 영역이므로
+     브랜드 색을 과하게 사용하지 않고 차분한 위계만 강조. */
+  background: #b8b8bf;
+  border: 1px solid #a8a8af;
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
-  /* hover 시 색 반전을 하지 않음 — 기본 상태 자체가 반전(네이비 배경)이므로
-     hover에서 추가 색 변화는 오히려 불필요한 혼란을 준다. 커서만 pointer로. */
+  /* hover 시 색 변화 없음 — 기본 상태만 유지 */
 }
 .aside-status-label {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.75);
 }
 .aside-status-val {
   font-size: 12px;
@@ -1851,25 +1857,8 @@ main {
   color: var(--cta);
 }
 
-/* 추천 질문 칩 */
-.ws-chips {
-  display: flex; flex-wrap: wrap; gap: 8px;
-  justify-content: center;
-}
-.sug-chip {
-  padding: 8px 16px; border-radius: 980px;
-  border: 1px solid var(--border);
-  background: var(--filter-bg); font-size: 13px;
-  color: var(--ink2); cursor: pointer; text-align: left;
-  transition: background .12s, border-color .12s, box-shadow .12s;
-  font-family: var(--font-text); line-height: 1.4;
-}
-.sug-chip:hover {
-  border-color: rgba(26,58,110,.4);
-  background: rgba(26,58,110,.04);
-  color: var(--ink);
-  box-shadow: 0 1px 6px rgba(0,0,0,.08);
-}
+/* 추천 질문 칩 — 정의는 아래 '2열 그리드(최종 정의)' 블록 참조.
+   (과거엔 여기 flex 기반 정의가 있었으나 중복이라 제거. 아래 grid 정의가 사실상 쓰임.) */
 
 /* 배지 */
 .ws-badges {
@@ -1923,32 +1912,63 @@ main {
   letter-spacing: 0.03em;
 }
 
-/* 추천 질문 칩 — 2열 그리드, 균일 간격 */
+/* 추천 질문 칩 — 2열 그리드 (최종 정의).
+   위쪽에 있던 플렉스형 .ws-chips는 이 블록이 덮어쓴다. display:grid + !important. */
 .ws-chips {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   width: 100%;
 }
+/* 칩 — 바깥 바탕(#dfdfe4, L3)과 확실히 구분되도록 순백 + 진한 테두리 + 얇은 그림자. */
 .sug-chip {
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
+  border: 1px solid #c7c7cc;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--ink);
   cursor: pointer;
   text-align: left;
   line-height: 1.4;
-  transition: background .12s, border-color .12s, box-shadow .12s;
+  transition: background .12s, border-color .12s, box-shadow .12s, transform .08s;
   font-family: var(--font-text);
   word-break: keep-all;
 }
 .sug-chip:hover {
-  border-color: rgba(26,58,110,.35);
+  border-color: var(--brand-point);
   background: rgba(26,58,110,.04);
   color: var(--ink);
-  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.sug-chip:active { transform: translateY(1px); }
+
+/* 페이지 인디케이터 — 칩 그리드 아래 중앙 정렬된 점 3개. grid-column 전체 span. */
+.sug-pager {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.sug-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #c7c7cc;
+  cursor: pointer;
+  transition: background .15s, transform .15s, width .15s;
+}
+.sug-dot:hover { background: #8e8e93; }
+/* 현재 페이지 점 — 네이비 반전, 살짝 넓적한 pill 형태로 현재 위치 강조 */
+.sug-dot.active {
+  background: var(--brand-point);
+  width: 20px;
+  border-radius: 4px;
 }
 
 /* 로딩 상태 */
