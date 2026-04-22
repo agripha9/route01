@@ -276,10 +276,6 @@ body{
 .ob-label{font-size:14px;font-weight:700;letter-spacing:-0.1px;text-transform:none;color:var(--ink);margin-bottom:6px;display:block}
 /* 필드 설명 inline hint — label 안에 쓰는 회색 부가 설명. */
 .ob-label .ob-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3);font-size:13px}
-/* 툴팁 힌트 — ⓘ 아이콘. 마우스 올리면 title 속성이 브라우저 기본 툴팁으로 표시됨.
-   점선 밑줄은 의도적으로 사용하지 않음 (전체 디자인과 일관성 유지). */
-.ob-label .ob-hint--tooltip{cursor:help;margin-left:2px;color:var(--ink3)}
-.ob-label .ob-hint--tooltip:hover{color:var(--ink2)}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .ob-chip{
