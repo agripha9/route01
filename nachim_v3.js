@@ -3263,8 +3263,8 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-para-margin:0;}',
-      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-para-margin:0;color:#1d1d1f;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
       'tbody tr:nth-child(odd) td{background:#ffffff;}',
@@ -3394,28 +3394,16 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       doc.querySelectorAll('table:not([data-from="blockquote"]) th').forEach(th => {
         th.style.setProperty('background-color', '#8B1A1A', 'important');
         th.style.setProperty('color', '#ffffff', 'important');
-        /* 상하 padding 0, 수평 padding만 유지.
-           이전: padding 4pt 8pt + line-height 1.25 → 셀 내부 총 높이 약 21pt
-                 단, Word altChunk는 padding 영역에 배경색이 전파되지 않아
-                 content-box 위아래로 흰 띠가 남는 현상(시도 3 확인).
-           현재: padding 0 8pt + line-height 2.0 → 셀 내부 총 높이 약 21pt (동등)
-                 배경색이 line-height 영역 전체에 칠해지므로 흰 띠 제거.
-           높이는 기존과 거의 동일하고 시각적 차이 최소화. */
-        th.style.padding = '0 8pt';
+        th.style.padding = '4pt 8pt';
         th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
         th.style.fontSize = '10.5pt';
-        th.style.lineHeight = '2.0';
+        th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
-        /* marked가 th에 <p>를 넣지는 않지만, 안전망으로 내부 자식의 margin/padding 0.
-           Word altChunk HTML 파서가 간혹 빈 <span>이나 다른 래퍼를 삽입하는 경우 대비. */
-        th.querySelectorAll('*').forEach(child => {
-          child.style.margin = '0';
-          child.style.padding = '0';
-        });
+        /* Word 줄 높이/단락 간격 정확도 강제 */
         const prev = th.getAttribute('style') || '';
-        th.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
+        th.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
         // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
@@ -3441,10 +3429,9 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
           child.style.margin = '0';
           child.style.padding = '0';
         });
-        /* Word 단락 간격 제로화 (th와 동일 이유 — 상세 주석은 th 블록 참고).
-           line-height 강제 고정은 다줄 셀에서 배경 잘림/콘텐츠 잘림 유발하므로 제외. */
+        /* Word 줄 높이/단락 간격 정확도 강제 (셀 세로 팽창 방지의 핵심) */
         const prev = td.getAttribute('style') || '';
-        td.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
+        td.setAttribute('style', prev + ';mso-line-height-rule:exactly;mso-line-height-alt:14pt;mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
       });
       // tr에 고정 높이와 cantSplit 유사 힌트 (blockquote 변환 테이블은 제외)
       doc.querySelectorAll('table:not([data-from="blockquote"]) tr').forEach(tr => {
