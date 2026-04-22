@@ -3263,7 +3263,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
       'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;word-break:keep-all;mso-para-margin:0;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:1pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.8;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;word-break:keep-all;mso-para-margin:0;}',
       'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;word-break:keep-all;overflow-wrap:anywhere;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
@@ -3394,25 +3394,27 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       doc.querySelectorAll('table:not([data-from="blockquote"]) th').forEach(th => {
         th.style.setProperty('background-color', '#8B1A1A', 'important');
         th.style.setProperty('color', '#ffffff', 'important');
-        th.style.padding = '4pt 8pt';
+        /* 흰 띠 최소화 전략:
+           Word altChunk는 <th> 배경색을 content-box(line-height 영역)에만 칠하고
+           padding 영역은 흰색으로 남김. padding을 최소화하고 그 높이만큼을 line-height
+           로 대체하면 흰 띠는 1pt 수준으로 줄어들어 육안 구분 불가, 전체 헤더 높이는
+           기존과 비슷하게 유지됨.
+           기존: padding 4pt 8pt + line-height 1.4 (상하 4pt 흰 띠)
+           개선: padding 1pt 8pt + line-height 1.8 (상하 1pt 흰 띠 — 거의 안 보임) */
+        th.style.padding = '1pt 8pt';
         th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
         th.style.fontSize = '10.5pt';
-        th.style.lineHeight = '1.4';
+        th.style.lineHeight = '1.8';
         th.style.verticalAlign = 'middle';
-        /* 헤더 줄바꿈 정책 (옵션 A — 흰 띠보다 표 전체 완성도 우선):
-           - word-break:keep-all — 한국어 단어 단위로만 줄바꿈. "순서" 같은 2글자가
-             세로로 쪼개지는 비전문적 렌더 방지.
-           - nowrap은 쓰지 않음 — 긴 헤더나 컬럼 많은 표에서 본문 셀이 붕괴하는
-             부작용이 더 큼. 헤더가 길면 자연스럽게 단어 경계에서 2줄로.
-           - mso-line-height-alt는 지정하지 않음 — 2줄 헤더에서 둘째 줄 배경이
-             잘리는 흰 띠의 주요 원인. line-height:1.4와 mso-para-margin:0 만으로
-             팽창 방지는 충분. */
+        /* 헤더 줄바꿈 정책 (옵션 A):
+           - word-break:keep-all — 한국어 단어 단위로만 줄바꿈
+           - nowrap 미사용 — 컬럼 수 많거나 긴 헤더에서 본문 셀 붕괴 방지
+           - mso-line-height-alt 미사용 — 2줄 헤더에서 둘째 줄 배경 잘림 방지 */
         th.style.wordBreak = 'keep-all';
         const prev = th.getAttribute('style') || '';
         th.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
-        // Word 색상 출력 강제
         th.setAttribute('bgcolor', '#8B1A1A');
       });
       doc.querySelectorAll('table:not([data-from="blockquote"]) td').forEach(td => {
