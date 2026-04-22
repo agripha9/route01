@@ -3178,7 +3178,18 @@ async function exportAnswer(type, id /*, btn */){
   const dateStr=now.toISOString().slice(0,10);
   const timeStr=now.toTimeString().slice(0,8).replace(/:/g,'');
   const docxFileName=`Route01_자문리포트_${dateStr}_${timeStr}.docx`;
-  const pdfPrintCss=`\n@page{margin:12mm}\nbody{-webkit-print-color-adjust:exact;print-color-adjust:exact}\n@media print{body{margin:0;background:#fff}.page{padding:1cm}}\n`;
+  const pdfPrintCss=`
+@page{margin:12mm}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media print{
+  body{margin:0;background:#fff}
+  .page{padding:1cm}
+  /* 표가 페이지를 넘길 때 헤더가 각 페이지 상단에서 자동 반복되는 현상 제거.
+     브라우저 기본값은 thead{display:table-header-group} → 반복.
+     table-row-group으로 바꾸면 일반 본문 행처럼 처리되어 한 번만 나타남. */
+  thead{display:table-row-group !important}
+}
+`;
 
   if(isPdf){
     const iframe=document.createElement('iframe');
@@ -3390,11 +3401,21 @@ async function exportAnswer(type, id /*, btn */){
         th.style.fontSize = '10.5pt';
         th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
-        /* Word 단락 간격 제로화 (셀 세로 팽창 방지).
-           과거에 `mso-line-height-rule:exactly;mso-line-height-alt:14pt`를 함께 넣었으나,
-           헤더 문구가 2줄 이상이 되면(좁은 컬럼 등) Word가 "첫 줄만 14pt 높이로 칠하고
-           나머지는 배경 없음"으로 해석하여 th 아래쪽에 흰 띠가 생기는 버그가 있었음.
-           단락 간격 0만으로도 팽창 방지는 충분하므로 line-height 강제 고정은 제거. */
+        /* Word 행 높이 팽창 방지 — td와 동일 처리.
+           marked가 th 내용도 <p>로 감쌀 수 있는데, <p>의 기본 margin이 살아 있으면
+           Word가 "텍스트 높이 + <p> 하단 여백"만큼 셀을 키우고, 배경색은 <p> 영역에만
+           칠해져 아래쪽이 흰 띠로 남는 문제가 있음. td처럼 <p>를 풀어버리고 자식
+           margin/padding을 0으로 잡으면 셀 전체가 배경색으로 균일하게 채워진다. */
+        let inner = th.innerHTML
+          .replace(/<p[^>]*>\s*/gi, '')       // <p> 열기 제거
+          .replace(/\s*<\/p>/gi, '<br>')      // </p> → <br>
+          .replace(/(<br\s*\/?>\s*)+$/gi, '') // 끝 <br> 제거
+          .trim();
+        th.innerHTML = inner || '&nbsp;';
+        th.querySelectorAll('*').forEach(child => {
+          child.style.margin = '0';
+          child.style.padding = '0';
+        });
         const prev = th.getAttribute('style') || '';
         th.setAttribute('style', prev + ';mso-para-margin:0;mso-para-margin-top:0;mso-para-margin-bottom:0;');
         // Word 색상 출력 강제
