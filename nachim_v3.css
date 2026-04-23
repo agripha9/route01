@@ -765,12 +765,20 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   line-height:1.28;
   letter-spacing:-0.022em;
 }
+/* H1 — 답변 버블에선 주로 멘토의 한 줄 격언/선언 용도 (특히 Naval).
+   다른 멘토도 쓸 수 있지만, 일반 섹션 제목은 H2를 쓴다.
+   명언집 같은 묵직한 존재감을 위해 크고 이탤릭. */
 .report-card .report-bubble h1{
-  font-size:24px;
-  font-weight:700;
-  margin:1.5rem 0 1rem;
+  font-size:32px;
+  font-weight:800;
+  font-style:italic;
+  letter-spacing:-0.5px;
+  line-height:1.25;
+  margin:1rem 0 2.5rem;
   color:#1d1d1f;
+  padding:0;
 }
+.report-card .report-bubble h1:first-child{margin-top:0.35rem}
 /* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대는 유지. 글자색은 검정. */
 .report-card .report-bubble h2{
   font-size:20px !important;
