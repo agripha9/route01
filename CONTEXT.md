@@ -2,7 +2,7 @@
 
 > **Claude에게**: 새 세션 시작 시 이 파일을 가장 먼저 읽고, 맥락을 파악한 뒤 작업하세요. 세션이 끝날 때(사용자가 "오늘 마무리" 또는 유사 표현) 이 파일을 업데이트하고 commit·push 하세요. 사용자에게 워크플로를 다시 설명하지 마세요 — 이미 알고 있습니다.
 
-최종 업데이트: 2026-04-22
+최종 업데이트: 2026-04-23
 
 ---
 
@@ -33,9 +33,9 @@
 ```
 route01/
 ├── CONTEXT.md           # 이 파일
-├── nachim_v3.html       # 메인 앱 (~895줄)
-├── nachim_v3.css        # 스타일 (~2745줄)
-├── nachim_v3.js         # 로직 (~5385줄)
+├── nachim_v3.html       # 메인 앱 (~890줄)
+├── nachim_v3.css        # 스타일 (~2856줄)
+├── nachim_v3.js         # 로직 (~5901줄)
 ├── index.html           # 루트 → nachim_v3로 리다이렉트
 ├── _redirects           # Cloudflare Pages 리다이렉트
 ├── logo.png
@@ -321,23 +321,154 @@ route01/
 
 ---
 
-## 22. 알려진 이슈 (2026-04-22 시점)
+## 24. 2026-04-23 세션 작업 로그 (21커밋)
+
+답변 품질·UX 정제 + 답변 속도/품질 인프라 착수. 온보딩 버그 수정부터 시작해 모달·로그인·답변 헤더·멘토 프롬프트 전면 재설계·Apple 스타일 답변 리팩터·로더 튜닝까지 진행한 뒤, Phase 1(모델 업그레이드 + 프롬프트 캐싱)까지 완료.
+
+### A. 온보딩·모달·로그인·업로드 다듬기
+- 온보딩 × 확인 모달 + 2개 버그 수정 (자동 멘토 선택 제거, ob 초기값 하드코딩 제거)
+- 배지 시스템 통일: 필수/FREE=네이비 채움+흰글씨, PRO=크림슨 채움+흰글씨, 이모지 제거
+- Apple compact 스타일: 모달 460px, primary 버튼 네이비→회색 `#86868b`
+- 로그인 화면 재디자인: 좌측 패널 L4 `#d4d4da`, 바깥 L2 `#e8e8ec`, 크림슨 이탤릭 타이틀, 셀링포인트 3개 + 멘토 칩
+- 셀링포인트 간격 1.5배 (22→33px, 모바일 16→24px) — `e40b4cd`
+- 업로드존 "관련 자료를 올릴수록 맞춤 자문이 정확해집니다" 힌트
+- "재무제표" 예시 제거 (OCR 품질 이슈)
+
+### B. 답변 헤더 — 멘토 정체성 확립
+- `7289714`, `bfd264f`, `e927819`, `4c45ee6` 답변 헤더 "Route01 AI" → **"Paul Graham [YC] · Route01 AI"**
+- `renderAiHeadInner(aiLabel, mentorOverride)` 헬퍼 도입
+- 버블마다 생성 시점 멘토 고정: `data-mentor` 속성, `addMsg(role,text,files,aiLabel,historyMentor)` 시그니처 확장
+- `saveHistory`에 `mentor` 필드 추가 → 히스토리 복원 시 그 시점 멘토로 복원
+- **멘토별 이니셜 모노그램 아바타**: PG `#F26522` / PT `#1a1a2e` / BC `#FF5A5F` / JH `#76b940` NVIDIA 그린 / NR `#2a2a2a` 차콜 (30×30 원형, 흰 이니셜)
+
+### C. 시스템 프롬프트 전면 재설계
+- `4f4b9c0`, `a910924`, `3fcc734` 근본 원인(공통 `## Executive Summary`가 오프닝 동질화) 제거
+- `buildSys()` 재작성, 기존은 `buildSysLegacy()`로 보존
+- **MENTOR_STYLES 5개 전면 확장**: `[당신은 누구인가]` / `[핵심 철학]` / `[어휘·프레임]` / `[자주 인용하는 사례]` / `[도메인별 접근 방식]` / `[답변 포맷 — 엄수]` / `[톤]` / `[금지]`
+- **멘토별 답변 포맷 차별화** (모두 H2 빨간 막대):
+  - Paul Graham: H1 결론 한 줄(이탤릭) + 에세이 본문 + `## 지금 할 일`
+  - Peter Thiel: `## 잘못된 전제` / `## 진짜 질문` / `## 독점 설계` / `## 오늘의 한 수`
+  - Brian Chesky: `## 지금의 경험` / `## 11성급 버전` / `## 거기로 가는 길` / `## Founder Mode — 이번 주`
+  - Jensen Huang: `## 30년 뒤 그림` / `## 플랫폼 레이어` / `## 지금의 고통` / `## 오늘부터 10년`
+  - Naval: `# 한 줄 격언` (조건부) + `## 진짜 질문` / `## 레버리지` / `## 판단과 복리` / `## 생각해볼 것`
+
+### D. 답변 품질 버그 수정
+- `b194a42`, `5ea4e39` 문장이 H2로 박히는 문제(공통 규칙에 "헤딩 20자 이내 명사구 + 마침표 금지" 추가)
+- `## 지금 할 일` 중복 렌더 → 프롬프트 "같은 섹션 제목 두 번 금지" + `preprocessMarkdown`에 빈 헤딩 제거 + 연속 중복 헤딩 병합 정규식
+- `44afd46`, `821b299`, `b4c9a96` Paul Graham·Naval 오프닝 통일(H1 이탤릭 22px/800)
+- `838670c` H3 하위 섹션 허용 + 표 활용 권장 블록 추가 (멘토 재설계 후 섹션·표 감소 대응)
+
+### E. Apple 스타일 답변 UX 리팩터
+- `c140412`, `7a4c622` 화면 + 내보내기(DOCX·PDF) 양쪽 동기화
+- 롤백 태그: `pre-apple-style-refresh` (`c05b6d9` 시점)
+- 화면: .report-bubble padding 2.25/2.75 → 3/3rem, font-size 14 → 15px, line-height 1.75 → 1.62, H2 20→22px, H3 18→17px, ul 마커 `#86868b`/400 (Apple 점)
+- Export: `EXPORT_DOC_STYLES` + `htmlStyle` 배열 + DOCX 인라인 셀 스타일 모두 11pt/1.62로 동기화
+
+### F. 로딩 애니메이션 재조정
+- `f67f0af` fade 구간 축소 (`FADE_END_PCT` 85→97): 빈 대기 1.65→0.33초
+- `76499a8` 안내 문구 "맞춤형 답변의 품질을 높이기 위해 시간이 다소 걸릴 수 있습니다" 2사이클 후 페이드인
+- `4698405` 안내 문구 위치: 카드 안 → `.ai-body` 바깥 직계 자식, 정렬 왼쪽 → 가운데
+- `a1d17bd` fade-out 3.63→1s, hold 2.2→1s, 사이클 11→8.4s (APPEAR 72% / HOLD 84% / FADE 96%)
+- `LOADER_CYCLE_SEC` 상수로 hint 타이머와 동기화
+
+### G. 헤더 멘토 모달 ↔ 온보딩 동기화
+- `989c955` `ob-mentor-row-badge-wrap` 래퍼 통일, 모달 padding `2.5rem 2.75rem`로 맞춤
+- `478e7ae` **추천 배지 골드 outline 스타일**: `#B8862C` border + `#9C6A1A` text + 흰 배경. FREE(네이비)·PRO(크림슨)과 완전 다른 시각 언어. 선택 시 흰 outline+흰 글씨
+- `paintMentorRecommendation(gridSelector)` 공용 헬퍼 (data-val/data-style 둘 다 처리). `openStyleModal`에서도 호출
+
+### H. Naval 표시명
+- `584ffe5` UI 레이어에서만 `mentorDisplayName()` 헬퍼로 **"Naval Ravikant (AngelList)"** 합성 (키는 그대로 `'Naval Ravikant'` 유지 → localStorage 호환). 적용 4곳: pb-style, style-btn-text, 프로필 모달, 변경 토스트. LLM userCtx와 답변 헤더는 건드리지 않음
+
+### I. 답변 속도/품질 Phase 1 (완료)
+- **Step 1 — 모델 업그레이드** (`bcd5f4a`): `resolveModelId` pick을 문자열 역순 정렬로 변경(최신 우선), opus 슬롯 캐시 추가, 3개 폴백 모두 최신화
+  - 메인·지원사업: `claude-3-5-sonnet-20241022` → `claude-sonnet-4-5-20250929`
+  - 추천 질문: `claude-3-5-haiku-20241022` → `claude-haiku-4-5-20251001`
+  - 사용자 피드백: "품질 상승 잘은 모르겠는데 조금 나아진 듯, 나머지 잘 나옴"
+- **Step 2 — 프롬프트 캐싱** (`617e553`): 메인 답변 `callOnce`와 지원사업 `buildGrantSystem` 둘 다 `system: system` → `system: [{type:'text', text:system, cache_control:{type:'ephemeral'}}]`. 추천 질문은 프롬프트 짧아 제외(<1024 토큰)
+  - 관측 로깅: `console.log('[cache]', {write, read, in, out})`
+  - **실측 검증**: 첫 요청 `write: 5582 read: 0`, 두 번째 요청 `write: 0 read: 5582` → 캐시 히트 정상 동작. 90% 할인 + 지연 단축 효과 활성화
+
+---
+
+## 25. 알려진 이슈 (2026-04-23 시점)
 
 1. **DOCX 표 헤더 흰 줄** — altChunk 파서가 `line-height`로 배경 안 칠함. CSS로는 해결 불가, `docx.js` OOXML 직생성 마이그레이션 필요 (로드맵 #12 일부)
-2. **답변 화면 blockquote/h3/h4의 네이비 tint 의심** — 2026-04-21부터 표류 중, 재현·조사 미완
-3. **숫자 리스트 들여쓰기** — `1. 2.` 정렬 불일치 케이스 있음
-4. **표 화면/DOCX/PDF 렌더 높이 차이** — line-height·padding 3군데 일치화 미완
+2. **숫자 리스트 들여쓰기** — `1. 2.` 정렬 불일치 케이스 있음 (2026-04-22부터 표류)
+3. **표 화면/DOCX/PDF 렌더 높이 차이** — 4-23 Apple 리팩터에서 11pt/1.62로 화면과 동기화했으나 실사용 검증 미완
+4. **Paul Graham 에세이 부족한 H2·표** — 멘토별 포맷 차별화로 `## 지금 할 일` 1개만 남은 구조. `838670c`에서 공통 규칙에 H3·표 활용 보강했지만 실사용 모니터링 필요
+5. **다른 멘토 답변 톤 체감 확인 미완** — Peter Thiel/Chesky/Huang/Naval 실제 답변에서 포맷·톤이 의도대로 나오는지 사용자 체감 관찰 필요
 
-## 23. 다음 세션 시작 시 권장 순서
+---
 
-**Phase B 후보** (사용자가 우선순위 지정 필요):
+## 26. 다음 세션 시작 시 권장 순서
+
+### 🔴 최우선: Phase 1 / Step 3 — 스트리밍 (1~2시간 작업)
+
+Phase 1의 3단계 중 마지막. **체감 대기 시간 극적 단축**이 목표.
+
+**범위**:
+- 메인 답변 경로만 스트리밍 (가장 체감 큰 경로)
+- 지원사업 도우미·추천 질문 생성은 non-stream 유지
+- 로더 → 스트리밍 전환: 첫 토큰 도착 시 로더 제거하고 답변 버블 노출 시작
+- 점진적 마크다운 렌더: 토큰 올 때마다 버블 내용 업데이트
+- `continue` 루프(`max_tokens` 도달 시 이어쓰기)도 스트리밍 유지
+
+**구현 포인트**:
+- `fetch`로 SSE 수신 → ReadableStream 파싱
+- Anthropic 이벤트 포맷: `message_start` → `content_block_delta` (여러 개) → `content_block_stop` → `message_delta` → `message_stop`
+- 스트리밍 중에는 `preprocessMarkdown`의 중복 헤딩 제거 로직이 부분 텍스트에서 오작동할 수 있음 → **스트리밍 중 최소 파이프라인으로 렌더**하고 **완료 시 전체 재렌더**하는 2패스 구조
+- stream 응답은 usage 정보가 `message_start.usage`와 `message_delta.usage`로 분산됨 → cache hit 로깅 코드 함께 수정
+
+### 🟡 다음: Phase 2 — 복잡도 기반 모델 라우팅 + RAG 경량화 (1~2주)
+
+**2-A. Sonnet/Opus 라우팅**
+- 판단 기준: 첨부 파일 있음 → Opus / 질문에 "분석·전략·시나리오·비교·계획" 포함 or 토큰 > 200 → Opus / 나머지 Sonnet 4.6
+- Opus 4.7 `$5/$25` (예전 4.1 대비 67% 인하), 평균 비용 +20~30% 증가 예상
+- 유료 플랜과 연결: FREE=Sonnet only, PRO=Opus 자동 라우팅
+
+**2-B. 업로드 PDF 경량 RAG**
+- 현재: PDF 전체 텍스트를 매 요청마다 프롬프트에 주입 → 토큰 낭비
+- 개선: 청크 분할 → 브라우저 로컬 벡터 검색(TF-IDF or 경량 임베딩) → 질문 관련 청크만 주입
+- **기대 효과**: 토큰 70~90% 절감 + 관련성 향상
+- 저장은 localStorage/IndexedDB, API 호출 없이 클라이언트 측 구현 가능
+
+### 🟢 장기: Phase 3 — Route01 지식 베이스 구축 (2~4주)
+
+**경쟁 서비스가 따라올 수 없는 해자 만들기**
+
+**3-A. 한국 스타트업 KB 수집**
+- 한국 VC 리스트·투자 트렌드
+- K-스타트업·TIPS·예비창업패키지 상세 정보
+- 한국 스타트업법·개인정보보호법·공정거래법 동향
+- 국내 IR 덱 사례·PMF 사례·피보팅 사례
+- 업종별 벤치마크 (SaaS CAC·LTV·Churn)
+- 멘토 에세이·인터뷰 transcript (법적 허용 범위)
+
+**3-B. 벡터화 + 검색 파이프라인**
+- 선택지: Anthropic Contextual Retrieval (임베딩 + BM25 + rank fusion) 또는 Claude Projects의 자동 RAG
+- **Contextual Retrieval** = 검색 실패율 67% 감소 (Anthropic 공식 발표 기법)
+
+**3-C. 답변 citation 표시**
+- 답변에 근거 자료 인용(출처 hover·링크)
+- 신뢰도 극대화
+
+### 로드맵 나머지 (시점 미정)
+
 - **#4 약관·개인정보처리방침**: 유료 서비스 기준 문서 초안 + 접근 동의 UI
 - **#9 유료화 정책·결제 연동**: Free vs PRO 요금제 확정 → 토스페이먼츠/포트원 연동
 - **#10 마이페이지**: PW 변경, 탈퇴, 요금제 확인/변경 화면
-- **#11 스타트업 버티컬 차별화 전략** (가장 중요): 기능·UX 차원의 차별화 기획
-- **#12 Apple UI/UX 리팩터 지속**: 실제 답변 렌더링 시 관찰되는 이슈들 수정
+- **#12 Apple UI/UX 리팩터 지속** (진행 중)
 
-**관찰 필요**:
-- 멘토 답변 톤 실사용 관찰 (Peter Thiel/Naval Ravikant 선택 시 고유 어휘·앵커 유지되는지)
-- 추천 질문 페이지네이션 실제 사용성 (3페이지 넘나들 때 혼란 여부)
-- 사이드바 토글 localStorage 상태 유지 정상 작동
+### 세션 시작 체크리스트
+
+1. 이 CONTEXT.md 읽기
+2. `git log --oneline -10`으로 최근 커밋 확인
+3. **가장 최근 세션의 "알려진 이슈"와 "다음 세션 권장 순서" 블록** 재확인
+4. 사용자 지시 대기 (또는 권장 순서의 최우선 작업 제안)
+5. **한국어로 응답, ask_user_input 버튼 비선호**
+
+### 사용자 선호·설정
+- Chrome "창 닫으면 사이트 데이터 삭제" OFF + `[*.]route01.kr` 쿠키 예외 추가됨
+- 품질 향상 시 가격 인상 의향 있음 (Opus 라우팅 OK)
+- 정식 오픈 전 Supabase 백엔드 도입 필요 (Phase 2 이후)
+- Apple 스타일, 네이비 `#1a3a6e` / 크림슨 `#8B1A1A`, 이모지·장식 아이콘 금지
