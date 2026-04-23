@@ -1099,15 +1099,14 @@ function showOnboardingCancelConfirm(target){
   m.id = 'ob-cancel-modal';
   m.style.zIndex = '9999';
   m.innerHTML = `
-    <div class="modal" style="max-width:420px">
+    <div class="modal" style="max-width:440px">
       <div class="modal-title">프로필 입력을 취소할까요?</div>
       <div class="modal-sub">
-        지금 종료하면 입력하신 내용은 저장되지 않습니다.<br>
-        다음에 다시 처음부터 입력하셔야 맞춤 자문을 받으실 수 있습니다.
+        지금 종료하면 입력하신 내용은 저장되지 않습니다. 다음에 다시 처음부터 입력하셔야 맞춤 자문을 받으실 수 있습니다.
       </div>
-      <div class="modal-btn-row" style="flex-wrap:nowrap">
-        <button type="button" class="modal-btn pri" id="ob-cancel-continue" style="flex:1">계속 입력</button>
-        <button type="button" class="modal-btn modal-btn--danger" id="ob-cancel-discard" style="flex:1">입력 취소</button>
+      <div class="modal-btn-row">
+        <button type="button" class="modal-btn pri" id="ob-cancel-continue">계속 입력</button>
+        <button type="button" class="modal-btn modal-btn--danger" id="ob-cancel-discard">입력 취소</button>
       </div>
     </div>`;
   document.body.appendChild(m);

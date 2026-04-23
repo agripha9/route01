@@ -1177,12 +1177,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .modal-bg.open{display:flex}
 .modal{
   position:relative;
-  background:var(--bg);border-radius:var(--r-lg);padding:1.75rem 2rem;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;
+  background:var(--bg);border-radius:var(--r-lg);padding:1.75rem 2rem;width:460px;max-width:92vw;max-height:85vh;overflow-y:auto;
   box-shadow:var(--shadow-md);border:1px solid rgba(0,0,0,0.06)
 }
 .modal-wide{width:640px}
-.modal-title{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1.14;letter-spacing:0.196px;color:var(--ink);margin-bottom:.35rem}
-.modal-sub{font-size:14px;color:var(--gray-80);margin-bottom:1.25rem;line-height:1.43;letter-spacing:-0.224px}
+.modal-title{font-family:var(--font-display);font-size:22px;font-weight:600;line-height:1.18;letter-spacing:-0.02em;color:var(--ink);margin-bottom:.35rem}
+.modal-sub{font-size:14px;color:var(--gray-80);margin-bottom:1.25rem;line-height:1.5;letter-spacing:-0.15px}
 /* 스타일(멘토) 모달 — 제목·부제 가운데 정렬 (온보딩 카드와 톤 일관) */
 #style-modal .modal-title,
 #style-modal .modal-sub{text-align:center}
@@ -1203,21 +1203,24 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-label{font-size:12px;font-weight:600;text-transform:none;letter-spacing:-0.12px;color:var(--ink3);margin-bottom:6px;display:block}
 .m-val{font-size:14px;color:var(--ink);font-weight:400;letter-spacing:-0.224px}
 .modal-edit{
-  width:100%;margin-top:1rem;padding:10px 14px;border-radius:var(--r);
-  background:var(--cta);color:#fff;border:1px solid var(--cta);
-  font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s;
+  width:100%;margin-top:1rem;padding:9px 14px;border-radius:var(--r);
+  background:var(--brand-point);color:#fff;border:1px solid var(--brand-point);
+  font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s, background .15s, border-color .15s;
+  letter-spacing:-0.15px;
 }
-.modal-edit:hover{opacity:.88;}
-.modal-edit:hover{opacity:.88}
-.modal-btn-row{display:flex;gap:8px;margin-top:1.25rem;flex-wrap:wrap}
+.modal-edit:hover{background:var(--brand-point-press);border-color:var(--brand-point-press);}
+.modal-btn-row{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:nowrap}
+/* Apple-style compact 버튼 — 14px 폰트, 9px 세로 패딩, 얇은 라디우스 */
 .modal-btn{
-  flex:1;min-width:100px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);
-  font-size:17px;font-weight:400;cursor:pointer;background:var(--bg2);color:var(--ink);
-  transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease)
+  flex:1;min-width:0;padding:9px 16px;border-radius:var(--r);border:1px solid var(--border);
+  font-size:14px;font-weight:500;cursor:pointer;background:#fff;color:var(--ink);
+  font-family:var(--font-text);letter-spacing:-0.15px;line-height:1.4;
+  transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease),color .15s var(--ease);
 }
-.modal-btn:hover{opacity:.92;border-color:#86868b;background:var(--filter-bg)}
-.modal-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta)}
-.modal-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
+.modal-btn:hover{border-color:#86868b;background:var(--filter-bg)}
+/* primary — 네이비 채움 (기본 색상 체계 일관) */
+.modal-btn.pri{background:var(--brand-point);color:#fff;border-color:var(--brand-point)}
+.modal-btn.pri:hover{opacity:1;background:var(--brand-point-press);border-color:var(--brand-point-press)}
 
 /* API 키 모달 필드 (HTML 인라인 보완) */
 .apple-field-label{font-size:12px;font-weight:600;color:var(--ink3);display:block;margin-bottom:8px;letter-spacing:-0.12px}
@@ -1239,8 +1242,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 .key-vis-toggle:hover{color:var(--ink)}
 .key-status-msg{font-size:11px;margin-top:6px;color:var(--gray-48);letter-spacing:-0.12px}
-.modal-btn--danger{background:#fff;color:#c41e1a;border-color:rgba(196,30,26,0.35)}
-.modal-btn--danger:hover{background:#fff5f5;border-color:rgba(196,30,26,0.5)}
+.modal-btn--danger{background:#fff;color:var(--cta);border-color:rgba(139,26,26,0.4)}
+.modal-btn--danger:hover{background:#fff5f5;border-color:var(--cta);color:var(--cta)}
 
 /* ASIDE TABS */
 .aside-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
