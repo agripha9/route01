@@ -352,8 +352,8 @@ body{
 .ob-btn:hover{opacity:.92}
 .ob-btn.sec{background:var(--white);color:var(--ink2)}
 .ob-btn.sec:hover{border-color:#86868b;background:var(--filter-bg)}
-.ob-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta)}
-.ob-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
+.ob-btn.pri{background:var(--brand-point);color:#fff;border-color:var(--brand-point)}
+.ob-btn.pri:hover{background:var(--brand-point-press);border-color:var(--brand-point-press)}
 .ob-btn:disabled{opacity:.4;cursor:not-allowed}
 .ind-tag{
   display:inline-flex;align-items:center;padding:6px 12px;border-radius:980px;border:1px solid var(--border);
@@ -2352,23 +2352,21 @@ main {
    온보딩 Step1 — 필수 표시 + 컴팩트 칩
 ══════════════════════════════════════ */
 
-/* 필수 배지 */
+/* 필수 배지 — 멘토 섹션의 FREE 배지와 동일한 pill 언어 (흰 배경 + 네이비 outline) */
 .ob-required {
   display: inline-block;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--ink3);
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin-left: 4px;
-  letter-spacing: 0.02em;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--brand-point);
+  background: #fff;
+  border: 1px solid var(--brand-point);
+  border-radius: 980px;
+  padding: 3px 9px;
+  margin-left: 6px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
   vertical-align: middle;
-  text-transform: uppercase;
-}
-.ob-required::before {
-  content: "· ";
-  color: var(--ink3);
+  text-transform: none;
 }
 
 /* 컴팩트 칩 그리드 — 위아래 폭 최소화 */
