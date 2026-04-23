@@ -684,10 +684,47 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   display:block;
 }
 .ai-head-name{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
   font-size:12px;
-  font-weight:700;
+  font-weight:400;
   color:var(--ink3);
-  letter-spacing:0.02em;
+  letter-spacing:-0.1px;
+  flex-wrap:wrap;
+}
+.ai-head-mentor{
+  font-size:14px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:-0.3px;
+}
+.ai-head-tag{
+  display:inline-block;
+  font-size:10px;
+  font-weight:600;
+  color:var(--ink2);
+  background:#fff;
+  border:1px solid var(--border);
+  padding:2px 7px;
+  border-radius:980px;
+  letter-spacing:0.04em;
+  line-height:1.3;
+}
+.ai-head-sep{
+  color:var(--ink3);
+  opacity:0.55;
+  font-weight:400;
+  margin:0 -2px;
+}
+.ai-head-brand,.ai-head-mode{
+  font-size:12px;
+  font-weight:500;
+  color:var(--ink3);
+  letter-spacing:-0.1px;
+}
+.ai-head-brand .brand{
+  font-weight:700;
 }
 .report-card .report-bubble{
   background:transparent;border:none;border-radius:0;box-shadow:none;

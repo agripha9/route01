@@ -1905,6 +1905,24 @@ async function getAiSuggestedQuestions(domainKey){
   }
 }
 
+/* 답변 버블 상단 헤더 — 로고 + 현재 선택된 멘토(이름·태그) + Route01 AI 보조 라벨.
+   aiLabel이 지정되면 그것을 우선(예: '지원 사업 도우미'). */
+function renderAiHeadInner(aiLabel){
+  const logoHTML = `<span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span>`;
+  /* 명시 라벨(지원사업 도우미 등)은 그대로 표시 */
+  if(aiLabel){
+    return `${logoHTML}<span class="ai-head-name"><span class="brand">Route01</span> AI <span class="ai-head-sep">·</span> <span class="ai-head-mode">${esc(String(aiLabel))}</span></span>`;
+  }
+  /* 기본: 현재 프로필의 멘토를 앞세우기 */
+  const styleKey = profile.style || 'Paul Graham (YC)';
+  const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[styleKey] : null;
+  /* 'Paul Graham (YC)' → 'Paul Graham' 로 괄호 앞부분만 */
+  const mentorName = styleKey.replace(/\s*\(.*\)\s*$/, '').trim();
+  const tag = meta ? meta.tag : '';
+  const tagHTML = tag ? `<span class="ai-head-tag">${esc(tag)}</span>` : '';
+  return `${logoHTML}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI 멘토링</span></span>`;
+}
+
 function addMsg(role,text,files,aiLabel){
   rmWelcome();
   const chat=document.getElementById('chat');
@@ -1922,7 +1940,7 @@ function addMsg(role,text,files,aiLabel){
       cr.setAttribute('data-for-export',id);
       cr.innerHTML=renderMD(safe);
     }
-    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
+    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner(aiLabel)}</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
   } else {
     const fileHtml=(files&&files.length)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${files.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid #d2d2d7;border-radius:20px;padding:2px 9px;font-size:11px;color:#1d1d1f;font-weight:500">${getIcon(f.name)} ${f.name}</span>`).join('')}</div>`:'';
     el.className = 'message user-msg';
@@ -1935,7 +1953,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head"><span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span><span class="ai-head-name"><span class="brand">Route01</span> AI</span></div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner()}</div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div></div></div></div>`;
   chat.appendChild(el);
   /* 로더 내용은 폭 측정 후 동적으로 채움 — appendChild 직후 DOM 렌더가 끝나야 폭을 잴 수 있음 */
   requestAnimationFrame(()=>{
