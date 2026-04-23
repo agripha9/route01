@@ -1438,6 +1438,18 @@ function toggleSidebar(){
   const currentlyClosed = aside.classList.contains('collapsed');
   applySidebarCollapsed(!currentlyClosed);
 }
+/* 멘토 표시명: 상단 pill·프로필 배지 등 UI에 표시할 때 사용.
+   키가 이미 괄호를 포함하면(Paul Graham (YC), Peter Thiel (Founders Fund) 등) 그대로,
+   없으면 MENTOR_META.tag를 붙여서 '이름 (소속)' 형태로 정규화한다.
+   예: 'Naval Ravikant' + tag 'AngelList' → 'Naval Ravikant (AngelList)' */
+function mentorDisplayName(styleKey){
+  const key = styleKey || 'Paul Graham (YC)';
+  if(/\(.+\)\s*$/.test(key)) return key;
+  const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[key] : null;
+  const tag = meta && meta.tag ? meta.tag : '';
+  return tag ? `${key} (${tag})` : key;
+}
+
 function applyProfile(){
   const name=profile.name||profile.industry||null;
   const pname=document.getElementById('pname');
@@ -1445,9 +1457,9 @@ function applyProfile(){
   const pbInfo=document.getElementById('pb-info');
   if(pbInfo) pbInfo.textContent=(profile.industry&&profile.stage)?`${profile.stage} · ${profile.industry}`:'프로필 미설정';
   const styleEl=document.getElementById('pb-style');
-  if(styleEl) styleEl.textContent=profile.style||'Paul Graham (YC)';
+  if(styleEl) styleEl.textContent=mentorDisplayName(profile.style);
   const styleBtn=document.getElementById('style-btn-text');
-  if(styleBtn) styleBtn.textContent=profile.style||'Paul Graham (YC)';
+  if(styleBtn) styleBtn.textContent=mentorDisplayName(profile.style);
 }
 
 /* (popular questions tab removed) */
@@ -3803,7 +3815,7 @@ function openModal(){
     <div class="modal-row"><span class="m-label">팀 규모</span><div class="m-val">${profile.team}</div></div>
     ${profile.mrr?`<div class="modal-row"><span class="m-label">월 매출</span><div class="m-val">${profile.mrr}</div></div>`:''}
     ${profile.concern?`<div class="modal-row"><span class="m-label">핵심 고민</span><div class="m-val" style="font-size:13px;line-height:1.5">${profile.concern}</div></div>`:''}
-    ${profile.style?`<div class="modal-row"><span class="m-label">멘토링 스타일</span><div class="m-val">${profile.style}</div></div>`:''}
+    ${profile.style?`<div class="modal-row"><span class="m-label">멘토링 스타일</span><div class="m-val">${esc(mentorDisplayName(profile.style))}</div></div>`:''}
   `:'<div style="font-size:14px;color:var(--ink3);margin-bottom:1rem">아직 프로필이 설정되지 않았어요.</div>';
   document.getElementById('modal').classList.add('open');
 }
@@ -3899,7 +3911,7 @@ function applyMentorChange(s){
   const pill = document.querySelector('.header-mentor-pill');
   const toast = document.createElement('div');
   toast.className = 'mentor-toast';
-  toast.textContent = `${s} 스타일로 변경됐습니다`;
+  toast.textContent = `${mentorDisplayName(s)} 스타일로 변경됐습니다`;
   toast.style.cssText = [
     'position:fixed',
     'background:#1d1d1f',
@@ -5146,7 +5158,7 @@ function syncUnifiedBadges() {
   if(co) co.textContent = concernText;
 
   /* 상단 멘토 뱃지 */
-  if(mentorHdr) mentorHdr.textContent = profile.style || 'Paul Graham (YC)';
+  if(mentorHdr) mentorHdr.textContent = mentorDisplayName(profile.style);
 }
 
 /* ──────────────────────────────────────────────────────────────────
