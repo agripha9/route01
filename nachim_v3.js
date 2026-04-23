@@ -1049,6 +1049,22 @@ function cancelOnboardingEdit(){
     && p.style
   );
 
+  /* DIAG — 원인 추적용. 브라우저 콘솔에서 확인 */
+  try{
+    console.log('[r01-cancel-diag]', {
+      ob_snapshot: JSON.parse(JSON.stringify(ob)),
+      saved_snapshot: saved,
+      isComplete_saved: isComplete(saved),
+      isComplete_ob: isComplete(ob),
+      ob_keys_nonempty: Object.keys(ob).filter(k=>{
+        const v = ob[k];
+        if(Array.isArray(v)) return v.length>0;
+        if(typeof v === 'string') return v.trim().length>0;
+        return v != null;
+      })
+    });
+  }catch(e){}
+
   if(isComplete(saved)){
     /* 편집 모드 — 변경사항 폐기하고 기존 프로필로 */
     document.getElementById('onboarding').classList.add('hidden');
