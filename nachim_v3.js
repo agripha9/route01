@@ -1908,15 +1908,36 @@ async function getAiSuggestedQuestions(domainKey){
   }
 }
 
+/* 멘토별 이니셜 모노그램 아바타 설정 — 연상 가능한 색상 계열 사용 (상표권 회피).
+   실제 브랜드 로고를 쓰지 않고, 각 멘토가 연관된 맥락의 색감만 차용. */
+const MENTOR_AVATAR = {
+  'Paul Graham (YC)':           { initials: 'PG', bg: '#F26522', fg: '#fff' }, // YC 오렌지 톤
+  'Peter Thiel (Founders Fund)':{ initials: 'PT', bg: '#1a1a2e', fg: '#fff' }, // 진남색
+  'Brian Chesky (Airbnb)':      { initials: 'BC', bg: '#FF5A5F', fg: '#fff' }, // 산호 톤
+  'Jensen Huang (NVIDIA)':      { initials: 'JH', bg: '#76b900', fg: '#fff' }, // NVIDIA 녹색 톤
+  'Naval Ravikant':             { initials: 'NR', bg: '#2a2a2a', fg: '#fff' }  // 차콜
+};
+
+/* Route01 브랜드 로고 — 지원사업 도우미 등 명시적 비-멘토 라벨 케이스에서 사용 */
+function renderBrandLogoHTML(){
+  return `<span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span>`;
+}
+
+/* 멘토별 이니셜 아바타 HTML */
+function renderMentorAvatarHTML(styleKey){
+  const av = MENTOR_AVATAR[styleKey];
+  if(!av) return renderBrandLogoHTML(); // 알 수 없는 멘토면 브랜드 로고로 fallback
+  return `<span class="ai-head-av ai-head-av--mentor" style="background:${av.bg};color:${av.fg}">${av.initials}</span>`;
+}
+
 /* 답변 버블 상단 헤더 — 로고 + 현재 선택된 멘토(이름·태그) + Route01 AI 보조 라벨.
    aiLabel이 지정되면 그것을 우선(예: '지원 사업 도우미').
    mentorOverride가 지정되면 profile.style 대신 그 값으로 렌더 — 이 버블이 생성된 시점의
    멘토를 고정해두기 위함. */
 function renderAiHeadInner(aiLabel, mentorOverride){
-  const logoHTML = `<span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span>`;
-  /* 명시 라벨(지원사업 도우미 등)은 그대로 표시 */
+  /* 명시 라벨(지원사업 도우미 등) — 브랜드 로고 유지, 멘토와 무관한 맥락 */
   if(aiLabel){
-    return `${logoHTML}<span class="ai-head-name"><span class="brand">Route01</span> AI <span class="ai-head-sep">·</span> <span class="ai-head-mode">${esc(String(aiLabel))}</span></span>`;
+    return `${renderBrandLogoHTML()}<span class="ai-head-name"><span class="brand">Route01</span> AI <span class="ai-head-sep">·</span> <span class="ai-head-mode">${esc(String(aiLabel))}</span></span>`;
   }
   /* 기본: override가 있으면 그것, 없으면 현재 프로필의 멘토 */
   const styleKey = mentorOverride || profile.style || 'Paul Graham (YC)';
@@ -1925,7 +1946,7 @@ function renderAiHeadInner(aiLabel, mentorOverride){
   const mentorName = styleKey.replace(/\s*\(.*\)\s*$/, '').trim();
   const tag = meta ? meta.tag : '';
   const tagHTML = tag ? `<span class="ai-head-tag">${esc(tag)}</span>` : '';
-  return `${logoHTML}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI</span></span>`;
+  return `${renderMentorAvatarHTML(styleKey)}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI</span></span>`;
 }
 
 function addMsg(role,text,files,aiLabel,historyMentor){
