@@ -956,7 +956,9 @@ function computeRecommendedMentor(){
   return best;
 }
 
-/* Step 3 진입 시 추천 멘토 배지 렌더. 이미 사용자가 멘토를 고른 상태면 추천 표시만 하고 선택은 유지. */
+/* Step 3 진입 시 추천 멘토에 배지만 표시. 자동 선택은 하지 않음 —
+   사용자가 직접 클릭해야 ob.style에 값이 들어간다. 이렇게 해야
+   cancelOnboardingEdit()에서 "완성됐다"고 오판하지 않는다. */
 function applyMentorRecommendation(){
   const recommended = computeRecommendedMentor();
   const rows = document.querySelectorAll('#style-grid .ob-mentor-row');
@@ -975,18 +977,6 @@ function applyMentorRecommendation(){
       }
     }
   });
-  /* 아직 멘토 선택 전이면 추천 멘토를 기본 선택 (사용자가 바꾸면 그대로 적용) */
-  if(!ob.style){
-    /* PRO 멘토는 자동 선택하지 않음 — Free 두 명 중 하나만 자동 */
-    const freeRecommended = (recommended === 'Paul Graham (YC)' || recommended === 'Peter Thiel (Founders Fund)')
-      ? recommended : 'Paul Graham (YC)';
-    const row = [...rows].find(r => r.dataset.val === freeRecommended);
-    if(row){
-      row.classList.add('sel');
-      ob.style = freeRecommended;
-      validate();
-    }
-  }
 }
 /* oninput 바인딩은 DOMContentLoaded에서 처리 */
 function goStep(n) {
@@ -997,7 +987,7 @@ function goStep(n) {
     const dot=document.getElementById('s'+i);
     if(dot) dot.classList.toggle('done',i<=n);
   }
-  /* Step 3 진입 시: 추천 멘토 배지 렌더링 + 기본 선택(Free만) */
+  /* Step 3 진입 시: 추천 멘토 배지만 렌더링 (자동 선택 없음 — 사용자가 직접 선택) */
   if(n === 3){
     applyMentorRecommendation();
   }
