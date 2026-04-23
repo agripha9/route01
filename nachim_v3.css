@@ -1456,7 +1456,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .auth-brand-mentors{margin-top:0;text-align:center;}
 .auth-mentor-label{font-size:18px;font-weight:700;letter-spacing:-0.3px;text-transform:none;color:var(--ink);margin-bottom:14px;line-height:1.35;}
 .auth-mentor-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
-.auth-mentor-chip{display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--border);padding:6px 14px;border-radius:980px;letter-spacing:-0.15px;line-height:1.3;}
+.auth-mentor-chip{display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:#fff;background:var(--ink);border:1px solid var(--ink);padding:6px 14px;border-radius:980px;letter-spacing:-0.15px;line-height:1.3;}
 
 /* 셀링 포인트 — 좌측 로그인 패널 */
 .auth-sellpoints{display:flex;flex-direction:column;gap:22px;width:100%;margin:0.5rem 0 2.25rem;padding-left:0;text-align:left;align-self:stretch;transform:translateX(36px);}
