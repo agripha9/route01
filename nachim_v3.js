@@ -828,7 +828,7 @@ let profile = {};
 let domain = 'strategy';
 let messages = [];
 let busy = false;
-let ob = {industry:'',sector:[],sectorOther:'',stage:'',target:'',team:'',mrr:'',invest:'',name:'',concern:'',style:'Paul Graham (YC)'};
+let ob = {industry:'',sector:[],sectorOther:'',stage:'',target:'',team:'',mrr:'',invest:'',name:'',concern:'',style:''};
 let step = 1;
 
 /* ─── 온보딩 ────────────────────────── */
