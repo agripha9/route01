@@ -2167,7 +2167,7 @@ function addMsg(role,text,files,aiLabel,historyMentor){
 }
 /* 로더 사이클 길이 (초). buildRouteLoader 내부 CYCLE_SEC과 동기화 필요.
    바꿀 때 두 곳 다 같이 수정. */
-const LOADER_CYCLE_SEC = 11;
+const LOADER_CYCLE_SEC = 8.4;
 
 /* 2사이클 후 안내 문구를 띄우기 위한 타이머 ID. hideLoad 때 정리. */
 let _loaderHintTimer = null;
@@ -2204,20 +2204,20 @@ function showLoad(){
    - 결과: 0부터 순차 등장 → 1까지 전부 보임 → 전원 동시 fade-out → 전원 숨은 채 대기 → 다시 0부터 */
 function buildRouteLoader(loader){
   /* ─── 설정값 ─── */
-  const CYCLE_SEC      = 11;     // 총 사이클(초). 이전에 사용자가 선호했던 값.
+  const CYCLE_SEC      = 8.4;    // 총 사이클(초). LOADER_CYCLE_SEC 과 동기화 필요.
   const SPACING_PX     = 18;     // 점 1개당 평균 할당 폭. 작을수록 개수 증가.
   const MIN_DOTS       = 11;     // 모바일 최소 보장
   const MAX_DOTS       = 43;     // 초광폭 상한 (4k+3 형태 준수 — 양끝 대칭 보장)
   const NODES_EVERY    = 4;      // N번째 점마다 노드로 교체
 
   /* 사이클 내 구간 비율 (합이 1.0 넘지 않게):
-     [0%  ~ APPEAR_END%] — 순차 등장
-     [APPEAR_END% ~ HOLD_END%] — 전원 hold
-     [HOLD_END% ~ FADE_END%]   — 일괄 fade-out
-     [FADE_END% ~ 100%]        — 전원 숨김 대기 (다음 사이클 전 여백) */
-  const APPEAR_END_PCT = 55;
-  const HOLD_END_PCT   = 64;
-  const FADE_END_PCT   = 97;
+     [0%  ~ APPEAR_END%] — 순차 등장      (6.05s)
+     [APPEAR_END% ~ HOLD_END%] — 전원 hold (1.0s)
+     [HOLD_END% ~ FADE_END%]   — 일괄 fade-out (1.0s)
+     [FADE_END% ~ 100%]        — 전원 숨김 대기 (0.35s 여백) */
+  const APPEAR_END_PCT = 72;
+  const HOLD_END_PCT   = 84;
+  const FADE_END_PCT   = 96;
 
   /* ─── 1. 폭 측정 → 점+노드 개수 결정 ─── */
   const totalWidth = loader.getBoundingClientRect().width || 0;
