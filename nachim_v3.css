@@ -1449,7 +1449,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .auth-brand-inner{position:relative;z-index:1;max-width:400px;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0.6rem;}
 .auth-brand-logo{height:64px;width:auto;display:block;margin-bottom:0;filter:none;}
 .auth-brand-kicker{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:0;}
-.auth-brand-title{font-family:var(--font-display);font-size:clamp(22px,2.5vw,34px);font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:-1.5px;margin-bottom:0.9rem;}
+.auth-brand-title{font-family:var(--font-display);font-size:clamp(28px,3.2vw,42px);font-weight:900;font-style:italic;color:var(--cta);line-height:1.05;letter-spacing:-1.8px;margin-bottom:0.9rem;}
 .auth-brand-desc{font-size:15px;color:var(--ink2);line-height:1.6;margin-bottom:2rem;}
 .auth-brand-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;justify-content:center;}
 .auth-pill{font-size:12px;font-weight:500;color:var(--ink2);background:#fff;border:1px solid var(--border);padding:5px 12px;border-radius:980px;white-space:nowrap;}
@@ -1546,7 +1546,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   .auth-shell{grid-template-columns:1fr;min-height:auto;}
   .auth-brand{padding:1.5rem 1.25rem;border-right:none;border-bottom:1px solid var(--border);}
   .auth-brand-logo{height:48px;margin-bottom:0.5rem;}
-  .auth-brand-title{font-size:22px;margin-bottom:1rem;}
+  .auth-brand-title{font-size:26px;margin-bottom:1rem;}
   .auth-brand-desc,.auth-brand-mentors{display:none;}
   .auth-sellpoints{gap:14px;margin-bottom:0;}
   .auth-sp-head{font-size:16px;}
@@ -2344,7 +2344,12 @@ main {
 .auth-brand-logo  { height: 72px !important; margin-bottom: 6px !important; }
 .auth-brand-kicker { margin-bottom: 4px !important; font-size: 12px !important; }
 .auth-brand-title {
-  font-size: clamp(24px, 3.2vh, 38px) !important;
+  font-size: clamp(28px, 4vh, 46px) !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  color: var(--cta) !important;
+  letter-spacing: -1.8px !important;
+  line-height: 1.05 !important;
   margin-bottom: 1.5rem !important;
 }
 .auth-brand-mentors { margin-top: 0 !important; }
