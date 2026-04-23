@@ -3265,46 +3265,46 @@ function buildExportMetaLine(){
 }
 
 /*보내기(DOCX/PDF) 공통 HTML — Word altChunk / 인쇄 미리보기 겸용 */
-const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:10.5pt;line-height:1.7;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
+const EXPORT_DOC_STYLES=`body{font-family:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:11pt;line-height:1.62;margin:0;background:#f5f5f7;color:#1d1d1f;letter-spacing:-0.008em}
 .brand{font-weight:700;letter-spacing:-0.03em;font-style:normal}
 .page{padding:1.8cm 2cm}
-.card{background:#fff;border:none;border-radius:12px;padding:26px 30px;box-shadow:none}
+.card{background:#fff;border:none;border-radius:12px;padding:30px 32px;box-shadow:none}
 .title{font-size:22px;color:#1d1d1f;margin:0 0 6px;font-weight:700;letter-spacing:-.028em;line-height:1.25}
-.meta{font-size:12px;color:#6e6e73;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e5e5ea}
+.meta{font-size:12px;color:#6e6e73;margin:0 0 22px;padding-bottom:14px;border-bottom:1px solid #e5e5ea}
 .content{max-width:100%}
-p{margin:0 0 14px;color:#1d1d1f}
+p{margin:0 0 14pt;color:#1d1d1f}
 strong{font-weight:700;color:#1d1d1f}
 em{font-style:italic;color:#1d1d1f}
-/* 제목 계층 — 화면과 동일 (본문 14 → h4 16 → h3 18 → h2 20 → h1 24, pt 환산) */
-h1{font-size:18pt;font-weight:700;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3}
-h2{font-size:15pt;font-weight:800;color:#1d1d1f;margin:20pt 0 10pt;padding:2pt 0 2pt 10pt;border-left:3.5pt solid #8B1A1A;line-height:1.35;letter-spacing:-0.015em}
+/* 제목 계층 — 화면과 동일 (본문 15 → h4 16 → h3 17 → h2 22 → h1 이탤릭 18, pt 환산) */
+h1{font-size:18pt;font-weight:800;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3;font-style:italic}
+h2{font-size:16pt;font-weight:800;color:#1d1d1f;margin:22pt 0 10pt;padding:2pt 0 2pt 11pt;border-left:3pt solid #8B1A1A;line-height:1.3;letter-spacing:-0.02em}
 h2:first-child{margin-top:4pt}
-h3{font-size:13.5pt;font-weight:700;color:#1d1d1f;margin:14pt 0 6pt;letter-spacing:-0.01em}
-h4{font-size:12pt;font-weight:700;color:#1d1d1f;margin:12pt 0 5pt}
-/* 리스트 — 마커 검정으로 통일 */
-ul,ol{margin:8pt 0 12pt;padding-left:24pt}
-li{margin-bottom:5pt;line-height:1.68}
+h3{font-size:12.5pt;font-weight:700;color:#1d1d1f;margin:14pt 0 6pt;letter-spacing:-0.01em;line-height:1.4}
+h4{font-size:11.5pt;font-weight:700;color:#1d1d1f;margin:12pt 0 5pt}
+/* 리스트 — 마커 Apple 톤 (ul 회색 점, ol 검정 숫자) */
+ul,ol{margin:8pt 0 12pt;padding-left:22pt}
+li{margin-bottom:5pt;line-height:1.62}
 ul{list-style-type:disc}
 ol{list-style-type:decimal}
-ul li::marker{color:#1d1d1f;font-weight:700}
+ul li::marker{color:#86868b;font-weight:400}
 ol li::marker{color:#1d1d1f;font-weight:700}
 li > p{margin:0 0 4pt}
 li > p:last-child{margin-bottom:0}
 /* 인용구 — 이탤릭 + 회색 좌측 막대 + 대칭 여백 */
-blockquote{margin:14pt 0;padding:10pt 14pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;border-radius:0 6pt 6pt 0;color:#1d1d1f;font-size:10.5pt;line-height:1.6;font-style:italic;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+blockquote{margin:14pt 0;padding:10pt 14pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;border-radius:0 6pt 6pt 0;color:#1d1d1f;font-size:11pt;line-height:1.62;font-style:italic;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 blockquote p{margin:0 0 6pt;color:#1d1d1f;font-style:italic}
 blockquote p:first-child{margin-top:0}
 blockquote p:last-child{margin-bottom:0}
 blockquote > *:first-child{margin-top:0}
 blockquote > *:last-child{margin-bottom:0}
 /* 표 — 레드 헤더만 유지, 나머지 중성 톤 */
-table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:12pt 0;border-radius:6pt;overflow:hidden;font-size:10.5pt}
+table{width:100%;border-collapse:collapse;border:1px solid #d2d2d7;margin:12pt 0;border-radius:6pt;overflow:hidden;font-size:11pt}
 th,td{border:1px solid #e5e5ea;padding:6pt 10pt;vertical-align:middle;line-height:1.5;text-align:left}
-thead th{background:#8B1A1A !important;color:#fff !important;font-size:10.5pt;font-weight:700;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
+thead th{background:#8B1A1A !important;color:#fff !important;font-size:11pt;font-weight:700;text-align:center;letter-spacing:-0.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-color:#8B1A1A}
 tbody td:first-child{font-weight:600;color:#1d1d1f}
 tbody tr:nth-child(even) td{background:#fdfafa}
 tbody tr:nth-child(odd) td{background:#ffffff}
-caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt;letter-spacing:-0.005em}
+caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:11pt;margin:0 0 5pt;letter-spacing:-0.005em}
 /* 링크 — 검정 + 밑줄 (파란색 제거) */
 a{color:#1d1d1f;text-decoration:underline}
 /* 구분선 */
@@ -4045,32 +4045,32 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       return;
     }
 
-    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 — 컨설팅 리포트 톤 (화면과 동기화) */
+    /* Word 호환 altChunk용 스타일(HEX + 고정 폰트) + 인라인 보강 — Apple 톤 (화면과 동기화) */
     const htmlStyle=[
-      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:10.5pt;line-height:1.7;}',
+      'body{margin:0;background:#ffffff;color:#1d1d1f;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;font-size:11pt;line-height:1.62;}',
       '.wrap{padding:0;}',
       '.header{padding:0 0 14pt 0;border-bottom:1px solid #e5e5ea;margin:0 0 18pt 0;}',
       '.header-title{font-size:20pt;font-weight:700;letter-spacing:-0.3pt;margin:0 0 6pt 0;color:#1d1d1f;line-height:1.3;}',
       '.header-meta{font-size:10pt;color:#6e6e73;margin:0;line-height:1.4;}',
-      'p{margin:0 0 11pt 0;color:#1d1d1f;}',
-      /* 제목 — 색은 전부 검정, 크기 사다리는 화면 14/16/18/20/24 에 비례 */
+      'p{margin:0 0 12pt 0;color:#1d1d1f;}',
+      /* 제목 — 색은 전부 검정, 크기 사다리는 화면과 비례 (18/22/17/16 → 18/16/12.5/11.5pt) */
       'h1,h2,h3,h4{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;color:#1d1d1f;letter-spacing:-0.2pt;}',
-      'h1{font-size:18pt;font-weight:700;margin:18pt 0 10pt 0;line-height:1.3;}',
-      /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 유지 */
-      'h2{font-size:15pt;font-weight:800;color:#1d1d1f;margin:18pt 0 9pt 0;padding:2pt 0 2pt 10pt;border-left:3pt solid #8B1A1A;line-height:1.35;}',
-      /* H3: 소제목 — 색 검정 (네이비 제거) */
-      'h3{font-size:13.5pt;font-weight:700;color:#1d1d1f;margin:13pt 0 6pt 0;}',
-      'h4{font-size:12pt;font-weight:700;color:#1d1d1f;margin:11pt 0 5pt 0;}',
+      'h1{font-size:18pt;font-weight:800;margin:18pt 0 10pt 0;line-height:1.3;font-style:italic;}',
+      /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 유지 (더 세련된 3pt 두께) */
+      'h2{font-size:16pt;font-weight:800;color:#1d1d1f;margin:20pt 0 10pt 0;padding:2pt 0 2pt 11pt;border-left:3pt solid #8B1A1A;line-height:1.3;letter-spacing:-0.4pt;}',
+      /* H3: 소제목 — 색 검정, H2와 간격 확보 */
+      'h3{font-size:12.5pt;font-weight:700;color:#1d1d1f;margin:13pt 0 6pt 0;line-height:1.4;}',
+      'h4{font-size:11.5pt;font-weight:700;color:#1d1d1f;margin:11pt 0 5pt 0;}',
       'strong{font-weight:700;color:#1d1d1f;}',
       'em{font-style:italic;color:#1d1d1f;}',
       '.brand{font-weight:700;letter-spacing:-0.3pt;}',
-      'ul,ol{padding-left:24pt;margin:7pt 0 11pt 0;}',
-      'li{margin-bottom:4pt;line-height:1.65;color:#1d1d1f;}',
-      /* 마커 — 검정으로 통일 */
-      'ul li::marker{color:#1d1d1f;font-weight:700;}',
+      'ul,ol{padding-left:22pt;margin:8pt 0 12pt 0;}',
+      'li{margin-bottom:4pt;line-height:1.62;color:#1d1d1f;}',
+      /* 마커 — ul은 회색 점(Apple 문서 톤), ol은 검정 굵게 (단계 강조) */
+      'ul li::marker{color:#86868b;font-weight:400;}',
       'ol li::marker{color:#1d1d1f;font-weight:700;}',
       /* 인용구 — 이탤릭 + 회색 좌측 막대 + 대칭 여백 */
-      'blockquote{margin:11pt 0;padding:9pt 13pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;color:#1d1d1f;font-size:10.5pt;line-height:1.6;font-style:italic;}',
+      'blockquote{margin:12pt 0;padding:10pt 14pt;border-left:3pt solid #d2d2d7;background:#f7f8fb;color:#1d1d1f;font-size:11pt;line-height:1.6;font-style:italic;}',
       'blockquote p{margin:0 0 5pt 0;color:#1d1d1f;font-style:italic;}',
       'blockquote p:first-child{margin-top:0;}',
       'blockquote p:last-child{margin-bottom:0;}',
@@ -4078,15 +4078,15 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'ul,ol,li,p,span,div,strong,em,a,code,h1,h3,h4,h5,h6{border-left:none !important;mso-border-left-alt:none !important;mso-border-between:none !important;}',
       'ins,del{text-decoration:none !important;border:none !important;background:transparent !important;mso-border-left-alt:none !important;}',
       /* 표 — 레드 헤더만 유지, 나머지 중성 */
-      'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:11pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
-      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:10.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
-      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:10.5pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
+      'table{border-collapse:collapse;width:100%;border:1px solid #d2d2d7;margin:12pt 0;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;}',
+      'th{background:#8B1A1A !important;color:#ffffff !important;padding:5pt 10pt;border:1px solid #8B1A1A;vertical-align:middle;text-align:center !important;font-weight:700;font-size:11pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;}',
+      'td{padding:5pt 10pt;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.5;font-size:11pt;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;mso-line-height-rule:exactly;mso-para-margin:0;color:#1d1d1f;}',
       'tbody td:first-child{font-weight:600;color:#1d1d1f;}',
       'tbody tr:nth-child(even) td{background:#fdfafa;}',
       'tbody tr:nth-child(odd) td{background:#ffffff;}',
-      'caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:10.5pt;margin:0 0 5pt 0;}',
+      'caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;font-size:11pt;margin:0 0 5pt 0;}',
       'code{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;background:#f5f5f7;border:1px solid #e5e5ea;padding:1pt 5pt;border-radius:4pt;color:#1d1d1f;}',
-      'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;margin:0 0 11pt 0;border:1px solid #d2d2d7;}',
+      'pre{font-family:Consolas,Menlo,monospace,"Malgun Gothic","맑은 고딕";font-style:normal;font-size:10pt;line-height:1.6;background:#f5f5f7;color:#1d1d1f;border-radius:6pt;padding:10pt 12pt;overflow:auto;margin:0 0 12pt 0;border:1px solid #d2d2d7;}',
       'pre code{background:transparent;border:none;padding:0;color:inherit;font-style:normal;}',
       'hr{border:none;border-top:1px solid #e5e5ea;margin:14pt 0;}',
       /* 링크 — 검정 + 밑줄 */
@@ -4214,7 +4214,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
         th.style.border = '1px solid #8B1A1A';
         th.style.textAlign = 'center';
         th.style.fontWeight = '700';
-        th.style.fontSize = '10.5pt';
+        th.style.fontSize = '11pt';
         th.style.lineHeight = '1.25';
         th.style.verticalAlign = 'middle';
         /* Word 줄 높이/단락 간격 정확도 강제 */
@@ -4228,7 +4228,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
         td.style.border = '1px solid #d2d2d7';
         td.style.verticalAlign = 'middle';
         td.style.lineHeight = '1.25';
-        td.style.fontSize = '10.5pt';
+        td.style.fontSize = '11pt';
         /* Word 행 높이 팽창 원인:
            1) <p> 태그의 기본 margin (1em top/bottom)
            2) mso-line-height-rule 미지정 시 큰 줄간격 기본값
