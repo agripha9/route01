@@ -1444,21 +1444,27 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .auth-shell{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:1100px;height:100vh;margin:0 auto;overflow:hidden;}
 
 /* 왼쪽 브랜드 */
-.auth-brand{background:linear-gradient(145deg,#0f1f4a 0%,#1a3a6e 45%,#8B1A1A 100%);display:flex;align-items:center;justify-content:center;padding:2rem 2.5rem;position:relative;overflow-y:auto;overflow-x:hidden;}
-.auth-brand::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 70%,rgba(139,26,26,.35) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(26,58,110,.45) 0%,transparent 50%);pointer-events:none;}
+.auth-brand{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:2rem 2.5rem;position:relative;overflow-y:auto;overflow-x:hidden;border-right:1px solid var(--border);}
+.auth-brand::before{content:none;}
 .auth-brand-inner{position:relative;z-index:1;max-width:400px;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0.6rem;}
-.auth-brand-logo{height:64px;width:auto;display:block;margin-bottom:0;filter:drop-shadow(0 2px 12px rgba(0,0,0,.3));}
-.auth-brand-kicker{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.1em;text-transform:uppercase;margin-bottom:0;}
-.auth-brand-title{font-family:var(--font-display);font-size:clamp(22px,2.5vw,34px);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-1.5px;margin-bottom:0.9rem;}
-.auth-brand-desc{font-size:15px;color:rgba(255,255,255,.68);line-height:1.6;margin-bottom:2rem;}
+.auth-brand-logo{height:64px;width:auto;display:block;margin-bottom:0;filter:none;}
+.auth-brand-kicker{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:0;}
+.auth-brand-title{font-family:var(--font-display);font-size:clamp(22px,2.5vw,34px);font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:-1.5px;margin-bottom:0.9rem;}
+.auth-brand-desc{font-size:15px;color:var(--ink2);line-height:1.6;margin-bottom:2rem;}
 .auth-brand-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;justify-content:center;}
-.auth-pill{font-size:12px;font-weight:500;color:rgba(255,255,255,.88);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:5px 12px;border-radius:980px;white-space:nowrap;}
+.auth-pill{font-size:12px;font-weight:500;color:var(--ink2);background:#fff;border:1px solid var(--border);padding:5px 12px;border-radius:980px;white-space:nowrap;}
 .auth-brand-mentors{margin-top:0;text-align:center;}
-.auth-mentor-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:10px;}
+.auth-mentor-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
 .auth-mentor-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
-.auth-mentor-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:10px;}
-.auth-mentor-chips{display:flex;flex-wrap:wrap;gap:6px;}
-.auth-mentor-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:rgba(255,255,255,.92);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:8px;}
+.auth-mentor-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--border);padding:6px 12px;border-radius:8px;}
+
+/* 셀링 포인트 — 좌측 로그인 패널 */
+.auth-sellpoints{display:flex;flex-direction:column;gap:14px;width:100%;margin-bottom:1.75rem;text-align:left;}
+.auth-sp{display:flex;gap:14px;align-items:flex-start;}
+.auth-sp-num{flex-shrink:0;font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--brand-point);letter-spacing:-0.02em;line-height:1.4;min-width:24px;}
+.auth-sp-body{flex:1;min-width:0;}
+.auth-sp-head{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;line-height:1.4;margin-bottom:3px;}
+.auth-sp-sub{font-size:13px;color:var(--ink2);line-height:1.5;letter-spacing:-0.15px;}
 
 /* 오른쪽 로그인 */
 .auth-right{background:var(--white);display:flex;align-items:center;justify-content:center;padding:0 2.5rem;overflow-y:auto;overflow-x:hidden;position:relative;z-index:1;}
@@ -1538,10 +1544,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 모바일 */
 @media(max-width:760px){
   .auth-shell{grid-template-columns:1fr;min-height:auto;}
-  .auth-brand{padding:2rem 1.5rem;}
-  .auth-brand-logo{height:56px;margin-bottom:1rem;}
-  .auth-brand-title{font-size:26px;}
+  .auth-brand{padding:1.5rem 1.25rem;border-right:none;border-bottom:1px solid var(--border);}
+  .auth-brand-logo{height:48px;margin-bottom:0.5rem;}
+  .auth-brand-title{font-size:22px;margin-bottom:1rem;}
   .auth-brand-desc,.auth-brand-mentors{display:none;}
+  .auth-sellpoints{gap:10px;margin-bottom:0;}
+  .auth-sp-head{font-size:14px;}
+  .auth-sp-sub{font-size:12px;}
   .auth-right{padding:2rem 1.5rem 2.5rem;}
 }
 
@@ -2338,13 +2347,7 @@ main {
   font-size: clamp(24px, 3.2vh, 38px) !important;
   margin-bottom: 1.5rem !important;
 }
-.auth-brand-pills {
-  margin-bottom: 1.75rem !important;
-  gap: 8px !important;
-}
-.auth-pill { padding: 5px 12px !important; font-size: 12px !important; }
 .auth-brand-mentors { margin-top: 0 !important; }
-.auth-mentor-desc   { font-size: 14px !important; line-height: 1.6 !important; margin-bottom: 1.25rem !important; }
 .auth-mentor-label  { margin-bottom: 10px !important; font-size: 12px !important; }
 .auth-mentor-chips  { gap: 8px !important; }
 .auth-mentor-chip   { padding: 7px 13px !important; font-size: 13px !important; line-height: 1.4 !important; }
