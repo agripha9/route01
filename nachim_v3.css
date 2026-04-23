@@ -352,8 +352,8 @@ body{
 .ob-btn:hover{opacity:.92}
 .ob-btn.sec{background:var(--white);color:var(--ink2)}
 .ob-btn.sec:hover{border-color:#86868b;background:var(--filter-bg)}
-.ob-btn.pri{background:var(--brand-point);color:#fff;border-color:var(--brand-point)}
-.ob-btn.pri:hover{background:var(--brand-point-press);border-color:var(--brand-point-press)}
+.ob-btn.pri{background:#86868b;color:#fff;border-color:#86868b}
+.ob-btn.pri:hover{background:#6e6e73;border-color:#6e6e73}
 .ob-btn:disabled{opacity:.4;cursor:not-allowed}
 .ind-tag{
   display:inline-flex;align-items:center;padding:6px 12px;border-radius:980px;border:1px solid var(--border);
@@ -1204,11 +1204,11 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-val{font-size:14px;color:var(--ink);font-weight:400;letter-spacing:-0.224px}
 .modal-edit{
   width:100%;margin-top:1rem;padding:9px 14px;border-radius:var(--r);
-  background:var(--brand-point);color:#fff;border:1px solid var(--brand-point);
+  background:#86868b;color:#fff;border:1px solid #86868b;
   font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s, background .15s, border-color .15s;
   letter-spacing:-0.15px;
 }
-.modal-edit:hover{background:var(--brand-point-press);border-color:var(--brand-point-press);}
+.modal-edit:hover{background:#6e6e73;border-color:#6e6e73;}
 .modal-btn-row{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:nowrap}
 /* Apple-style compact 버튼 — 14px 폰트, 9px 세로 패딩, 얇은 라디우스 */
 .modal-btn{
@@ -1219,8 +1219,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 .modal-btn:hover{border-color:#86868b;background:var(--filter-bg)}
 /* primary — 네이비 채움 (기본 색상 체계 일관) */
-.modal-btn.pri{background:var(--brand-point);color:#fff;border-color:var(--brand-point)}
-.modal-btn.pri:hover{opacity:1;background:var(--brand-point-press);border-color:var(--brand-point-press)}
+.modal-btn.pri{background:#86868b;color:#fff;border-color:#86868b}
+.modal-btn.pri:hover{opacity:1;background:#6e6e73;border-color:#6e6e73}
 
 /* API 키 모달 필드 (HTML 인라인 보완) */
 .apple-field-label{font-size:12px;font-weight:600;color:var(--ink3);display:block;margin-bottom:8px;letter-spacing:-0.12px}
