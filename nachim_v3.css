@@ -1115,13 +1115,14 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 
 /* 로더 하단 안내 문구 — 2 사이클 경과 후 페이드인.
+   답변 카드 바깥 좌측에 배치 (.ai-body 하위, .report-card 다음 형제).
    기본은 완전 숨김(높이·여백 0) 상태로 두고, --show 클래스가 붙으면 표시. */
 .route-loader-hint{
   opacity:0;
   max-height:0;
   overflow:hidden;
   margin-top:0;
-  text-align:center;
+  text-align:left;
   font-size:12.5px;
   color:var(--ink3);
   letter-spacing:-0.12px;

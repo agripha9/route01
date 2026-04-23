@@ -2173,7 +2173,7 @@ function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner()}</div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div><div class="route-loader-hint" aria-hidden="true">맞춤형 답변의 품질을 높이기 위해 시간이 다소 걸릴 수 있습니다.</div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner()}</div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div></div></div><div class="route-loader-hint" aria-hidden="true">맞춤형 답변의 품질을 높이기 위해 시간이 다소 걸릴 수 있습니다.</div></div>`;
   chat.appendChild(el);
   /* 로더 내용은 폭 측정 후 동적으로 채움 — appendChild 직후 DOM 렌더가 끝나야 폭을 잴 수 있음 */
   requestAnimationFrame(()=>{
