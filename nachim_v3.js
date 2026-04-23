@@ -1142,27 +1142,39 @@ function computeRecommendedMentor(){
   return best;
 }
 
-/* Step 3 진입 시 추천 멘토에 배지만 표시. 자동 선택은 하지 않음 —
-   사용자가 직접 클릭해야 ob.style에 값이 들어간다. 이렇게 해야
-   cancelOnboardingEdit()에서 "완성됐다"고 오판하지 않는다. */
-function applyMentorRecommendation(){
+/* 추천 멘토 배지를 주어진 그리드의 행에 주입. data attribute 이름이 그리드마다 달라서
+   (온보딩 style-grid: data-val, 상단 style-modal-grid: data-style) 두 이름 다 확인한다.
+   기존 배지는 지우고 새로 그리므로 여러 번 호출해도 안전. */
+function paintMentorRecommendation(gridSelector){
   const recommended = computeRecommendedMentor();
-  const rows = document.querySelectorAll('#style-grid .ob-mentor-row');
+  const rows = document.querySelectorAll(`${gridSelector} .ob-mentor-row`);
   rows.forEach(row => {
     /* 기존 추천 배지 제거 */
     const oldBadge = row.querySelector('.ob-mentor-recommend');
     if(oldBadge) oldBadge.remove();
-    /* 추천 멘토에만 배지 추가 — FREE/PRO 배지 바로 왼쪽에 삽입 */
-    if(row.dataset.val === recommended){
-      const tierBadge = row.querySelector('.ob-mentor-row-badge');
-      if(tierBadge){
-        const tag = document.createElement('div');
-        tag.className = 'ob-mentor-recommend';
-        tag.textContent = '추천';
-        tierBadge.parentNode.insertBefore(tag, tierBadge);
-      }
+    /* 행의 멘토 키 — 두 가지 데이터 속성 중 하나 */
+    const key = row.dataset.val || row.dataset.style;
+    if(key !== recommended) return;
+    /* FREE/PRO 배지 래퍼를 찾아 그 안쪽 가장 앞에 추가 (배지 래퍼가 있으면),
+       없으면 tier 배지 바로 앞에 삽입 (온보딩 구버전 호환) */
+    const wrap = row.querySelector('.ob-mentor-row-badge-wrap');
+    const tierBadge = row.querySelector('.ob-mentor-row-badge');
+    const tag = document.createElement('div');
+    tag.className = 'ob-mentor-recommend';
+    tag.textContent = '추천';
+    if(wrap){
+      wrap.insertBefore(tag, wrap.firstChild);
+    } else if(tierBadge && tierBadge.parentNode){
+      tierBadge.parentNode.insertBefore(tag, tierBadge);
     }
   });
+}
+
+/* Step 3 진입 시 추천 멘토에 배지만 표시. 자동 선택은 하지 않음 —
+   사용자가 직접 클릭해야 ob.style에 값이 들어간다. 이렇게 해야
+   cancelOnboardingEdit()에서 "완성됐다"고 오판하지 않는다. */
+function applyMentorRecommendation(){
+  paintMentorRecommendation('#style-grid');
 }
 /* oninput 바인딩은 DOMContentLoaded에서 처리 */
 function goStep(n) {
@@ -3884,6 +3896,8 @@ function openStyleModal(){
       btn.classList.add('sel');
     });
   });
+  /* 현재 프로필 기반 추천 배지 주입 — 온보딩과 동일 로직 */
+  paintMentorRecommendation('#style-modal-grid');
   document.getElementById('style-modal').classList.add('open');
 }
 
