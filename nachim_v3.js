@@ -3860,7 +3860,7 @@ function openStyleModal(){
           <div class="ob-mentor-row-line ob-mentor-row-line--fit">${esc(m.fit)}</div>
         </div>
       </div>
-      ${`<div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div>`}
+      ${`<div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge ${m.free?'free-badge':'pro-badge'}">${m.free?'FREE':'PRO'}</div></div>`}
     </div>`;
   }).join('');
 

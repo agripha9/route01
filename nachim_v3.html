@@ -689,11 +689,11 @@
 
 <!-- 멘토 스타일 선택 모달 -->
 <div class="modal-bg" id="style-modal">
-  <div class="modal" style="width:690px;max-width:calc(100vw - 2rem)">
+  <div class="modal" style="width:690px;max-width:calc(100vw - 2rem);padding:2.5rem 2.75rem">
     <button class="modal-close" onclick="closeStyleModal(true)">×</button>
     <div class="modal-title">멘토 스타일 선택</div>
     <div class="modal-sub">원하는 멘토를 선택한 뒤 아래 <strong>적용</strong> 버튼을 눌러주세요.</div>
-    <div style="display:flex;flex-direction:column;gap:8px" id="style-modal-grid"></div>
+    <div id="style-modal-grid"></div>
     <div class="modal-btn-row">
       <button class="modal-btn" onclick="closeStyleModal(true)">취소</button>
       <button class="modal-btn pri" onclick="closeStyleModal(false)">적용</button>
