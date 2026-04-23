@@ -1114,6 +1114,26 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   gap:0;
 }
 
+/* 로더 하단 안내 문구 — 2 사이클 경과 후 페이드인.
+   기본은 완전 숨김(높이·여백 0) 상태로 두고, --show 클래스가 붙으면 표시. */
+.route-loader-hint{
+  opacity:0;
+  max-height:0;
+  overflow:hidden;
+  margin-top:0;
+  text-align:center;
+  font-size:12.5px;
+  color:var(--ink3);
+  letter-spacing:-0.12px;
+  line-height:1.45;
+  transition:opacity .35s ease, max-height .35s ease, margin-top .35s ease;
+}
+.route-loader-hint.route-loader-hint--show{
+  opacity:1;
+  max-height:40px;
+  margin-top:10px;
+}
+
 /* 로더를 담은 버블: 답변 카드 폭 전체를 쓰되 세로 패딩은 질문 버블 수준으로 축소.
    가로 패딩은 답변 카드 기본치를 유지해 0·1과 카드 내부 벽 사이 여유 확보.
    .report-bubble 기본은 padding:2.25rem 2.75rem 이므로 세로만 0.9rem로 덮어씀. */

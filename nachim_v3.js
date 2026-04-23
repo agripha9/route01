@@ -2162,17 +2162,31 @@ function addMsg(role,text,files,aiLabel,historyMentor){
   chat.appendChild(el);
   chat.scrollTop=chat.scrollHeight;
 }
+/* 로더 사이클 길이 (초). buildRouteLoader 내부 CYCLE_SEC과 동기화 필요.
+   바꿀 때 두 곳 다 같이 수정. */
+const LOADER_CYCLE_SEC = 11;
+
+/* 2사이클 후 안내 문구를 띄우기 위한 타이머 ID. hideLoad 때 정리. */
+let _loaderHintTimer = null;
+
 function showLoad(){
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
   el.className='message';el.id='load-msg';
-  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner()}</div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div></div></div></div>`;
+  el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner()}</div><div class="report-card"><div class="m-bubble report-bubble"><div class="route-loader" aria-label="로딩 중"></div><div class="route-loader-hint" aria-hidden="true">맞춤형 답변의 품질을 높이기 위해 시간이 다소 걸릴 수 있습니다.</div></div></div></div>`;
   chat.appendChild(el);
   /* 로더 내용은 폭 측정 후 동적으로 채움 — appendChild 직후 DOM 렌더가 끝나야 폭을 잴 수 있음 */
   requestAnimationFrame(()=>{
     const loader = el.querySelector('.route-loader');
     if(loader) buildRouteLoader(loader);
   });
+  /* 2사이클이 끝나는 시점(≈ CYCLE × 2)에 안내 문구를 페이드인.
+     사용자가 "아직 로딩 중인데 오래 걸리네?" 체감하기 시작하는 지점. */
+  if(_loaderHintTimer){ clearTimeout(_loaderHintTimer); _loaderHintTimer = null; }
+  _loaderHintTimer = setTimeout(()=>{
+    const hint = el.querySelector('.route-loader-hint');
+    if(hint) hint.classList.add('route-loader-hint--show');
+  }, LOADER_CYCLE_SEC * 2 * 1000);
   chat.scrollTop=chat.scrollHeight;
 }
 
@@ -2200,7 +2214,7 @@ function buildRouteLoader(loader){
      [FADE_END% ~ 100%]        — 전원 숨김 대기 (다음 사이클 전 여백) */
   const APPEAR_END_PCT = 55;
   const HOLD_END_PCT   = 75;
-  const FADE_END_PCT   = 85;
+  const FADE_END_PCT   = 97;
 
   /* ─── 1. 폭 측정 → 점+노드 개수 결정 ─── */
   const totalWidth = loader.getBoundingClientRect().width || 0;
@@ -2340,7 +2354,11 @@ window.addEventListener('resize', () => {
 });
 
 
-function hideLoad(){const e=document.getElementById('load-msg');if(e)e.remove();}
+function hideLoad(){
+  if(_loaderHintTimer){ clearTimeout(_loaderHintTimer); _loaderHintTimer = null; }
+  const e=document.getElementById('load-msg');
+  if(e) e.remove();
+}
 
 /* fmt() kept for backward compatibility (use renderMD instead) */
 function fmt(md){return renderMD(md);}
