@@ -736,21 +736,21 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 }
 .report-card .report-bubble{
   background:transparent;border:none;border-radius:0;box-shadow:none;
-  padding:2.25rem 2.75rem 2rem;
+  padding:3rem 3rem 2.5rem;
   font-family:var(--font-text);
-  font-size:14px;
-  line-height:1.75;
-  letter-spacing:-0.012em;
+  font-size:15px;
+  line-height:1.62;
+  letter-spacing:-0.011em;
   color:#1d1d1f;
 }
 @media (max-width: 900px){
   .report-card .report-bubble{
-    padding:1.75rem 1.5rem 1.5rem;
+    padding:2rem 1.5rem 1.75rem;
   }
 }
 /* 본문 단락 — 여유있는 세로 리듬 */
 .report-card .report-bubble p{
-  margin:0 0 1.15rem;
+  margin:0 0 1.4rem;
   color:#1d1d1f;
 }
 .report-card .report-bubble p:last-child{margin-bottom:0}
@@ -779,23 +779,23 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   padding:0;
 }
 .report-card .report-bubble h1:first-child{margin-top:0.35rem}
-/* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대는 유지. 글자색은 검정. */
+/* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대는 유지하되 더 세련되게. 글자색은 검정. */
 .report-card .report-bubble h2{
-  font-size:20px !important;
+  font-size:22px !important;
   font-weight:800 !important;
-  margin:2.75rem 0 1.2rem;
-  padding:0.2rem 0 0.2rem 18px;
-  border-left:5px solid #8B1A1A;
-  line-height:1.3;
+  margin:3rem 0 1.3rem;
+  padding:0.2rem 0 0.2rem 20px;
+  border-left:4px solid #8B1A1A;
+  line-height:1.28;
   color:#1d1d1f !important;
-  letter-spacing:-0.024em;
+  letter-spacing:-0.028em;
 }
 .report-card .report-bubble h2:first-child{margin-top:0.35rem}
 /* H3 — 소제목. 색 검정으로 통일, 크기·굵기로만 구분(장식 제거). */
 .report-card .report-bubble h3{
-  font-size:18px !important;
+  font-size:17px !important;
   font-weight:700 !important;
-  margin:2.2rem 0 .9rem !important;
+  margin:1.9rem 0 .8rem !important;
   color:#1d1d1f !important;
   letter-spacing:-0.02em !important;
   line-height:1.4 !important;
@@ -807,7 +807,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
 }
 .report-card .report-bubble h3[data-numbered]{
-  font-size:18px !important;
+  font-size:17px !important;
   font-weight:700 !important;
   color:#1d1d1f !important;
 }
@@ -893,15 +893,15 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 리스트 — 컨설팅 리포트 들여쓰기. 
    소제목(H3) 아래에 있을 때 계층이 시각적으로 명확하도록 충분히 들여씀. */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) :is(ul, ol){
-  margin:.7rem 0 1.25rem;
+  margin:.8rem 0 1.4rem;
   margin-left:0;
-  padding-left:2.5rem !important;
+  padding-left:2.2rem !important;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li{
   list-style-position:outside !important;
   padding-left:.5rem;
-  margin-bottom:.6rem;
-  line-height:1.75;
+  margin-bottom:.55rem;
+  line-height:1.65;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul{
   list-style-type:disc !important;
@@ -924,12 +924,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
   display:none !important;
 }
-/* ul 마커: 브랜드 딥블루 */
+/* ul 마커: 중간 회색 점 (Apple 문서 스타일) */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul > li::marker{
-  color:#1d1d1f !important;
-  font-weight:700;
+  color:#86868b !important;
+  font-weight:400;
 }
-/* ol 마커: 검정, 숫자 정렬 */
+/* ol 마커: 검정, 숫자 정렬 — 실행 단계 명시성 유지 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol > li::marker{
   color:#1d1d1f !important;
   font-weight:700;
@@ -960,14 +960,14 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
 /* 인용구(blockquote) — 이탤릭으로 본문과 구분. 본문과 동일 폭. */
 .report-card .report-bubble blockquote{
-  margin:1.5rem 0;
-  padding:.9rem 1.25rem;
+  margin:1.6rem 0;
+  padding:1rem 1.4rem;
   background:#f7f8fb;
   border-left:3px solid #d2d2d7;
   border-radius:0 6px 6px 0;
   color:#1d1d1f;
-  font-size:14px;
-  line-height:1.65;
+  font-size:15px;
+  line-height:1.62;
   font-style:italic;
 }
 .report-card .report-bubble blockquote p{
