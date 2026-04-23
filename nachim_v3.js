@@ -602,7 +602,7 @@ async function submitGrantHelper(){
 
   const extractText=(j)=> (j?.content||[]).filter(c=>c?.type==='text'&&typeof c?.text==='string').map(c=>c.text).join('');
   const callOnce=async (msgs,maxTokens)=>{
-    const model=(await resolveModelId('sonnet')) || 'claude-3-5-sonnet-20241022';
+    const model=(await resolveModelId('sonnet')) || 'claude-sonnet-4-5-20250929';
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
@@ -2097,7 +2097,7 @@ async function getAiSuggestedQuestions(domainKey){
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body:JSON.stringify({
-        model:(await resolveModelId('haiku')) || 'claude-3-5-haiku-20241022',
+        model:(await resolveModelId('haiku')) || 'claude-haiku-4-5-20251001',
         max_tokens:380,
         stream:false,
         system:sys,
@@ -2744,7 +2744,7 @@ async function doSend(text){
   }
 
   try{
-    const model=(await resolveModelId('sonnet')) || 'claude-3-5-sonnet-20241022';
+    const model=(await resolveModelId('sonnet')) || 'claude-sonnet-4-5-20250929';
     const system=buildSys();
 
     const extractText=(j)=> (j?.content||[]).filter(c=>c?.type==='text'&&typeof c?.text==='string').map(c=>c.text).join('');
@@ -2841,7 +2841,7 @@ function renderAnswerActions(id){
 
 const ANSWER_RAW = new Map();
 
-let MODEL_CACHE = {sonnet:null, haiku:null, ts:0};
+let MODEL_CACHE = {sonnet:null, haiku:null, opus:null, ts:0};
 async function resolveModelId(family){
   const fam=String(family||'').toLowerCase();
   const now=Date.now();
@@ -2858,10 +2858,21 @@ async function resolveModelId(family){
     if(!res.ok) throw new Error('models api failed');
     const j=await res.json();
     const ids=(j?.data||[]).map(m=>m?.id).filter(Boolean);
-    const pick=(substr)=> ids.find(id=>String(id).toLowerCase().includes(substr));
+    /* "이 계열 최신 버전"을 고르는 규칙:
+       1) 이름에 family substr 포함
+       2) 그중 버전 번호·날짜가 가장 큰 것
+       비교 기준: 문자열 정렬 역순 (claude-sonnet-4-6 > claude-sonnet-4-5-20250929 > claude-3-5-sonnet-...)
+       Anthropic ID 규칙상 문자열 내림차순이 사실상 최신순과 일치. */
+    const pick=(substr)=>{
+      const cands = ids.filter(id=>String(id).toLowerCase().includes(substr));
+      if(!cands.length) return null;
+      cands.sort((a,b)=> String(b).localeCompare(String(a)));
+      return cands[0];
+    };
     const son=pick('sonnet');
     const hai=pick('haiku');
-    MODEL_CACHE={sonnet:son||null, haiku:hai||null, ts:now};
+    const opu=pick('opus');
+    MODEL_CACHE={sonnet:son||null, haiku:hai||null, opus:opu||null, ts:now};
     return MODEL_CACHE[fam];
   }catch(e){
     return null;
