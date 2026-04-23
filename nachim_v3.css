@@ -1876,6 +1876,7 @@ main {
 .ws-dc-grant .ws-pro-badge {
   background: #fff;
   color: var(--cta);
+  border-color: #fff;
 }
 
 /* 추천 질문 칩 — 정의는 아래 '2열 그리드(최종 정의)' 블록 참조.
@@ -1920,13 +1921,13 @@ main {
   margin-bottom: -4px;
 }
 
-/* 도메인 칩 - PRO 뱃지 — 멘토 PRO 배지와 동일한 언어 (흰 배경 + 크림슨 outline pill) */
+/* 도메인 칩 - PRO 뱃지 — 멘토 PRO 배지와 동일 언어 (크림슨 채움 + 흰 글씨) */
 .ws-pro-badge {
   display: inline-block;
   font-size: 9.5px;
   font-weight: 700;
-  background: #fff;
-  color: var(--cta);
+  background: var(--cta);
+  color: #fff;
   border: 1px solid var(--cta);
   border-radius: 980px;
   padding: 3px 9px;
@@ -2352,13 +2353,13 @@ main {
    온보딩 Step1 — 필수 표시 + 컴팩트 칩
 ══════════════════════════════════════ */
 
-/* 필수 배지 — 멘토 섹션의 FREE 배지와 동일한 pill 언어 (흰 배경 + 네이비 outline) */
+/* 필수 배지 — 네이비 채움 + 흰 글씨 (멘토 FREE 배지와 동일 언어) */
 .ob-required {
   display: inline-block;
   font-size: 9.5px;
   font-weight: 700;
-  color: var(--brand-point);
-  background: #fff;
+  color: #fff;
+  background: var(--brand-point);
   border: 1px solid var(--brand-point);
   border-radius: 980px;
   padding: 3px 9px;
@@ -2570,16 +2571,17 @@ main {
   line-height: 1.2;
 }
 .free-badge {
-  color: var(--brand-point);
+  color: #fff;
   border-color: var(--brand-point);
-  background: #fff;
+  background: var(--brand-point);
 }
 .pro-badge {
-  color: var(--cta);
+  color: #fff;
   border-color: var(--cta);
-  background: #fff;
+  background: var(--cta);
 }
-/* 선택(반전)된 상태에서는 배지도 투명 흰 톤으로 */
+/* 선택(반전)된 상태에서는 row 배경이 같은 네이비/크림슨이라
+   solid 배지가 묻히므로 흰 outline + 투명 배경으로 반전 */
 .ob-mentor-row.sel .ob-mentor-row-badge {
   background: transparent;
   border-color: rgba(255,255,255,0.75);
@@ -2597,8 +2599,8 @@ main {
   display: inline-block;
   font-size: 9.5px;
   font-weight: 700;
-  color: var(--cta);
-  background: #fff;
+  color: #fff;
+  background: var(--cta);
   border: 1px solid var(--cta);
   border-radius: 980px;
   padding: 3px 9px;
