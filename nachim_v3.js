@@ -964,14 +964,14 @@ function applyMentorRecommendation(){
     /* 기존 추천 배지 제거 */
     const oldBadge = row.querySelector('.ob-mentor-recommend');
     if(oldBadge) oldBadge.remove();
-    /* 추천 멘토에만 배지 추가 */
+    /* 추천 멘토에만 배지 추가 — FREE/PRO 배지 바로 왼쪽에 삽입 */
     if(row.dataset.val === recommended){
-      const info = row.querySelector('.ob-mentor-row-info');
-      if(info){
+      const tierBadge = row.querySelector('.ob-mentor-row-badge');
+      if(tierBadge){
         const tag = document.createElement('div');
         tag.className = 'ob-mentor-recommend';
-        tag.textContent = '✦ 지금 상황에 추천';
-        info.insertBefore(tag, info.firstChild);
+        tag.textContent = '추천';
+        tierBadge.parentNode.insertBefore(tag, tierBadge);
       }
     }
   });

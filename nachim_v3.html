@@ -263,10 +263,10 @@
     <div class="ob-title">당신의 스타트업</div>
     <div class="ob-sub">맞춤형 자문을 위해 먼저 기본 정보를 알려주세요. (30초)</div>
 
-    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">*필수</span> <span class="ob-hint">— 무엇을 만드는 팀인가요?</span></label>
+    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">필수</span> <span class="ob-hint">— 무엇을 만드는 팀인가요?</span></label>
     <input class="ob-input" id="industry-in" autocomplete="off" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
 
-    <label class="ob-label">업종 <span class="ob-required">*필수</span> <span class="ob-hint">— 복수 선택 가능 · 없으면 기타 클릭 후 입력</span></label>
+    <label class="ob-label">업종 <span class="ob-required">필수</span> <span class="ob-hint">— 복수 선택 가능 · 없으면 기타 클릭 후 입력</span></label>
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="industry-tags">
       <span class="ind-tag" data-sector="SaaS" onclick="toggleSector(this)">SaaS</span>
       <span class="ind-tag" data-sector="앱/플랫폼" onclick="toggleSector(this)">앱</span>
@@ -291,7 +291,7 @@
     </div>
     <input class="ob-input" id="sector-other-in" autocomplete="off" placeholder="업종을 직접 입력하세요" oninput="onSectorOtherInput(this.value)" style="display:none;margin-bottom:10px"/>
 
-    <label class="ob-label" style="margin-top:4px">현재 단계 <span class="ob-required">*필수</span></label>
+    <label class="ob-label" style="margin-top:4px">현재 단계 <span class="ob-required">필수</span></label>
     <div class="ob-grid-3 ob-chip-grid--compact" id="stage-grid">
       <div class="ob-chip ob-chip--sm" data-val="아이디어" onclick="pickChip('stage',this)">아이디어</div>
       <div class="ob-chip ob-chip--sm" data-val="MVP 개발중" onclick="pickChip('stage',this)">MVP</div>
@@ -301,7 +301,7 @@
       <div class="ob-chip ob-chip--sm" data-val="시리즈A+" onclick="pickChip('stage',this)">시리즈A+</div>
     </div>
 
-    <label class="ob-label" style="margin-top:4px">타겟 고객 <span class="ob-required">*필수</span></label>
+    <label class="ob-label" style="margin-top:4px">타겟 고객 <span class="ob-required">필수</span></label>
     <div class="ob-grid ob-chip-grid--compact" id="target-grid">
       <div class="ob-chip ob-chip--sm" data-val="B2B (기업)" onclick="pickChip('target',this)">B2B (기업)</div>
       <div class="ob-chip ob-chip--sm" data-val="B2C (소비자)" onclick="pickChip('target',this)">B2C (소비자)</div>
@@ -319,13 +319,15 @@
     <div class="ob-title">지금의 상황</div>
     <div class="ob-sub">자문의 깊이를 결정하는 정보입니다. 선택 항목은 언제든 프로필에서 수정할 수 있어요. (30초)</div>
 
-    <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">*필수</span>
+    <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">필수</span>
       <span class="ob-hint">— 자세할수록 답변이 정확해집니다 (현재 고민·과거 시도·원하는 결과)</span>
     </label>
-    <textarea class="ob-input ob-textarea" id="concern-in" autocomplete="off" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
-    <div class="ob-char-count" id="concern-count">0 / 500</div>
+    <div class="ob-textarea-wrap">
+      <textarea class="ob-input ob-textarea" id="concern-in" autocomplete="off" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
+      <div class="ob-char-count" id="concern-count">0 / 500</div>
+    </div>
 
-    <label class="ob-label">팀 규모 <span class="ob-required">*필수</span>
+    <label class="ob-label">팀 규모 <span class="ob-required">필수</span>
       <span class="ob-hint">— 솔로 창업자와 10인 팀은 받을 조언이 완전히 다릅니다</span>
     </label>
     <div class="ob-grid ob-chip-grid--compact" id="team-grid">
@@ -362,7 +364,7 @@
     <div class="ob-title">당신의 멘토</div>
     <div class="ob-sub">5명의 창업 거장 중 답변 스타일을 결정할 멘토를 선택하세요. 상황별 추천을 참고해도 좋습니다. (20초)</div>
 
-    <label class="ob-label">멘토 스타일 <span class="ob-required">*필수</span>
+    <label class="ob-label">멘토 스타일 <span class="ob-required">필수</span>
       <span class="ob-hint">— 상황에 맞는 추천 멘토가 표시됩니다. Paul Graham·Peter Thiel은 무료, 나머지는 PRO 플랜 이상 · 멘토는 언제든 프로필에서 변경할 수 있어요.</span>
     </label>
     <div class="ob-mentor-list" id="style-grid">
@@ -377,7 +379,7 @@
             <div class="ob-mentor-row-line ob-mentor-row-line--fit">PMF 직전·직후, 초기 생존과 첫 고객 확보가 최우선인 창업팀에 적합.</div>
           </div>
         </div>
-        <div class="ob-mentor-row-badge free-badge">FREE</div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge free-badge">FREE</div></div>
       </div>
 
       <!-- 2. Peter Thiel — 무료 -->
@@ -390,7 +392,7 @@
             <div class="ob-mentor-row-line ob-mentor-row-line--fit">시장 진입 전략, 차별화·포지셔닝, 근본 재설계가 필요한 팀. 점진적 개선엔 부적합.</div>
           </div>
         </div>
-        <div class="ob-mentor-row-badge free-badge">FREE</div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge free-badge">FREE</div></div>
       </div>
 
       <!-- 3. Brian Chesky — PRO -->
@@ -403,7 +405,7 @@
             <div class="ob-mentor-row-line ob-mentor-row-line--fit">D2C·브랜드 중심 서비스, 위기 대응, 고객 충성도 설계가 핵심인 팀에 적합.</div>
           </div>
         </div>
-        <div class="ob-mentor-row-badge pro-badge">PRO</div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
       </div>
 
       <!-- 4. Jensen Huang — PRO -->
@@ -416,7 +418,7 @@
             <div class="ob-mentor-row-line ob-mentor-row-line--fit">기술 기반 스타트업, 장기 R&D 투자, 플랫폼·생태계 락인이 핵심 전략인 팀.</div>
           </div>
         </div>
-        <div class="ob-mentor-row-badge pro-badge">PRO</div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
       </div>
 
       <!-- 5. Naval Ravikant — PRO -->
@@ -429,13 +431,13 @@
             <div class="ob-mentor-row-line ob-mentor-row-line--fit">사업 방향 재검토, 창업자 마인드셋 정비, 근본부터 다시 설계하고 싶을 때 적합.</div>
           </div>
         </div>
-        <div class="ob-mentor-row-badge pro-badge">PRO</div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
       </div>
 
     </div>
 
     <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드 <span class="ob-hint">— 선택</span>
-      <span class="ob-pro-lock">🔒 PRO 이상</span>
+      <span class="ob-pro-lock">PRO</span>
     </label>
     <div class="upload-zone upload-zone--locked" id="ob-drop-zone" onclick="checkUploadAccess()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
       <div class="upload-zone-icon">📎</div>

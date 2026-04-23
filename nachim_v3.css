@@ -320,14 +320,28 @@ body{
   font-size:15px;
   font-family:var(--font-text);
   letter-spacing:-0.3px;
+  padding-right:14px;
+  padding-bottom:22px; /* 카운터가 앉을 자리 */
 }
-/* textarea 아래 글자수 카운터 */
+/* textarea를 감싸는 래퍼 — 카운터 absolute 위치 기준 */
+.ob-textarea-wrap{
+  position:relative;
+  margin-bottom:10px;
+}
+.ob-textarea-wrap .ob-textarea{
+  margin-bottom:0;
+}
+/* textarea 우측 하단 안쪽에 작게 */
 .ob-char-count{
-  text-align:right;
+  position:absolute;
+  right:10px;
+  bottom:8px;
   font-size:11px;
   color:var(--ink3);
-  margin-top:-4px;
-  margin-bottom:10px;
+  background:transparent;
+  pointer-events:none;
+  letter-spacing:-0.1px;
+  font-variant-numeric:tabular-nums;
 }
 .ob-btn-row{display:flex;gap:8px;margin-top:1rem;justify-content:center;align-items:center}
 .ob-btn{
@@ -1903,17 +1917,20 @@ main {
   margin-bottom: -4px;
 }
 
-/* 도메인 칩 - PRO 뱃지 */
+/* 도메인 칩 - PRO 뱃지 — 멘토 PRO 배지와 동일한 언어 (흰 배경 + 크림슨 outline pill) */
 .ws-pro-badge {
-  font-size: 9px;
+  display: inline-block;
+  font-size: 9.5px;
   font-weight: 700;
-  background: var(--cta);
-  color: #fff;
-  padding: 1px 5px;
-  border-radius: 4px;
-  margin-left: 3px;
+  background: #fff;
+  color: var(--cta);
+  border: 1px solid var(--cta);
+  border-radius: 980px;
+  padding: 3px 9px;
+  margin-left: 5px;
   vertical-align: middle;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 
 /* 추천 질문 칩 — 2열 그리드 (최종 정의).
@@ -2336,16 +2353,19 @@ main {
 .ob-required {
   display: inline-block;
   font-size: 10px;
-  font-weight: 700;
-  color: var(--brand-main);
-  background: rgba(139,26,26,.08);
-  border: 1px solid rgba(139,26,26,.2);
-  border-radius: 4px;
-  padding: 1px 5px;
+  font-weight: 600;
+  color: var(--ink3);
+  background: transparent;
+  border: none;
+  padding: 0;
   margin-left: 4px;
   letter-spacing: 0.02em;
   vertical-align: middle;
-  text-transform: none;
+  text-transform: uppercase;
+}
+.ob-required::before {
+  content: "· ";
+  color: var(--ink3);
 }
 
 /* 컴팩트 칩 그리드 — 위아래 폭 최소화 */
@@ -2395,24 +2415,32 @@ main {
   cursor: pointer;
   transition: border-color .15s, background .15s, box-shadow .15s, color .15s;
 }
-/* 추천 멘토 배지 — row 상단에 얇게 표시되는 강조 라벨 */
+/* 추천 멘토 배지 — FREE/PRO 배지 바로 왼쪽에 붙음. 네이비 채움 pill. */
+.ob-mentor-row-badge-wrap {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 1;
+}
 .ob-mentor-recommend {
-  display: inline-block;
-  margin-bottom: 6px;
-  padding: 2px 8px;
-  background: rgba(139, 26, 26, 0.08);
-  color: var(--cta);
-  border: 1px solid rgba(139, 26, 26, 0.25);
-  border-radius: 999px;
-  font-size: 11px;
+  padding: 3px 9px;
+  background: var(--brand-point);
+  color: #fff;
+  border: 1px solid var(--brand-point);
+  border-radius: 980px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: -0.1px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 .ob-mentor-row.sel .ob-mentor-recommend {
-  /* 선택된 상태에선 배경이 어두우므로 배지를 흰색 반투명으로 반전 */
-  background: rgba(255, 255, 255, 0.2);
+  /* 선택된 상태에선 배경이 네이비/크림슨으로 변하므로 흰 outline 으로 반전 */
+  background: transparent;
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.75);
 }
 .ob-mentor-row:hover {
   border-color: rgba(26,58,110,.3);
@@ -2530,35 +2558,30 @@ main {
   line-height: 1.55;
   letter-spacing: -0.1px;
 }
-/* FREE/PRO 배지 — row 내부 우측 상단. 헤더 pill 과 같은 둥근 pill 언어. */
+/* FREE/PRO 배지 — ob-mentor-row-badge-wrap 내부의 flex 아이템. */
 .ob-mentor-row-badge {
-  position: absolute;
-  top: 10px;
-  right: 14px;
   font-size: 9.5px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 980px;
-  letter-spacing: 0.04em;
-  border: 1px solid rgba(0,0,0,0.1);
-  background: #f5f5f7;
-  color: var(--ink3);
-  z-index: 1;
+  letter-spacing: 0.06em;
+  border: 1px solid transparent;
+  line-height: 1.2;
 }
 .free-badge {
   color: var(--brand-point);
-  border-color: rgba(26,58,110,.22);
-  background: rgba(26,58,110,.06);
+  border-color: var(--brand-point);
+  background: #fff;
 }
 .pro-badge {
   color: var(--cta);
-  border-color: rgba(139,26,26,.22);
-  background: rgba(139,26,26,.06);
+  border-color: var(--cta);
+  background: #fff;
 }
 /* 선택(반전)된 상태에서는 배지도 투명 흰 톤으로 */
 .ob-mentor-row.sel .ob-mentor-row-badge {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.35);
+  background: transparent;
+  border-color: rgba(255,255,255,0.75);
   color: #fff;
 }
 
@@ -2571,14 +2594,16 @@ main {
 }
 .ob-pro-lock {
   display: inline-block;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   color: var(--cta);
-  background: rgba(139,26,26,.08);
-  border: 1px solid rgba(139,26,26,.2);
-  border-radius: 4px;
-  padding: 1px 6px;
+  background: #fff;
+  border: 1px solid var(--cta);
+  border-radius: 980px;
+  padding: 3px 9px;
   margin-left: 5px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
   vertical-align: middle;
   text-transform: none;
 }
