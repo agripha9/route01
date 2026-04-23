@@ -1920,7 +1920,7 @@ function renderAiHeadInner(aiLabel){
   const mentorName = styleKey.replace(/\s*\(.*\)\s*$/, '').trim();
   const tag = meta ? meta.tag : '';
   const tagHTML = tag ? `<span class="ai-head-tag">${esc(tag)}</span>` : '';
-  return `${logoHTML}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI 멘토링</span></span>`;
+  return `${logoHTML}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI</span></span>`;
 }
 
 function addMsg(role,text,files,aiLabel){
