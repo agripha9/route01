@@ -2216,7 +2216,7 @@ function buildRouteLoader(loader){
      [HOLD_END% ~ FADE_END%]   — 일괄 fade-out
      [FADE_END% ~ 100%]        — 전원 숨김 대기 (다음 사이클 전 여백) */
   const APPEAR_END_PCT = 55;
-  const HOLD_END_PCT   = 75;
+  const HOLD_END_PCT   = 64;
   const FADE_END_PCT   = 97;
 
   /* ─── 1. 폭 측정 → 점+노드 개수 결정 ─── */
