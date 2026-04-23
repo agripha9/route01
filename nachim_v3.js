@@ -1075,22 +1075,72 @@ function cancelOnboardingEdit(){
     return;
   }
 
-  /* 필수 미입력 — 미완성 Step으로 되돌리고 경고 */
+  /* 필수 미입력 — 커스텀 confirm 모달: [계속 입력] / [입력 취소] */
   const sectorOk = (ob.sector && ob.sector.length>0) || (ob.sectorOther && ob.sectorOther.trim().length>0);
   const step1Ok = !!(ob.industry && sectorOk && ob.stage && ob.target);
   const step2Ok = !!(ob.concern && ob.concern.trim().length>0 && ob.team);
 
+  /* 어느 Step이 미완성인지 — 계속 입력 시 이동할 타겟 */
   let target = 1;
-  let msg = '먼저 기본 정보(사업 소개·업종·단계·타겟)를 입력해주세요.';
-  if(step1Ok && !step2Ok){
-    target = 2;
-    msg = '핵심 고민과 팀 규모를 입력해주세요. 맞춤 자문을 위해 필요합니다.';
-  } else if(step1Ok && step2Ok){
-    target = 3;
-    msg = '답변 스타일을 결정할 멘토를 선택해주세요.';
-  }
-  if(step !== target) goStep(target);
-  alert(msg);
+  if(step1Ok && !step2Ok) target = 2;
+  else if(step1Ok && step2Ok) target = 3;
+
+  showOnboardingCancelConfirm(target);
+}
+
+/* 온보딩 종료 확인 모달 — 기존 .modal 스타일 재사용, 이모지·아이콘 없음 */
+function showOnboardingCancelConfirm(target){
+  /* 중복 생성 방지 */
+  const exist = document.getElementById('ob-cancel-modal');
+  if(exist) exist.remove();
+
+  const m = document.createElement('div');
+  m.className = 'modal-bg open';
+  m.id = 'ob-cancel-modal';
+  m.style.zIndex = '9999';
+  m.innerHTML = `
+    <div class="modal" style="max-width:420px">
+      <div class="modal-title">프로필 입력을 취소할까요?</div>
+      <div class="modal-sub">
+        지금 종료하면 입력하신 내용은 저장되지 않습니다.<br>
+        다음에 다시 처음부터 입력하셔야 맞춤 자문을 받으실 수 있습니다.
+      </div>
+      <div class="modal-btn-row" style="flex-wrap:nowrap">
+        <button type="button" class="modal-btn pri" id="ob-cancel-continue" style="flex:1">계속 입력</button>
+        <button type="button" class="modal-btn modal-btn--danger" id="ob-cancel-discard" style="flex:1">입력 취소</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+
+  const close = () => { m.remove(); };
+  /* 백드롭 클릭 = 계속 입력 (실수 방지로 취소는 버튼으로만) */
+  m.addEventListener('click', e=>{ if(e.target===m){ close(); if(step !== target) goStep(target); } });
+
+  document.getElementById('ob-cancel-continue').addEventListener('click', ()=>{
+    close();
+    if(step !== target) goStep(target);
+  });
+
+  document.getElementById('ob-cancel-discard').addEventListener('click', ()=>{
+    close();
+    /* 입력한 값 전부 폐기 */
+    try{ localStorage.removeItem('vd_profile'); }catch(e){}
+    ob = {};
+    profile = {};
+    /* 온보딩 UI 숨기고 로그인 화면으로 (로그아웃 수행) */
+    document.getElementById('onboarding').classList.add('hidden');
+    logout();
+  });
+
+  /* ESC 키 = 계속 입력 */
+  const escHandler = (e)=>{
+    if(e.key === 'Escape'){
+      close();
+      if(step !== target) goStep(target);
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 function hydrateOnboardingFromOb(){
@@ -2179,17 +2229,15 @@ function checkProfileBeforeSend(text){
   m.style.zIndex = '9999';
   m.id = 'no-profile-modal';
   m.innerHTML = `
-    <div class="modal" style="max-width:420px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">👤</div>
+    <div class="modal" style="max-width:420px">
       <div class="modal-title">먼저 프로필을 설정해주세요</div>
-      <div class="modal-sub" style="text-align:left;line-height:1.7;margin-bottom:1rem">
-        맞춤형 자문을 위해 업종·단계·핵심 고민이 필요합니다.<br>
-        <br>
-        ✅ <strong>맞춤형</strong> 자문 (일반론 → 나만의 조언)<br>
-        ✅ <strong>멘토 스타일</strong>에 맞는 피드백 톤<br>
-        ✅ <strong>도메인별</strong> 구체적 수치와 사례
+      <div class="modal-sub">
+        맞춤형 자문을 위해 업종·단계·핵심 고민 정보가 필요합니다.
+        프로필을 설정하시면 일반론이 아닌 귀사 상황에 맞는 답변과,
+        선택하신 멘토의 스타일에 맞는 피드백 톤, 그리고 도메인별
+        구체적인 수치와 사례를 받아보실 수 있습니다.
       </div>
-      <button class="modal-btn pri" onclick="document.getElementById('no-profile-modal').remove();editProfile();" style="width:100%">프로필 설정 →</button>
+      <button class="modal-btn pri" onclick="document.getElementById('no-profile-modal').remove();editProfile();" style="width:100%">프로필 설정</button>
     </div>`;
   document.body.appendChild(m);
   /* 백드롭 클릭으로 닫기 비활성 — 닫으려면 반드시 프로필 설정을 거쳐야 함 */
