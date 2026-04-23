@@ -3314,7 +3314,7 @@ p{margin:0 0 14pt;color:#1d1d1f}
 strong{font-weight:700;color:#1d1d1f}
 em{font-style:italic;color:#1d1d1f}
 /* 제목 계층 — 화면과 동일 (본문 15 → h4 16 → h3 17 → h2 22 → h1 이탤릭 18, pt 환산) */
-h1{font-size:18pt;font-weight:800;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3;font-style:italic}
+h1{font-size:20pt;font-weight:800;color:#1d1d1f;margin:18pt 0 10pt;letter-spacing:-0.02em;line-height:1.3;font-style:italic}
 h2{font-size:16pt;font-weight:800;color:#1d1d1f;margin:22pt 0 10pt;padding:2pt 0 2pt 11pt;border-left:3pt solid #8B1A1A;line-height:1.3;letter-spacing:-0.02em}
 h2:first-child{margin-top:4pt}
 h3{font-size:12.5pt;font-weight:700;color:#1d1d1f;margin:14pt 0 6pt;letter-spacing:-0.01em;line-height:1.4}
@@ -4093,7 +4093,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
       'p{margin:0 0 12pt 0;color:#1d1d1f;}',
       /* 제목 — 색은 전부 검정, 크기 사다리는 화면과 비례 (18/22/17/16 → 18/16/12.5/11.5pt) */
       'h1,h2,h3,h4{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif !important;color:#1d1d1f;letter-spacing:-0.2pt;}',
-      'h1{font-size:18pt;font-weight:800;margin:18pt 0 10pt 0;line-height:1.3;font-style:italic;}',
+      'h1{font-size:20pt;font-weight:800;margin:18pt 0 10pt 0;line-height:1.3;font-style:italic;}',
       /* H2: 섹션 제목 — 좌측 브랜드 레드 세로 막대 유지 (더 세련된 3pt 두께) */
       'h2{font-size:16pt;font-weight:800;color:#1d1d1f;margin:20pt 0 10pt 0;padding:2pt 0 2pt 11pt;border-left:3pt solid #8B1A1A;line-height:1.3;letter-spacing:-0.4pt;}',
       /* H3: 소제목 — 색 검정, H2와 간격 확보 */

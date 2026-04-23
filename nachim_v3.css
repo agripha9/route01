@@ -769,7 +769,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
    다른 멘토도 쓸 수 있지만, 일반 섹션 제목은 H2를 쓴다.
    크기는 H2 수준으로 절제하되, 이탤릭과 좌측 막대 없음으로 격언 특유의 느낌 유지. */
 .report-card .report-bubble h1{
-  font-size:18px;
+  font-size:20px;
   font-weight:700;
   font-style:italic;
   letter-spacing:-0.2px;
