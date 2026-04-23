@@ -611,7 +611,7 @@ async function submitGrantHelper(){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model,max_tokens:maxTokens,stream:false,system:buildGrantSystem(),messages:msgs})
+      body:JSON.stringify({model,max_tokens:maxTokens,stream:false,system:[{type:'text', text:buildGrantSystem(), cache_control:{type:'ephemeral'}}],messages:msgs})
     });
     if(!res.ok){
       let errMsg='API 오류';
@@ -2762,7 +2762,11 @@ async function doSend(text){
           model,
           max_tokens:maxTokens,
           stream:false,
-          system,
+          /* 프롬프트 캐싱 — 시스템 프롬프트 전체를 하나의 ephemeral 캐시 블록으로.
+             같은 멘토·프로필·도메인 조합의 후속 요청은 5분 내 cache hit → 입력 비용 90% 절감 + 지연 단축.
+             단일 블록이므로 buildSys() 내용 중 어느 부분이 바뀌어도 전체 재처리되지만, 
+             Route01 사용 패턴(같은 세션에서 같은 멘토로 여러 질문)엔 충분. */
+          system:[{type:'text', text:system, cache_control:{type:'ephemeral'}}],
           messages:msgs
         })
       });
@@ -2789,6 +2793,19 @@ async function doSend(text){
     for(let turn=0;turn<4;turn++){
       const maxTokens=8192;
       j=await callOnce(convo, maxTokens);
+      /* 프롬프트 캐싱 관측: cache_read_input_tokens > 0 이면 캐시 히트.
+         초기 안정화 기간에만 유지, 추후 제거 가능. */
+      try{
+        const u=j?.usage||{};
+        if(u.cache_creation_input_tokens || u.cache_read_input_tokens){
+          console.log('[cache]', {
+            write: u.cache_creation_input_tokens||0,
+            read:  u.cache_read_input_tokens||0,
+            in:    u.input_tokens||0,
+            out:   u.output_tokens||0
+          });
+        }
+      }catch(_){}
       const part=extractText(j);
       if(part) fullTextAll+=part;
       stopReason=String(j?.stop_reason||'');
