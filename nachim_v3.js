@@ -1419,7 +1419,9 @@ function saveHistory(q,a,domainTitle){
     }
     const raw=localStorage.getItem('vd_history');
     const log=raw?JSON.parse(raw):[];
-    log.unshift({q,a:aStr,domain:domainTitle,domainKey:domain,ts:Date.now()});
+    /* 질문 당시 멘토도 기록 — 나중에 히스토리 열 때 그 시점 멘토로 헤더 복원 */
+    const mentorAtAsk = profile.style || 'Paul Graham (YC)';
+    log.unshift({q,a:aStr,domain:domainTitle,domainKey:domain,mentor:mentorAtAsk,ts:Date.now()});
     localStorage.setItem('vd_history',JSON.stringify(log.slice(0,200)));
   }catch(e){localStorage.removeItem('vd_history');}
   renderHistory();
@@ -1586,7 +1588,8 @@ function openHistConversation(h){
     addMsg('ai','> 저장된 답변을 불러올 수 없습니다. (기록 손상으로 추정)\n\n이 질문은 **위 입력창에 다시 입력**하여 새로 물어봐 주세요.');
     messages.push({role:'assistant', content:''});
   } else {
-    addMsg('ai', aStr);
+    /* 히스토리 저장 시점의 멘토로 헤더 복원 (h.mentor가 없는 구 기록은 현재 프로필로 fallback) */
+    addMsg('ai', aStr, null, null, h.mentor);
     messages.push({role:'assistant', content:aStr});
   }
 
@@ -1906,15 +1909,17 @@ async function getAiSuggestedQuestions(domainKey){
 }
 
 /* 답변 버블 상단 헤더 — 로고 + 현재 선택된 멘토(이름·태그) + Route01 AI 보조 라벨.
-   aiLabel이 지정되면 그것을 우선(예: '지원 사업 도우미'). */
-function renderAiHeadInner(aiLabel){
+   aiLabel이 지정되면 그것을 우선(예: '지원 사업 도우미').
+   mentorOverride가 지정되면 profile.style 대신 그 값으로 렌더 — 이 버블이 생성된 시점의
+   멘토를 고정해두기 위함. */
+function renderAiHeadInner(aiLabel, mentorOverride){
   const logoHTML = `<span class="ai-head-av"><img class="m-av-logo" src="./logo.png" width="22" height="22" alt=""/></span>`;
   /* 명시 라벨(지원사업 도우미 등)은 그대로 표시 */
   if(aiLabel){
     return `${logoHTML}<span class="ai-head-name"><span class="brand">Route01</span> AI <span class="ai-head-sep">·</span> <span class="ai-head-mode">${esc(String(aiLabel))}</span></span>`;
   }
-  /* 기본: 현재 프로필의 멘토를 앞세우기 */
-  const styleKey = profile.style || 'Paul Graham (YC)';
+  /* 기본: override가 있으면 그것, 없으면 현재 프로필의 멘토 */
+  const styleKey = mentorOverride || profile.style || 'Paul Graham (YC)';
   const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[styleKey] : null;
   /* 'Paul Graham (YC)' → 'Paul Graham' 로 괄호 앞부분만 */
   const mentorName = styleKey.replace(/\s*\(.*\)\s*$/, '').trim();
@@ -1923,7 +1928,7 @@ function renderAiHeadInner(aiLabel){
   return `${logoHTML}<span class="ai-head-name"><span class="ai-head-mentor">${esc(mentorName)}</span>${tagHTML}<span class="ai-head-sep">·</span><span class="ai-head-brand"><span class="brand">Route01</span> AI</span></span>`;
 }
 
-function addMsg(role,text,files,aiLabel){
+function addMsg(role,text,files,aiLabel,historyMentor){
   rmWelcome();
   const chat=document.getElementById('chat');
   const el=document.createElement('div');
@@ -1935,12 +1940,16 @@ function addMsg(role,text,files,aiLabel){
     const id='a'+Date.now()+Math.random().toString(36).slice(2);
     const safe=text||'';
     ANSWER_RAW.set(id, safe);
+    /* 버블 생성 시점의 멘토를 고정 — 이후 멘토가 바뀌어도 이 답변 헤더는 유지.
+       히스토리에서 복원하는 경우 historyMentor가 넘어오면 그 시점 멘토로. */
+    const capturedMentor = historyMentor || profile.style || 'Paul Graham (YC)';
+    el.setAttribute('data-mentor', capturedMentor);
     const cr=document.getElementById('chat-res');
     if(cr){
       cr.setAttribute('data-for-export',id);
       cr.innerHTML=renderMD(safe);
     }
-    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner(aiLabel)}</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
+    el.innerHTML=`<div class="m-body ai-body"><div class="ai-head">${renderAiHeadInner(aiLabel, capturedMentor)}</div><div class="report-card"><div class="m-bubble report-bubble" data-answer-id="${id}" data-raw="${esc(safe)}">${renderMD(safe)}</div>${renderAnswerActions(id)}</div></div>`;
   } else {
     const fileHtml=(files&&files.length)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${files.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid #d2d2d7;border-radius:20px;padding:2px 9px;font-size:11px;color:#1d1d1f;font-weight:500">${getIcon(f.name)} ${f.name}</span>`).join('')}</div>`:'';
     el.className = 'message user-msg';
@@ -4802,7 +4811,7 @@ function openR01HistModal(id) {
 
     addMsg('user', item.q, []);
     messages.push({role:'user', content:item.q});
-    addMsg('ai', item.a || '');
+    addMsg('ai', item.a || '', null, null, item.mentor);
     messages.push({role:'assistant', content:item.a || ''});
 
     setTimeout(()=>{
