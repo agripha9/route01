@@ -11,7 +11,7 @@
 ## 1. 프로젝트 개요
 
 - **이름**: Route01 — AI 기반 스타트업 자문 서비스
-- **배포**: https://route01.kr (메인 앱 경로: `/nachim_v3.html`)
+- **배포**: https://route01.kr (루트 `/`가 메인 앱 — 2026-04-24부터 `index.html` 사용)
 - **GitHub**: `agripha9/route01` (public)
 - **호스팅**: Cloudflare Pages, `main` 브랜치 push 시 1~2분 내 자동 배포
 - **사용자**: 서울, 한국어
@@ -35,7 +35,7 @@
 ```
 route01/
 ├── CONTEXT.md           # 이 파일
-├── nachim_v3.html       # 메인 앱 (~890줄)
+├── index.html           # 메인 앱 (~890줄, 2026-04-24 전엔 nachim_v3.html)
 ├── nachim_v3.css        # 스타일 (~2856줄)
 ├── nachim_v3.js         # 로직 (~5901줄)
 ├── index.html           # 루트 → nachim_v3로 리다이렉트
@@ -261,7 +261,7 @@ route01/
    - 로드맵 #12: Apple 스타일 UI 리팩터 (전체 일관성 점검)
 4. **Claude Code 핸드오프**
    - Design에서 확정된 화면을 핸드오프 번들로 묶음
-   - Claude Code로 넘겨 실제 `nachim_v3.html/css/js`에 반영할 코드 생성
+   - Claude Code로 넘겨 실제 `index.html` / `nachim_v3.css` / `nachim_v3.js`에 반영할 코드 생성
    - 사용자가 본 세션처럼 피드백 루프 진행
 
 ### 주의
@@ -586,6 +586,33 @@ route01/
 - 같은 PDF 재질문 패턴 → 캐싱 이득 실측
 - 거의 안 쓰임 → Phase 2-B 여기서 종료
 
+### I. URL 정리 — `nachim_v3.html` → `index.html`
+
+**문제**: 사용자가 `route01.kr` 방문하면 주소창이 `route01.kr/nachim_v3.html`로 바뀌어 내부 개발 코드명이 외부에 노출됨. 기존 구조는 `index.html` meta refresh와 `_redirects`가 서로 싸우는 엉킨 상태였음.
+
+**원인 분석**:
+- 기존 `index.html`: JS + meta refresh로 `./nachim_v3.html`로 이동 (URL 변경 발생)
+- 기존 `_redirects`: `/nachim_v3.html → / 301` + `/ → /nachim_v3.html 200` — 모순되는 두 규칙
+- Cloudflare Pages는 정작 `nachim_v3.html` → `nachim_v3` 자동 리다이렉트까지 수행. 상태 엉킴
+
+**해결책 선택 과정**:
+- Cloudflare 공식 문서 확인: `/*  /nachim_v3.html  200` 규칙은 `nachim_v3.html → nachim_v3.html` 루프로 인해 "Infinite loop detected" 경고 발생 위험
+- Cloudflare Pages는 루트에 `index.html`이 있으면 자동으로 `/`에서 서빙함
+- **가장 정석**: 파일명 자체를 `index.html`로 바꾸기 → Cloudflare 기본 동작이 URL을 `/`로 유지
+
+**실행**:
+- `git mv nachim_v3.html index.html` (히스토리 보존)
+- 기존 리다이렉트 `index.html` 제거
+- `_redirects`를 하위 호환만 남김: `/nachim_v3.html → / 301`, `/nachim_v3 → / 301`
+- CSS/JS 파일명(`nachim_v3.css`/`.js`)은 **변경 안 함** — 내부 참조 그대로 유지, 외부 노출 없음
+- CONTEXT.md 파일 트리 + 배포 설명 업데이트
+
+**결과**:
+- `route01.kr/` → `index.html` 자동 서빙, URL은 `/`로 유지 ✅
+- `route01.kr/nachim_v3.html` (옛 링크) → 301로 `/`로 영구 리다이렉트 ✅
+- `route01.kr/nachim_v3` (Cloudflare 자동 확장자 제거된 형태) → 301로 `/`로 ✅
+- 주소창에 깔끔하게 `route01.kr`만 표시
+
 ---
 
 ## 29. 2026-04-24 끝난 시점의 핵심 팩트 (다음 세션용)
@@ -596,6 +623,8 @@ route01/
 - **H2 위계는 typography + whitespace 단독** (크기 24px, weight 600, margin 3.5rem/1rem, **no border**)
 - **H3 색 shift** `var(--ink2)` #3d3d3a로 H2와 차별화
 - **수평선 `---` 금지** — 프롬프트·CSS 양쪽
+- **메인 앱 파일**: `index.html` (2026-04-24 이전엔 `nachim_v3.html`). CSS·JS는 파일명 유지 (`nachim_v3.css`/`.js`)
+- **URL 정책**: `route01.kr/` 루트만 사용자에게 보임. 옛 `/nachim_v3.html` 링크는 `/`로 301 리다이렉트
 - **Phase 2-A 라우팅 작동 중** — FREE 멘토 Sonnet, PRO + 복잡 질문 Opus 4.7
 - **Phase 2-B PDF 캐싱 적용** — 채팅 첨부 PDF `cache_control: ephemeral`. 5분 TTL 내 재질문 시 PDF 토큰 90% 할인. 관찰 로그 `[pdf]` + `[cache]`로 확인. 본격 RAG 여부는 클로즈 베타 데이터로 판단.
 - **Phase 1 Step 3 스트리밍 SKIP** — 백엔드 도입 시점에 재검토

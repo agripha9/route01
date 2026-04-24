@@ -1,10 +1,890 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=./nachim_v3.html">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route01 — AI Startup Advisory</title>
+<meta name="description" content="스타트업을 위한 AI 자문 서비스. Finding your Route from Zero to One.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="./vendor/auth0-spa-js.production.js"></script>
+<link rel="stylesheet" href="./nachim_v3.css">
 </head>
 <body>
-<script>window.location.href='./nachim_v3.html';</script>
+
+<!-- ── AUTH (LOGIN REQUIRED) ───────────────── -->
+<div id="auth" role="dialog" aria-modal="true" aria-labelledby="auth-heading">
+  <div class="auth-shell">
+
+    <!-- 왼쪽: 브랜드 -->
+    <div class="auth-brand">
+      <div class="auth-brand-inner">
+        <!-- 로고 + 슬로건 (간격 없이 밀착) -->
+        <div class="auth-logo-wrap">
+          <img src="./logo.png" class="auth-brand-logo" alt="Route01"/>
+          <p class="auth-brand-kicker" id="auth-sub">AI Startup Advisory</p>
+        </div>
+        <h1 class="auth-brand-title" id="auth-heading">Finding your Route<br>from Zero to One</h1>
+
+        <!-- 셀링 포인트 -->
+        <div class="auth-sellpoints">
+          <div class="auth-sp">
+            <div class="auth-sp-num">01</div>
+            <div class="auth-sp-body">
+              <div class="auth-sp-head">스타트업 전문 맞춤형 인공지능 자문 서비스</div>
+              <div class="auth-sp-sub">간단한 프로필 입력 한 번으로, 언제나 맞춤형 자문<br>스타트업에 특화된 전문 자문 서비스</div>
+            </div>
+          </div>
+          <div class="auth-sp">
+            <div class="auth-sp-num">02</div>
+            <div class="auth-sp-body">
+              <div class="auth-sp-head">지원사업부터 IR 덱까지</div>
+              <div class="auth-sp-sub">정부 지원사업 도우미부터 IR 덱까지<br>투자유치·경영·마케팅·재무·HR·법무/특허 등 어떤 분야든</div>
+            </div>
+          </div>
+          <div class="auth-sp">
+            <div class="auth-sp-num">03</div>
+            <div class="auth-sp-body">
+              <div class="auth-sp-head">합리적인 비용으로 세계적인 멘토들의 자문까지</div>
+              <div class="auth-sp-sub">만나기 힘든 세계적인 스타트업 멘토들의 스타일로<br>경쟁 서비스 대비 합리적인 비용으로</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 멘토 소개 -->
+        <div class="auth-brand-mentors">
+          <div class="auth-mentor-label">현재 선택 가능한 세계 최고 멘토 스타일</div>
+          <div class="auth-mentor-chips">
+            <span class="auth-mentor-chip">Paul Graham</span>
+            <span class="auth-mentor-chip">Peter Thiel</span>
+            <span class="auth-mentor-chip">Brian Chesky</span>
+            <span class="auth-mentor-chip">Jensen Huang</span>
+            <span class="auth-mentor-chip">Naval Ravikant</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 로그인 -->
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-tabs-bar">
+          <button class="auth-tab active" id="atab-login" onclick="switchAuthTab('login')">로그인</button>
+          <button class="auth-tab" id="atab-signup" onclick="switchAuthTab('signup')">회원가입</button>
+        </div>
+
+        <!-- 소셜 -->
+        <div class="auth-social-wrap">
+          <button type="button" class="auth-btn auth-social-btn google-btn" onclick="loginProvider('google-oauth2')">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google로 계속하기
+          </button>
+          <button type="button" class="auth-btn auth-social-btn apple-btn" onclick="loginProvider('apple')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            Apple로 계속하기
+          </button>
+          <div class="auth-social-row2">
+            <button type="button" class="auth-btn auth-social-btn naver-btn" onclick="loginProvider('naver')">
+              <span style="font-size:15px;font-weight:900;color:#fff;font-family:sans-serif">N</span>&nbsp;네이버
+            </button>
+            <button type="button" class="auth-btn auth-social-btn kakao-btn" onclick="loginProvider('kakao')">
+              <svg width="18" height="17" viewBox="0 0 18 17" fill="#3A1D1D"><path d="M9 0C4.029 0 0 3.164 0 7.067c0 2.506 1.629 4.708 4.09 5.979l-.87 3.237c-.077.285.255.514.499.336L7.5 14.27c.494.065.996.099 1.5.099 4.971 0 9-3.164 9-7.067C18 3.164 13.971 0 9 0z"/></svg>
+              카카오
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-or-divider"><span>또는 이메일로</span></div>
+
+        <!-- 로그인 폼 -->
+        <div id="aform-login" class="aform">
+          <div class="afield">
+            <label class="afield-label" for="alogin-email">이메일</label>
+            <input class="afield-input" id="alogin-email" type="email" placeholder="hello@example.com" autocomplete="email"/>
+          </div>
+          <div class="afield">
+            <label class="afield-label" for="alogin-pw">
+              비밀번호
+              <button type="button" class="aforgot-btn" onclick="showForgotPw()">비밀번호 찾기</button>
+            </label>
+            <div class="apw-wrap">
+              <input class="afield-input" id="alogin-pw" type="password" placeholder="••••••••" autocomplete="current-password"/>
+              <button type="button" class="apw-eye" onclick="togglePwEye('alogin-pw',this)">👁</button>
+            </div>
+          </div>
+          <button type="button" class="auth-btn auth-submit-btn" onclick="emailLogin()">로그인</button>
+          <div class="aerr" id="aerr-login"></div>
+        </div>
+
+        <!-- 회원가입 폼 -->
+        <div id="aform-signup" class="aform" style="display:none">
+          <div class="afield">
+            <label class="afield-label" for="asignup-email">이메일</label>
+            <input class="afield-input" id="asignup-email" type="email" placeholder="hello@example.com" autocomplete="email"/>
+            <div class="aerr" id="aerr-email-dup"></div>
+          </div>
+          <div class="afield">
+            <label class="afield-label" for="asignup-pw">비밀번호 <span style="font-weight:400;color:var(--ink3)">(8자 이상)</span></label>
+            <div class="apw-wrap">
+              <input class="afield-input" id="asignup-pw" type="password" placeholder="8자 이상" autocomplete="new-password"/>
+              <button type="button" class="apw-eye" onclick="togglePwEye('asignup-pw',this)">👁</button>
+            </div>
+          </div>
+          <div class="afield">
+            <label class="afield-label" for="asignup-pw2">비밀번호 확인</label>
+            <div class="apw-wrap">
+              <input class="afield-input" id="asignup-pw2" type="password" placeholder="비밀번호 재입력" autocomplete="new-password"/>
+              <button type="button" class="apw-eye" onclick="togglePwEye('asignup-pw2',this)">👁</button>
+            </div>
+          </div>
+
+          <!-- 약관 동의 — label/button 완전 분리 구조 -->
+          <div class="aterms-box" id="aterms-box">
+            <!-- 전체 동의 -->
+            <div class="aterms-row aterms-all-row">
+              <input type="checkbox" id="agree-all" onchange="toggleAllTerms(this)"/>
+              <span class="aterms-label-all">전체 동의</span>
+            </div>
+            <div class="aterms-divider"></div>
+            <!-- 이용약관 -->
+            <div class="aterms-row">
+              <input type="checkbox" id="agree-terms" onchange="syncAllCheck()"/>
+              <span class="aterms-label">[필수] 이용약관</span>
+              <button type="button" class="aview-btn" id="btn-view-terms">보기</button>
+            </div>
+            <!-- 개인정보처리방침 -->
+            <div class="aterms-row">
+              <input type="checkbox" id="agree-privacy" onchange="syncAllCheck()"/>
+              <span class="aterms-label">[필수] 개인정보처리방침</span>
+              <button type="button" class="aview-btn" id="btn-view-privacy">보기</button>
+            </div>
+            <!-- 마케팅 -->
+            <div class="aterms-row">
+              <input type="checkbox" id="agree-marketing"/>
+              <span class="aterms-label">[선택] 마케팅 정보 수신</span>
+            </div>
+          </div>
+
+          <button type="button" class="auth-btn auth-submit-btn" onclick="emailSignup()">회원가입</button>
+          <div class="aerr" id="aerr-signup"></div>
+        </div>
+
+        <!-- 이메일 인증 안내 -->
+        <div id="aform-verify" class="aform" style="display:none;text-align:center;padding:8px 0">
+          <div style="font-size:40px;margin-bottom:16px">📧</div>
+          <div style="font-size:17px;font-weight:600;color:var(--ink);margin-bottom:8px">이메일을 확인해 주세요</div>
+          <div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:20px">
+            <span id="averify-addr" style="font-weight:600;color:var(--ink)"></span>으로<br>6자리 인증 코드를 발송했습니다.
+          </div>
+          <!-- 데모용 코드 표시 박스 -->
+          <div class="averify-demo-box" style="display:none;background:var(--bg);border:1px dashed var(--border);border-radius:var(--r);padding:12px;margin-bottom:16px;font-size:13px;color:var(--ink3);">
+            <div style="margin-bottom:4px">📌 데모 모드 — 인증 코드:</div>
+            <div id="averify-demo-code" style="font-size:24px;font-weight:700;letter-spacing:6px;color:var(--ink);font-family:monospace"></div>
+          </div>
+          <!-- 코드 입력란 -->
+          <div class="afield" style="margin-bottom:10px">
+            <label class="afield-label" style="justify-content:center">인증 코드 6자리 입력</label>
+            <input class="afield-input" id="averify-code-input" type="text" inputmode="numeric" maxlength="6" placeholder="123456" style="text-align:center;font-size:20px;letter-spacing:6px;font-family:monospace" onkeydown="if(event.key==='Enter')verifySignupCode()"/>
+          </div>
+          <div class="aerr" id="averr-verify" style="margin-bottom:8px"></div>
+          <button type="button" class="auth-btn auth-submit-btn" onclick="verifySignupCode()">인증 완료</button>
+          <button type="button" class="alink-btn" style="margin-top:10px" onclick="resendVerify()">인증 코드 재발송</button>
+          <button type="button" class="alink-btn" onclick="switchAuthTab('signup')" style="margin-top:4px">← 회원가입으로 돌아가기</button>
+        </div>
+
+        <!-- 비밀번호 찾기 -->
+        <div id="aform-forgot" class="aform" style="display:none">
+          <p style="font-size:14px;color:var(--ink3);margin-bottom:14px;line-height:1.6">가입하신 이메일로 비밀번호 재설정 링크를 보내드립니다.</p>
+          <div class="afield">
+            <label class="afield-label" for="aforgot-email">이메일</label>
+            <input class="afield-input" id="aforgot-email" type="email" placeholder="hello@example.com"/>
+          </div>
+          <button type="button" class="auth-btn auth-submit-btn" onclick="sendResetPw()">재설정 링크 발송</button>
+          <button type="button" class="alink-btn" onclick="switchAuthTab('login')" style="margin-top:8px">← 로그인으로 돌아가기</button>
+          <div class="aerr" id="aerr-forgot"></div>
+        </div>
+
+        <div class="auth-bottom-row">
+          <button type="button" class="auth-demo-btn" onclick="demoLogin()">🔓 데모 체험 (로그인 없이)</button>
+          <button type="button" class="auth-settings-btn" onclick="openAuth0Settings()">Auth0 설정</button>
+        </div>
+        <p class="auth-copy">© 2026 <span class="brand">Route01</span> &nbsp;·&nbsp;
+          <a href="#" onclick="openTermsModal('terms');return false">이용약관</a> &nbsp;·&nbsp;
+          <a href="#" onclick="openTermsModal('privacy');return false">개인정보처리방침</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 약관 모달 ───────────────────────────── -->
+<div class="modal-bg" id="terms-modal">
+  <div class="modal modal-wide" style="max-width:620px">
+    <button class="modal-close" onclick="closeTermsModal()">×</button>
+    <div class="modal-title" id="terms-modal-title">이용약관</div>
+    <div class="terms-scroll" id="terms-modal-body"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn pri" onclick="closeTermsModal()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ONBOARDING ────────────────────────── -->
+<div id="onboarding" class="hidden">
+<div class="ob-card" style="position:relative">
+  <button class="modal-close" id="ob-close-btn" onclick="cancelOnboardingEdit()" style="position:sticky;top:10px;float:right;z-index:2" title="닫기">×</button>
+  <div class="ob-logo">
+    <img class="brand-logo brand-logo--onboard" src="./logo.png" width="80" height="80" alt="Route01"/>
+    <div class="ob-logo-text">
+      <span class="ob-logo-slogan-main">AI Startup Advisory</span>
+      <span class="ob-logo-slogan-sub">Finding your Route from Zero to One</span>
+    </div>
+  </div>
+  <div class="ob-steps">
+    <div class="ob-step done" id="s1"></div>
+    <div class="ob-step" id="s2"></div>
+    <div class="ob-step" id="s3"></div>
+  </div>
+
+  <!-- Step 1: 당신의 스타트업 — 필수 4개 -->
+  <div class="ob-section active" id="sec1">
+    <div class="ob-title">당신의 스타트업</div>
+    <div class="ob-sub">맞춤형 자문을 위해 먼저 기본 정보를 알려주세요. (30초)</div>
+
+    <label class="ob-label">사업 한 줄 소개 <span class="ob-required">필수</span> <span class="ob-hint">— 무엇을 만드는 팀인가요?</span></label>
+    <input class="ob-input" id="industry-in" autocomplete="off" placeholder="예: AI를 활용한 캐릭터 IP 숏폼 플랫폼" oninput="onIndustryInput(this.value)" style="margin-bottom:14px"/>
+
+    <label class="ob-label">업종 <span class="ob-required">필수</span> <span class="ob-hint">— 복수 선택 가능 · 없으면 기타 클릭 후 입력</span></label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="industry-tags">
+      <span class="ind-tag" data-sector="SaaS" onclick="toggleSector(this)">SaaS</span>
+      <span class="ind-tag" data-sector="앱/플랫폼" onclick="toggleSector(this)">앱</span>
+      <span class="ind-tag" data-sector="커머스/이커머스" onclick="toggleSector(this)">커머스</span>
+      <span class="ind-tag" data-sector="핀테크/금융" onclick="toggleSector(this)">핀테크</span>
+      <span class="ind-tag" data-sector="헬스케어/바이오" onclick="toggleSector(this)">헬스케어</span>
+      <span class="ind-tag" data-sector="바이오" onclick="toggleSector(this)">바이오</span>
+      <span class="ind-tag" data-sector="에듀테크/교육" onclick="toggleSector(this)">에듀테크</span>
+      <span class="ind-tag" data-sector="AI/데이터" onclick="toggleSector(this)">AI/데이터</span>
+      <span class="ind-tag" data-sector="물류/모빌리티" onclick="toggleSector(this)">물류/모빌리티</span>
+      <span class="ind-tag" data-sector="HR/채용/조직" onclick="toggleSector(this)">HR/채용</span>
+      <span class="ind-tag" data-sector="마케팅/광고테크" onclick="toggleSector(this)">마케팅/광고</span>
+      <span class="ind-tag" data-sector="프롭테크" onclick="toggleSector(this)">프롭테크</span>
+      <span class="ind-tag" data-sector="콘텐츠/미디어" onclick="toggleSector(this)">콘텐츠</span>
+      <span class="ind-tag" data-sector="게임/엔터테인먼트" onclick="toggleSector(this)">게임/엔터</span>
+      <span class="ind-tag" data-sector="제조/하드웨어" onclick="toggleSector(this)">제조/HW</span>
+      <span class="ind-tag" data-sector="보안/사이버보안" onclick="toggleSector(this)">보안</span>
+      <span class="ind-tag" data-sector="푸드테크/외식" onclick="toggleSector(this)">푸드테크</span>
+      <span class="ind-tag" data-sector="여행/숙박" onclick="toggleSector(this)">여행/숙박</span>
+      <span class="ind-tag" data-sector="반려동물" onclick="toggleSector(this)">반려동물</span>
+      <span class="ind-tag ind-tag-other" data-sector="기타" onclick="toggleSector(this)">기타</span>
+    </div>
+    <input class="ob-input" id="sector-other-in" autocomplete="off" placeholder="업종을 직접 입력하세요" oninput="onSectorOtherInput(this.value)" style="display:none;margin-bottom:10px"/>
+
+    <label class="ob-label" style="margin-top:4px">현재 단계 <span class="ob-required">필수</span></label>
+    <div class="ob-grid-3 ob-chip-grid--compact" id="stage-grid">
+      <div class="ob-chip ob-chip--sm" data-val="아이디어" onclick="pickChip('stage',this)">아이디어</div>
+      <div class="ob-chip ob-chip--sm" data-val="MVP 개발중" onclick="pickChip('stage',this)">MVP</div>
+      <div class="ob-chip ob-chip--sm" data-val="초기 매출" onclick="pickChip('stage',this)">초기 매출</div>
+      <div class="ob-chip ob-chip--sm" data-val="시드 준비" onclick="pickChip('stage',this)">시드 준비</div>
+      <div class="ob-chip ob-chip--sm" data-val="시드 완료" onclick="pickChip('stage',this)">시드 완료</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈A+" onclick="pickChip('stage',this)">시리즈A+</div>
+    </div>
+
+    <label class="ob-label" style="margin-top:4px">타겟 고객 <span class="ob-required">필수</span></label>
+    <div class="ob-grid ob-chip-grid--compact" id="target-grid">
+      <div class="ob-chip ob-chip--sm" data-val="B2B (기업)" onclick="pickChip('target',this)">B2B (기업)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2C (소비자)" onclick="pickChip('target',this)">B2C (소비자)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2G (공공/정부)" onclick="pickChip('target',this)">B2G (공공)</div>
+      <div class="ob-chip ob-chip--sm" data-val="B2B+B2C 복합" onclick="pickChip('target',this)">복합</div>
+    </div>
+
+    <div class="ob-btn-row">
+      <button class="ob-btn pri" id="btn1" onclick="goStep(2)" disabled>다음</button>
+    </div>
+  </div>
+
+  <!-- Step 2: 지금의 상황 — 필수 2개(concern, team) + 선택 3개 -->
+  <div class="ob-section" id="sec2">
+    <div class="ob-title">지금의 상황</div>
+    <div class="ob-sub">자문의 깊이를 결정하는 정보입니다. 선택 항목은 언제든 프로필에서 수정할 수 있어요. (30초)</div>
+
+    <label class="ob-label">핵심 고민 또는 목표 <span class="ob-required">필수</span>
+      <span class="ob-hint">— 자세할수록 답변이 정확해집니다 (현재 고민·과거 시도·원하는 결과)</span>
+    </label>
+    <div class="ob-textarea-wrap">
+      <textarea class="ob-input ob-textarea" id="concern-in" autocomplete="off" placeholder="예: 6개월 안에 시드 투자를 받고 싶어요. 지금까지 MVP 3개월 운영하며 MAU 200명 확보했는데, IR 덱을 어떻게 구성해야 할지, 어떤 VC에 먼저 접근해야 할지 전략이 필요합니다." maxlength="500"></textarea>
+      <div class="ob-char-count" id="concern-count">0 / 500</div>
+    </div>
+
+    <label class="ob-label">팀 규모 <span class="ob-required">필수</span>
+      <span class="ob-hint">— 솔로 창업자와 10인 팀은 받을 조언이 완전히 다릅니다</span>
+    </label>
+    <div class="ob-grid ob-chip-grid--compact" id="team-grid">
+      <div class="ob-chip ob-chip--sm" data-val="1명(솔로)" onclick="pickChip('team',this)">1명 (솔로)</div>
+      <div class="ob-chip ob-chip--sm" data-val="2~3명" onclick="pickChip('team',this)">2~3명</div>
+      <div class="ob-chip ob-chip--sm" data-val="4~10명" onclick="pickChip('team',this)">4~10명</div>
+      <div class="ob-chip ob-chip--sm" data-val="11명 이상" onclick="pickChip('team',this)">11명 이상</div>
+    </div>
+
+    <label class="ob-label" style="margin-top:4px">월 매출(MRR)
+      <span class="ob-hint">— 선택 · 런웨이와 PMF 신호 판단에 활용됩니다</span>
+    </label>
+    <input class="ob-input" id="mrr-in" type="text" autocomplete="off" placeholder="예: 월 300만원 / 아직 없음" style="margin-bottom:14px"/>
+
+    <label class="ob-label">투자 상황 <span class="ob-hint">— 선택</span></label>
+    <div class="ob-grid ob-chip-grid--compact" id="invest-grid">
+      <div class="ob-chip ob-chip--sm" data-val="미투자" onclick="pickChip('invest',this)">미투자</div>
+      <div class="ob-chip ob-chip--sm" data-val="엔젤/시드 완료" onclick="pickChip('invest',this)">엔젤/시드</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈A 완료" onclick="pickChip('invest',this)">시리즈A</div>
+      <div class="ob-chip ob-chip--sm" data-val="시리즈B+" onclick="pickChip('invest',this)">시리즈B+</div>
+    </div>
+
+    <label class="ob-label" style="margin-top:4px">스타트업 이름 <span class="ob-hint">— 선택</span></label>
+    <input class="ob-input" id="name-in" type="text" name="startup-name" autocomplete="off" placeholder="예: 모두의스튜디오" style="margin-bottom:14px"/>
+
+    <div class="ob-btn-row">
+      <button class="ob-btn sec" onclick="goStep(1)">이전</button>
+      <button class="ob-btn pri" id="btn2" onclick="goStep(3)" disabled>다음</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 멘토 선택 + 자료 업로드 -->
+  <div class="ob-section" id="sec3">
+    <div class="ob-title">당신의 멘토</div>
+    <div class="ob-sub">5명의 창업 거장 중 답변 스타일을 결정할 멘토를 선택하세요. 상황별 추천을 참고해도 좋습니다. (20초)</div>
+
+    <label class="ob-label">멘토 스타일 <span class="ob-required">필수</span>
+      <span class="ob-hint">— 상황에 맞는 추천 멘토가 표시됩니다. Paul Graham·Peter Thiel은 무료, 나머지는 PRO 플랜 이상 · 멘토는 언제든 프로필에서 변경할 수 있어요.</span>
+    </label>
+    <div class="ob-mentor-list" id="style-grid">
+
+      <!-- 1. Paul Graham — 무료 -->
+      <div class="ob-mentor-row" data-val="Paul Graham (YC)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-row-left">
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Paul Graham <span class="ob-mentor-row-tag">YC</span></div>
+            <div class="ob-mentor-row-line">YC 공동창업자. 수천 개 초기 스타트업을 배출한 인큐베이터의 철학을 만든 에세이스트.</div>
+            <div class="ob-mentor-row-line">결론 먼저, 짧고 단호한 문장. "Do things that don't scale"로 당장 실행 가능한 액션 제시.</div>
+            <div class="ob-mentor-row-line ob-mentor-row-line--fit">PMF 직전·직후, 초기 생존과 첫 고객 확보가 최우선인 창업팀에 적합.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge free-badge">FREE</div></div>
+      </div>
+
+      <!-- 2. Peter Thiel — 무료 -->
+      <div class="ob-mentor-row" data-val="Peter Thiel (Founders Fund)" onclick="pickChip('style',this)">
+        <div class="ob-mentor-row-left">
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Peter Thiel <span class="ob-mentor-row-tag">Founders Fund</span></div>
+            <div class="ob-mentor-row-line">PayPal 공동창업자, Palantir·Facebook 초기 투자자. 《Zero to One》 저자.</div>
+            <div class="ob-mentor-row-line">역발상 질문으로 프레임을 뒤집음. 10배 차별화·독점·비밀(secrets)을 기준으로 냉정하게 검증.</div>
+            <div class="ob-mentor-row-line ob-mentor-row-line--fit">시장 진입 전략, 차별화·포지셔닝, 근본 재설계가 필요한 팀. 점진적 개선엔 부적합.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge free-badge">FREE</div></div>
+      </div>
+
+      <!-- 3. Brian Chesky — PRO -->
+      <div class="ob-mentor-row is-pro ob-mentor-row--locked" data-val="Brian Chesky (Airbnb)" onclick="pickMentorOrUpgrade(this,'Brian Chesky (Airbnb)')">
+        <div class="ob-mentor-row-left">
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Brian Chesky <span class="ob-mentor-row-tag">Airbnb</span></div>
+            <div class="ob-mentor-row-line">Airbnb 공동창업자·CEO. 디자이너 출신으로 고객 경험 설계의 대가.</div>
+            <div class="ob-mentor-row-line">"11성급 경험" 사고실험으로 이상적 고객 경험부터 역산. 위기를 브랜드 자산으로 전환하는 프레임.</div>
+            <div class="ob-mentor-row-line ob-mentor-row-line--fit">D2C·브랜드 중심 서비스, 위기 대응, 고객 충성도 설계가 핵심인 팀에 적합.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
+      </div>
+
+      <!-- 4. Jensen Huang — PRO -->
+      <div class="ob-mentor-row is-pro ob-mentor-row--locked" data-val="Jensen Huang (NVIDIA)" onclick="pickMentorOrUpgrade(this,'Jensen Huang (NVIDIA)')">
+        <div class="ob-mentor-row-left">
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Jensen Huang <span class="ob-mentor-row-tag">NVIDIA</span></div>
+            <div class="ob-mentor-row-line">NVIDIA 창업자·CEO. CUDA에 10년 적자 베팅으로 AI 시대 기반을 만든 집념의 창업자.</div>
+            <div class="ob-mentor-row-line">30년 관점에서 현재를 역산. 플랫폼·생태계·기술 해자 설계 중심. 실패를 학습으로 치환.</div>
+            <div class="ob-mentor-row-line ob-mentor-row-line--fit">기술 기반 스타트업, 장기 R&D 투자, 플랫폼·생태계 락인이 핵심 전략인 팀.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
+      </div>
+
+      <!-- 5. Naval Ravikant — PRO -->
+      <div class="ob-mentor-row is-pro ob-mentor-row--locked" data-val="Naval Ravikant" onclick="pickMentorOrUpgrade(this,'Naval Ravikant')">
+        <div class="ob-mentor-row-left">
+          <div class="ob-mentor-row-info">
+            <div class="ob-mentor-row-name">Naval Ravikant <span class="ob-mentor-row-tag">AngelList</span></div>
+            <div class="ob-mentor-row-line">AngelList 창업자. 레버리지·판단력·부의 원리에 대한 통찰로 유명한 사상가 겸 투자자.</div>
+            <div class="ob-mentor-row-line">첫 원리 사고로 질문 자체를 재정의. 격언 같은 한 문장과 레버리지(코드·미디어·자본·노동) 프레임.</div>
+            <div class="ob-mentor-row-line ob-mentor-row-line--fit">사업 방향 재검토, 창업자 마인드셋 정비, 근본부터 다시 설계하고 싶을 때 적합.</div>
+          </div>
+        </div>
+        <div class="ob-mentor-row-badge-wrap"><div class="ob-mentor-row-badge pro-badge">PRO</div></div>
+      </div>
+
+    </div>
+
+    <label class="ob-label" style="margin-top:.75rem">관련 자료 업로드 <span class="ob-hint">— 선택 · 관련 자료를 올릴수록 맞춤 자문이 정확해집니다</span>
+      <span class="ob-pro-lock">PRO</span>
+    </label>
+    <div class="upload-zone upload-zone--locked" id="ob-drop-zone" onclick="checkUploadAccess()" ondragover="obDragOver(event)" ondragleave="obDragLeave(event)" ondrop="obDrop(event)">
+      <div class="upload-zone-icon">📎</div>
+      <div class="upload-zone-text">파일을 끌어다 놓거나 클릭하여 업로드</div>
+      <div class="upload-zone-sub">회사소개서 · IR 자료 · 사업계획서 · 계약서 등 — <strong>PDF만</strong> · 파일당 최대 20MB</div>
+    </div>
+    <input type="file" id="ob-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="obFileSelect(this.files)"/>
+    <div class="file-list" id="ob-file-list"></div>
+
+    <div class="ob-btn-row">
+      <button class="ob-btn sec" onclick="goStep(2)">이전</button>
+      <button class="ob-btn pri" id="btn3" onclick="finishOnboarding()">시작하기</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── APP ──────────────────────────────── -->
+<div id="app">
+  <header>
+    <div class="logo" onclick="goHome()" title="홈으로" style="cursor:pointer;">
+      <img src="./logo.png" style="height:32px;width:auto;display:block;" alt="Route01"/>
+      <span class="brand-name">Route01</span>
+      <span class="logo-tagline">
+        <span class="logo-slogan-main">AI Startup Advisory</span>
+        <span class="logo-slogan-sub">Finding your Route from Zero to One</span>
+      </span>
+    </div>
+    <div class="header-center">
+      <span class="hb-pill header-profile-pill" onclick="editProfile()">
+        <span id="pname" class="hb-pill-name">프로필 미설정</span>
+      </span>
+      <span class="hb-pill hb-accent header-mentor-pill" onclick="openStyleModal()">
+        <svg class="hb-pill-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="header-mentor-name" class="hb-pill-name">Paul Graham (YC)</span>
+        <svg class="hb-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </div>
+    <div class="header-actions">
+      <button class="hb-pill hb-icon-only" onclick="goHome()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="hb-pill hb-hide-text-mobile" onclick="openMyPage()">
+        <svg class="hb-pill-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="hb-pill-name">마이페이지</span>
+      </button>
+      <button class="hb-pill hb-hide-text-mobile" id="logout-btn" onclick="logout()">
+        <span class="hb-pill-name">로그아웃</span>
+      </button>
+      <button class="hb-pill hb-status hb-status-warn" id="key-btn" onclick="openKeyModal()">
+        <span id="key-status-dot" class="key-dot key-dot-off"></span>
+        <span id="key-status-text" class="hb-pill-name">API 키 설정</span>
+      </button>
+    </div>
+  </header>
+  <div class="app-body">
+    <!-- 기존 사이드바 (JS 호환용, 숨김) -->
+    <div style="display:none">
+      <div class="aside-tabs">
+        <button class="aside-tab active" id="tab-domain" onclick="switchTab('domain')">도메인</button>
+        <button class="aside-tab" id="tab-history" onclick="switchTab('history')">내 질문</button>
+      </div>
+      <div class="aside-panel" id="panel-domain"><div class="s-top">
+        <button type="button" class="d-btn active" data-domain-key="strategy" onclick="selectDomain(this,'strategy')"><div class="d-ico"></div>경영전략</button>
+        <button type="button" class="d-btn" data-domain-key="investment" onclick="selectDomain(this,'investment')"><div class="d-ico"></div>투자 / IR</button>
+        <button type="button" class="d-btn" data-domain-key="finance" onclick="selectDomain(this,'finance')"><div class="d-ico"></div>재무 / 회계</button>
+        <button type="button" class="d-btn" data-domain-key="marketing" onclick="selectDomain(this,'marketing')"><div class="d-ico"></div>마케팅 / 홍보</button>
+        <button type="button" class="d-btn" data-domain-key="sales" onclick="selectDomain(this,'sales')"><div class="d-ico"></div>영업 / 제휴</button>
+        <button type="button" class="d-btn" data-domain-key="hr" onclick="selectDomain(this,'hr')"><div class="d-ico"></div>인사 / 노무</button>
+        <button type="button" class="d-btn" data-domain-key="legal" onclick="selectDomain(this,'legal')"><div class="d-ico"></div>법률 / 특허</button>
+        <button type="button" class="d-btn d-btn-grant" data-domain-key="grant" onclick="openGrantModal(event)"><div class="d-ico"></div><span>지원 사업 도우미</span></button>
+      </div></div>
+      <div class="aside-panel" id="panel-history" style="display:none"><div class="s-top">
+        <div class="hist-domain-bar" id="hist-domain-bar">
+          <span class="hdb-ico" id="hist-domain-ico"></span>
+          <div class="hdb-main"><div class="hdb-title" id="hist-domain-title">경영전략 자문</div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 실제 사이드바: 질문 기록 전용 -->
+    <aside id="sidebar">
+      <div class="aside-hdr">
+        <span class="aside-hdr-title">질문 기록</span>
+        <button class="aside-toggle" id="aside-toggle-close" onclick="toggleSidebar()" aria-label="사이드바 접기">
+          <svg width="18" height="14" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="10,14 4,8 10,2"/>
+            <polyline points="17,14 11,8 17,2"/>
+            <polyline points="24,14 18,8 24,2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="s-top">
+        <div id="history-list"><div class="pop-empty">아직 질문 기록이 없어요.</div></div>
+      </div>
+      <!-- 사이드바 하단 상태 배지 (2개로 축소 — 멘토는 상단으로 이동) -->
+      <div class="aside-status-badges">
+        <div class="aside-status-item" onclick="editProfile()">
+          <span class="aside-status-label">사업 요약</span>
+          <span class="aside-status-val" id="ub-biz">미설정</span>
+        </div>
+        <div class="aside-status-item" onclick="editProfile()">
+          <span class="aside-status-label">핵심 고민</span>
+          <span class="aside-status-val" id="ub-concern">미설정</span>
+        </div>
+      </div>
+    </aside>
+    <!-- 사이드바가 닫혔을 때만 보이는 "다시 열기" 부동 버튼 -->
+    <button class="aside-open-fab" id="aside-toggle-open" onclick="toggleSidebar()" aria-label="사이드바 열기">
+      <svg width="18" height="14" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,14 10,8 4,2"/>
+        <polyline points="11,14 17,8 11,2"/>
+        <polyline points="18,14 24,8 18,2"/>
+      </svg>
+    </button>
+
+    <main>
+      <!-- JS 호환용 숨김 요소들 -->
+      <div style="display:none">
+        <div id="d-ico"></div><h2 id="d-title"></h2><p id="d-desc"></p>
+        <div id="pb-info"></div><div id="pb-style"></div>
+      </div>
+
+      <!-- 프로필 미설정 배너 (상단 고정) -->
+      <div class="profile-banner" id="profile-banner" style="display:none">
+        <span class="pb-icon">👤</span>
+        <div class="pb-text">
+          <strong>맞춤형 자문을 받으려면 프로필을 설정해 주세요</strong>
+          <span>스타트업 정보를 입력하면 훨씬 정확한 자문을 받을 수 있어요</span>
+        </div>
+        <button class="pb-set-btn" onclick="editProfile()">프로필 설정 →</button>
+        <button class="pb-close-btn" onclick="dismissProfileBanner()">×</button>
+      </div>
+
+      <!-- 채팅 영역 (대화 쌓이는 곳) -->
+      <div class="chat" id="chat"></div>
+      <div id="chat-res" data-for-export="" hidden aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"></div>
+
+      <!-- 웰컴 화면: 질문창 중앙 + 추천 질문 (대화 전에만 표시) -->
+      <div class="welcome-screen" id="welcome-screen">
+        <div class="ws-content">
+
+          <!-- 인사말 -->
+          <div class="ws-greeting">
+            <div class="ws-logo">
+              <img src="./logo.png" alt="Route01" style="height:52px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,.12))"/>
+              <div class="ws-logo-slogans">
+                <span class="ws-slogan-main">AI Startup Advisory</span>
+                <span class="ws-slogan-sub">Finding your Route from Zero to One</span>
+              </div>
+            </div>
+            <h2 class="ws-title" id="ws-title">무엇이든 질문하세요</h2>
+          </div>
+
+          <!-- 입력창 (고급형) -->
+          <div class="ws-input-wrap">
+            <div class="ws-input-card" id="ws-input-card">
+              <textarea class="ws-input" id="ws-input" rows="1" placeholder="스타트업 관련 무엇이든 질문하세요..." onkeydown="wsOnKey(event)" oninput="wsResize(this)"></textarea>
+              <div class="ws-input-actions">
+                <button class="ws-file-btn" title="PDF 첨부" onclick="document.getElementById('ws-file-input').click()">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <input type="file" id="ws-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
+                <button class="ws-send-btn" id="ws-send-btn" onclick="wsSend()">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="ws-disclaimer">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span class="brand">Route01</span> AI는 실수를 할 수 있습니다. 중요한 의사결정 전에는 전문가와 상담하세요.
+            </div>
+          </div>
+
+          <!-- 추천 질문 안내 문구 -->
+          <p class="ws-sug-guide">적절한 질문이 떠오르지 않으면 아래 추천 질문을 클릭하셔도 됩니다.</p>
+
+          <!-- 분야 필터 (전체 제거, 지원사업 유료 표시) -->
+          <div class="ws-domain-bar">
+            <button class="ws-dc active" data-domain="investment" onclick="filterSugDomain('investment',this)">투자/IR</button>
+            <button class="ws-dc" data-domain="strategy" onclick="filterSugDomain('strategy',this)">전략/BM</button>
+            <button class="ws-dc" data-domain="marketing" onclick="filterSugDomain('marketing',this)">마케팅</button>
+            <button class="ws-dc" data-domain="finance" onclick="filterSugDomain('finance',this)">재무</button>
+            <button class="ws-dc" data-domain="hr" onclick="filterSugDomain('hr',this)">팀/HR</button>
+            <button class="ws-dc" data-domain="legal" onclick="filterSugDomain('legal',this)">법률</button>
+            <button class="ws-dc ws-dc-grant" onclick="checkGrantAccess()">지원사업 <span class="ws-pro-badge">PRO</span></button>
+          </div>
+
+          <!-- 추천 질문 칩 (2열 그리드) -->
+          <div class="ws-chips" id="sug-chips"></div>
+
+
+        </div><!-- /ws-content -->
+
+
+
+      </div><!-- /welcome-screen -->
+      <div class="input-area">
+        <div class="input-area-inner">
+        <div class="domain-banner" id="domain-banner" style="display:none" aria-hidden="true"></div>
+        <div class="chat-files-preview" id="chat-files-preview"></div>
+        <div class="input-row">
+          <button class="chat-file-btn" title="PDF 첨부 (파일당 최대 20MB)" onclick="document.getElementById('chat-file-input').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <input type="file" id="chat-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
+          <textarea class="chat-in" id="input" rows="1" placeholder="자문이 필요한 내용을 입력하세요..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+          <button class="send" id="send-btn" onclick="send()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+        <div class="disclaimer">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span class="brand">Route01</span> AI는 실수를 할 수 있습니다. 중요한 의사결정 전에는 전문가와 상담하세요.
+        </div>
+        <div class="hint">
+          <span>Enter 전송 · Shift+Enter 줄바꿈</span>
+          <span>📎 PDF 첨부 가능 · 파일당 최대 20MB</span>
+        </div>
+        </div><!-- /input-area-inner -->
+      </div>
+    </main>
+  </div>
+
+  <!-- API 키 설정 모달 -->
+<div class="modal-bg" id="key-modal">
+  <div class="modal" style="width:460px">
+    <button class="modal-close" onclick="closeKeyModal()">×</button>
+    <div class="modal-title">API 키 설정</div>
+    <div class="modal-sub">Anthropic API 키를 입력하면 바로 테스트할 수 있어요. 키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</div>
+
+    <div class="modal-field-wrap" style="margin-bottom:1rem">
+      <label class="apple-field-label" for="key-input">Anthropic API 키</label>
+      <div class="key-input-wrap">
+        <input id="key-input" class="apple-field-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off"/>
+        <button type="button" class="key-vis-toggle" onclick="toggleKeyVis()" id="key-vis-btn" aria-label="키 표시 전환">👁</button>
+      </div>
+      <div id="key-status-msg" class="key-status-msg">키를 입력하고 저장하세요.</div>
+    </div>
+
+    <div class="apple-callout">
+      <div class="apple-callout-title">키 발급 방법</div>
+      <ol>
+        <li><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> 접속 → 로그인</li>
+        <li>왼쪽 메뉴 <strong>API Keys</strong> → <strong>Create Key</strong> 클릭</li>
+        <li>키 복사 후 위 입력란에 붙여넣기</li>
+      </ol>
+    </div>
+
+    <div class="modal-btn-row">
+      <button type="button" class="modal-btn" onclick="closeKeyModal()">취소</button>
+      <button type="button" class="modal-btn modal-btn--danger" onclick="deleteKey()">키 삭제</button>
+      <button type="button" class="modal-btn pri" onclick="saveKey()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 멘토 스타일 선택 모달 -->
+<div class="modal-bg" id="style-modal">
+  <div class="modal" style="width:690px;max-width:calc(100vw - 2rem);padding:2.5rem 2.75rem">
+    <button class="modal-close" onclick="closeStyleModal(true)">×</button>
+    <div class="modal-title">멘토 스타일 선택</div>
+    <div class="modal-sub">원하는 멘토를 선택한 뒤 아래 <strong>적용</strong> 버튼을 눌러주세요.</div>
+    <div id="style-modal-grid"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeStyleModal(true)">취소</button>
+      <button class="modal-btn pri" onclick="closeStyleModal(false)">적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth0 설정 모달 -->
+<div class="modal-bg" id="auth0-modal">
+  <div class="modal" style="width:520px">
+    <button class="modal-close" onclick="closeAuth0Settings()">×</button>
+    <div class="modal-title">Auth0 연동</div>
+    <div class="modal-sub">소셜 로그인을 쓰려면 테넌트 도메인과 애플리케이션의 클라이언트 ID가 필요합니다.</div>
+    <div style="margin-bottom:16px">
+      <label class="auth0-field-label" for="auth0-domain">도메인</label>
+      <input id="auth0-domain" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: 내테넌트.us.auth0.com" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="auth0-field-label" for="auth0-clientid">클라이언트 ID</label>
+      <input id="auth0-clientid" class="auth0-flat-input" type="text" autocomplete="off" placeholder="Auth0 대시보드에서 복사한 클라이언트 ID" />
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="auth0-field-label" for="auth0-audience">API 대상 · audience (선택)</label>
+      <input id="auth0-audience" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: https://api.example.com (API 식별자가 있을 때만)" />
+    </div>
+    <p class="auth0-hint">Auth0 앱 설정의 「허용된 콜백 URL」에 아래 주소를 그대로 추가하세요.<br><strong id="auth0-redirect-url"></strong></p>
+    <div class="modal-btn-row">
+      <button type="button" class="modal-btn" onclick="closeAuth0Settings()">취소</button>
+      <button type="button" class="modal-btn pri" onclick="saveAuth0Settings()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 지원 사업 도우미 -->
+<div class="modal-bg" id="grant-modal">
+  <div class="modal modal-wide" style="max-width:560px">
+    <button type="button" class="modal-close" onclick="closeGrantModal()">×</button>
+    <div class="modal-title">지원 사업 도우미</div>
+    <div class="modal-sub">지원사업 공고문과 회사 소개를 반영해, 첨부해 주신 <strong>사업계획서 양식</strong> 구조에 맞춰 초안을 작성합니다. (<strong>PDF만</strong> 업로드 · 파일당 최대 20MB)</div>
+    <div class="grant-field">
+      <span class="grant-field-label">① 지원사업 공고문 <span style="color:#b91c1c;font-weight:600">*</span></span>
+      <p class="grant-field-hint">공고문은 <strong>PDF</strong>로만 첨부해 주세요. (파일당 최대 20MB)</p>
+      <input type="file" id="grant-file-ann" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('ann',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-ann').click()">+ 공고문 PDF 추가</button>
+      <div class="grant-list" id="grant-list-ann"></div>
+    </div>
+    <div class="grant-field">
+      <span class="grant-field-label">② 사업계획서 양식 <span style="color:#b91c1c;font-weight:600">*</span></span>
+      <p class="grant-field-hint">제출해야 하는 목차·양식을 <strong>PDF</strong>로 변환하여 첨부해 주세요. (파일당 최대 20MB)</p>
+      <input type="file" id="grant-file-tpl" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('tpl',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-tpl').click()">+ 양식 파일 추가</button>
+      <div class="grant-list" id="grant-list-tpl"></div>
+    </div>
+    <div class="grant-field">
+      <span class="grant-field-label">③ 회사소개 자료</span>
+      <p class="grant-field-hint">회사소개서·IR·브로슈어 등을 <strong>PDF</strong>로 첨부하거나, 아래에 직접 입력하세요.</p>
+      <input type="file" id="grant-file-co" multiple accept=".pdf,application/pdf" style="display:none" onchange="grantFileChosen('co',this.files)" />
+      <button type="button" class="grant-add-btn" onclick="document.getElementById('grant-file-co').click()">+ 회사소개 파일 추가</button>
+      <div class="grant-list" id="grant-list-co"></div>
+      <textarea id="grant-text-co" class="ob-input ob-textarea" style="min-height:100px;margin-bottom:0" placeholder="회사 소개, 사업 내용, 조직, 실적 등 (자료가 있으면 보완용으로 입력)"></textarea>
+    </div>
+    <div class="modal-btn-row" style="margin-top:1.25rem">
+      <button type="button" class="modal-btn" onclick="closeGrantModal()">취소</button>
+      <button type="button" class="modal-btn pri" id="grant-submit-btn" onclick="submitGrantHelper()">확인 · 계획서 초안 작성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 인기질문 확인 모달 -->
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal" style="width:360px">
+    <div class="modal-title">질문 확인</div>
+    <div class="confirm-q-box" id="confirm-q-text"></div>
+    <p class="confirm-q-hint">이 질문을 <span class="brand">Route01</span> AI에게 전송할까요?</p>
+    <div class="modal-btn-row">
+      <button class="modal-btn" id="confirm-cancel-btn">취소</button>
+      <button class="modal-btn pri" id="confirm-ok-btn">질문하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 다운로드 모달(기존 상단 다운로드 버튼 제거로 더 이상 사용하지 않음) -->
+
+<!-- 질문 기록 상세 모달 -->
+<div class="modal-bg" id="hist-modal">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeHistModal()">×</button>
+    <div class="modal-title" id="hist-modal-domain"></div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:1rem" id="hist-modal-time"></div>
+    <div class="hist-block hist-block--q">
+      <div class="hist-block-label">질문</div>
+      <div class="hist-block-body" id="hist-modal-q"></div>
+    </div>
+    <div class="hist-block hist-block--a">
+      <div class="hist-block-label"><span class="brand">Route01</span> AI 자문</div>
+      <div class="hist-block-body hist-block-body--answer" id="hist-modal-a"></div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeHistModal()">닫기</button>
+      <button class="modal-btn pri" onclick="followUpFromHist()">추가 질문하기 →</button>
+    </div>
+  </div>
+</div>
+<!-- 마이페이지 모달 -->
+<div class="modal-bg" id="mypage-modal">
+  <div class="modal modal-wide" style="max-width:560px">
+    <button class="modal-close" onclick="closeMyPage()">×</button>
+    <div class="modal-title">마이페이지</div>
+    <div id="mypage-body"></div>
+  </div>
+</div>
+
+<!-- 요금제 선택 모달 -->
+<div class="modal-bg" id="pricing-modal">
+  <div class="modal modal-wide" style="max-width:600px">
+    <button class="modal-close" onclick="closePricingModal()">×</button>
+    <div class="modal-title">요금제</div>
+    <div class="modal-sub">더 많은 질문과 기능이 필요하신가요?</div>
+    <div id="pricing-body"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closePricingModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="modal-bg" id="pw-change-modal">
+  <div class="modal" style="width:400px">
+    <button class="modal-close" onclick="closePwChange()">×</button>
+    <div class="modal-title">비밀번호 변경</div>
+    <div class="afield" style="margin-bottom:12px">
+      <label class="afield-label" for="pw-cur">현재 비밀번호</label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-cur" type="password" placeholder="현재 비밀번호"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-cur',this)">👁</button>
+      </div>
+    </div>
+    <div class="afield" style="margin-bottom:12px">
+      <label class="afield-label" for="pw-new">새 비밀번호 <span style="font-weight:400;color:var(--ink3)">(8자 이상)</span></label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-new" type="password" placeholder="새 비밀번호"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new',this)">👁</button>
+      </div>
+    </div>
+    <div class="afield" style="margin-bottom:16px">
+      <label class="afield-label" for="pw-new2">새 비밀번호 확인</label>
+      <div class="apw-wrap">
+        <input class="afield-input" id="pw-new2" type="password" placeholder="새 비밀번호 재입력"/>
+        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new2',this)">👁</button>
+      </div>
+    </div>
+    <div class="aerr" id="aerr-pw-change" style="margin-bottom:10px"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closePwChange()">취소</button>
+      <button class="modal-btn pri" onclick="submitPwChange()">변경하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 회원탈퇴 확인 모달 -->
+<div class="modal-bg" id="withdraw-modal">
+  <div class="modal" style="width:380px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div class="modal-title">정말 탈퇴하시겠어요?</div>
+    <div class="modal-sub" style="text-align:left;padding:12px 16px;background:var(--bg);border-radius:var(--r);margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--ink2)">
+      탈퇴 시 다음 데이터가 모두 삭제됩니다:<br>
+      • 프로필 정보<br>
+      • 질문 기록<br>
+      • 구독 정보 (환불 불가)<br><br>
+      <strong>이 작업은 되돌릴 수 없습니다.</strong>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeWithdraw()">취소</button>
+      <button class="modal-btn modal-btn--danger" onclick="submitWithdraw()">탈퇴하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 프로필 모달 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">내 스타트업 프로필</div>
+    <div class="modal-sub">이 정보로 맞춤형 멘토링이 제공됩니다.</div>
+    <div id="modal-body"></div>
+    <button class="modal-edit" onclick="editProfile()">프로필 수정하기</button>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<script src="./nachim_v3.js"></script>
 </body>
 </html>
