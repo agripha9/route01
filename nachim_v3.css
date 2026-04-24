@@ -1,25 +1,28 @@
-/* Route01 — Apple-inspired UI (design-md/apple DESIGN.md + preview.html tokens) */
+/* Route01 — warm-neutral design system (see DESIGN.md for canonical spec) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --pure-black:#000000;
-  --ink:#1d1d1f;
-  --ink2:#424245;
-  --ink3:#6e6e73;
-  --gray-80:rgba(0,0,0,0.8);
-  --gray-48:rgba(0,0,0,0.48);
-  /* ═══ 배경 색상 계층 (2026-04-21 개편 · 3차)
-     답변 버블은 순백, 주변만 어둡게 → 버블이 더 뚜렷하게 떠 보임.
-     - L1 #ffffff : 답변 버블 (원래 순백)
-     - L2 #e8e8ec : 입력창·모달 등 인터랙션 표면
-     - L3 #dfdfe4 : 메인 채팅 영역 배경
-     - L4 #d4d4da : 사이드바 (한 단계 더 어둡게 시선 분리)
-     - L5 (--nav-glass 유지) : 최상단 헤더
+  /* Ink scale — warm-tinted text hierarchy (Claude-inspired, replaces pure/cool grays) */
+  --ink:#1d1d1f;         /* primary body, H2 */
+  --ink2:#3d3d3a;        /* H3, emphasized secondary (Claude "Dark Warm") */
+  --ink3:#5e5d59;        /* secondary text, metadata (Claude "Olive Gray") */
+  --ink4:#87867f;        /* tertiary, ul markers (Claude "Stone Gray") */
+  --gray-80:rgba(20,20,19,0.8);
+  --gray-48:rgba(20,20,19,0.48);
+  /* ═══ Warm-neutral background ladder — all grays tinted warm
+     Depth comes from these steps, not from shadows.
+     - L1 #ffffff : answer bubble (pure white paper)
+     - L2 #f2f0ea : input fields, upload chips, subtle cards
+     - L3 #e8e6dc : main chat body, modal overlays — Warm Sand (primary canvas)
+     - L4 #ddd9cd : sidebar, section dividers (one step darker for separation)
+     - L5 rgba(20,20,19,0.8) : top nav — warm near-black with blur
      ═══ */
-  --bg:#dfdfe4;        /* L3 — body·메인 영역 기본 */
-  --bg2:#e8e8ec;       /* L2 — 카드·모달·입력창 표면 */
-  --bg3:#d4d4da;       /* L4 — 사이드바·구분 영역 */
-  --filter-bg:#ffffff; /* L1 — 답변 버블 (순백) */
+  --bg:#e8e6dc;        /* L3 — body·메인 영역 기본 (Warm Sand) */
+  --bg2:#f2f0ea;       /* L2 — 카드·모달·입력창 표면 */
+  --bg3:#ddd9cd;       /* L4 — 사이드바·구분 영역 (warm taupe) */
+  --filter-bg:#ffffff; /* L1 — 답변 버블 (순백 paper) */
   --white:#ffffff;
+  /* Brand — crimson is the signature, used for brand/interactive ONLY (not section decoration) */
   --brand-main:#8B1A1A;
   --brand-main-press:#721616;
   --brand-point:#1a3a6e;
@@ -30,8 +33,9 @@
   --cta-press:var(--brand-main-press);
   --link-blue:var(--brand-point);
   --link-blue-dark:#2a4a8a;
-  --border:#d2d2d7;
-  --border2:#c7c7cc;
+  /* Warm-tinted borders — replaces cool #d2d2d7 scale */
+  --border:#e5e2d7;    /* hairline — barely visible warm cream */
+  --border2:#d1cdbf;   /* emphasis — prominent containment */
   --pri:var(--brand-main);
   --accent:var(--brand-point);
   --r:8px;
@@ -41,9 +45,10 @@
   --shadow-md:rgba(0,0,0,0.22) 3px 5px 30px 0px;
   --shadow-card:0 4px 24px rgba(0,0,0,.06);
   --ring-blue:0 0 0 3px rgba(26,58,110,0.22);
+  --ring-crimson:0 0 0 3px rgba(139,26,26,0.22);  /* primary focus halo */
   --ring-dark:0 0 0 2px rgba(255,255,255,0.2);
   --ease:cubic-bezier(.2,.8,.2,1);
-  --nav-glass:rgba(0,0,0,0.8);
+  --nav-glass:rgba(20,20,19,0.8);  /* warm near-black (was pure 0,0,0) */
   --font-display:'Inter',-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
   --font-text:'Inter',-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
   --font-sans:var(--font-text);
