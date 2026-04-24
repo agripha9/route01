@@ -5762,9 +5762,21 @@ function syncHeaderPlanPill(){
   function handleEnter(e){
     const target = e.target.closest('[data-tip]');
     if(!target) return;
+    /* 같은 [data-tip] 부모의 자식 간 이동이면 새 툴팁 안 띄움 (로고 내부 img/span 간 이동 방지) */
+    const from = e.relatedTarget;
+    if(from && from.nodeType === 1 && from.closest && from.closest('[data-tip]') === target) return;
+    /* 이미 같은 target에 대해 타이머/표시 중이면 그대로 둠 */
+    if(currentTarget === target) return;
     const text = target.getAttribute('data-tip');
     if(!text) return;
     currentTarget = target;
+    /* 브라우저 기본 title 툴팁이 커스텀과 중복으로 뜨는 문제 방지 —
+       data-tip이 있는 요소의 title을 data-tip-title로 잠시 옮겨둠.
+       leave 시점에 복원. */
+    if(target.hasAttribute('title')){
+      target.setAttribute('data-tip-title', target.getAttribute('title'));
+      target.removeAttribute('title');
+    }
     if(showTimer) clearTimeout(showTimer);
     /* 150ms 딜레이 — 마우스 스쳐 지나갈 때 툴팁 안 뜨게 */
     showTimer = setTimeout(()=>{
@@ -5778,6 +5790,11 @@ function syncHeaderPlanPill(){
     /* 자식으로의 이동은 leave로 취급 안 함 (relatedTarget 기반) */
     const to = e.relatedTarget;
     if(to && from.contains(to)) return;
+    /* title 속성 복원 (a11y·검색엔진·no-js fallback용 의미 보존) */
+    if(from.hasAttribute('data-tip-title')){
+      from.setAttribute('title', from.getAttribute('data-tip-title'));
+      from.removeAttribute('data-tip-title');
+    }
     hide();
   }
 
