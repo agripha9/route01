@@ -1271,7 +1271,9 @@ function editProfile(targetStep){
     const dot=document.getElementById('s'+i);
     if(dot) dot.classList.toggle('done', i<=s);
   }
-  hydrateOnboardingFromOb();
+  /* keepStep:true — 방금 editProfile이 세팅한 step/sec/dot을 hydrate가
+     덮어쓰지 않도록 보존. 폼 입력값만 ob 기반으로 채움. */
+  hydrateOnboardingFromOb({ keepStep: true });
 }
 
 /* 온보딩 닫기(×) — 스마트 동작 (3단계 구조):
@@ -1400,16 +1402,22 @@ function showOnboardingCancelConfirm(target){
   document.addEventListener('keydown', escHandler);
 }
 
-function hydrateOnboardingFromOb(){
-  /* step reset — 3단계 구조 */
-  step=1;
-  ['sec1','sec2','sec3'].forEach((s,i)=>{
-    const el=document.getElementById(s);
-    if(el) el.classList.toggle('active', i===0);
-  });
-  for(let i=1;i<=3;i++){
-    const dot=document.getElementById('s'+i);
-    if(dot) dot.classList.toggle('done', i<=1);
+function hydrateOnboardingFromOb(opts){
+  /* opts.keepStep === true 이면 step/섹션/dot 리셋 건너뜀
+     (editProfile(targetStep) 같은 호출처에서 step을 미리 지정한 상태 보존).
+     기본값: false → 기존 동작 (항상 Step 1로 리셋). */
+  const keepStep = !!(opts && opts.keepStep);
+  if(!keepStep){
+    /* step reset — 3단계 구조 */
+    step=1;
+    ['sec1','sec2','sec3'].forEach((s,i)=>{
+      const el=document.getElementById(s);
+      if(el) el.classList.toggle('active', i===0);
+    });
+    for(let i=1;i<=3;i++){
+      const dot=document.getElementById('s'+i);
+      if(dot) dot.classList.toggle('done', i<=1);
+    }
   }
 
   /* inputs */
