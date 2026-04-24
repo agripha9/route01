@@ -5672,7 +5672,7 @@ const R01_PLANS = [
   {
     id:'pro', name:'Pro', price:19900, priceText:'₩19,900/월',
     desc:'Route01의 전체 가치',
-    features:['무제한 질문','전체 멘토 5명 이용 (PG · Thiel · Chesky · Huang · Naval)','지원사업 도우미','PDF 파일 업로드','DOCX/PDF 내보내기','우선 응답'],
+    features:['무제한 질문','더 깊이 있는 답변 품질','전체 멘토 5명 이용 (PG · Thiel · Chesky · Huang · Naval)','지원사업 도우미','PDF 파일 업로드','DOCX/PDF 내보내기'],
     limit:99999, color:'#8B1A1A', cta:'시작하기', highlight:true
   }
   /* Team 플랜 — v2.0 도입 예정.
