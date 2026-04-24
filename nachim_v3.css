@@ -490,6 +490,9 @@ header{
 }
 .hb-pill.hb-icon-only{
   width:30px;padding:0;justify-content:center;
+  /* 기본 pill은 980px(완전 원형)이지만 아이콘 전용은 10px로 둥근 사각형 —
+     홈 버튼의 '집' 형태와 더 어울리고 다른 pill(텍스트)과 시각적 구분 */
+  border-radius:10px;
 }
 
 /* 멘토 스타일 pill — 브랜드 크림슨 톤 살짝 */
