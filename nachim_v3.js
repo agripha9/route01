@@ -4008,7 +4008,7 @@ function openStyleModal(){
   /* 프로토타입 단계: 전체 멘토 개방 */
   const PROTOTYPE_MODE = true;
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
-  const isPaid = PROTOTYPE_MODE ? true : (plan === 'starter' || plan === 'pro' || plan === 'team');
+  const isPaid = PROTOTYPE_MODE ? true : (plan === 'pro');
 
   grid.innerHTML = Object.keys(MENTOR_META).map(k => {
     const m = MENTOR_META[k];
@@ -4034,7 +4034,7 @@ function openStyleModal(){
       /* 유료 플랜 검증 (프로토타입 단계엔 우회) */
       if(!PROTOTYPE_MODE){
         const pl = getCurrentPlan ? getCurrentPlan() : 'free';
-        const paid = (pl === 'starter' || pl === 'pro' || pl === 'team');
+        const paid = (pl === 'pro');
         if(meta && !meta.free && !paid){
           closeStyleModal(true /* cancel */);
           openPricingModal();
@@ -4995,7 +4995,7 @@ function syncAllCheck() {
 
 /* ── 약관 모달 ── */
 const R01_TERMS = {
-  terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 <span class="brand">Route01</span>이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p><span class="brand">Route01</span>은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li><span class="brand">Route01</span> AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 20회 무료</li><li>Starter: 9,900원/월 (100회)</li><li>Pro: 29,900원/월 (무제한)</li><li>Team: 99,000원/월 (5인)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
+  terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 <span class="brand">Route01</span>이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p><span class="brand">Route01</span>은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li><span class="brand">Route01</span> AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 10회 무료</li><li>Pro: 19,900원/월 (무제한, 전체 멘토 + 지원사업 도우미 + PDF/내보내기)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
   privacy:{title:'개인정보처리방침',html:`<h3>1. 수집 항목</h3><ul><li><strong>필수:</strong> 이메일, 소셜 로그인 식별자</li><li><strong>선택:</strong> 스타트업명, 업종, 단계, 팀 규모</li></ul><h3>2. 수집 목적</h3><ul><li>서비스 제공 및 회원 관리</li><li>맞춤형 AI 자문 제공</li><li>마케팅 정보 발송 (동의 시)</li></ul><h3>3. 보유 기간</h3><p>회원 탈퇴 시 즉시 삭제</p><h3>4. 처리 위탁</h3><ul><li>Anthropic: AI 답변 생성</li><li>Auth0(Okta): 로그인 인증</li><li>토스페이먼츠: 결제 처리</li></ul><h3>5. 이용자 권리</h3><p>열람·수정·삭제 요청: privacy@route01.kr</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`}
 };
 function openTermsModal(type) {
@@ -5599,28 +5599,29 @@ function checkGrantAccess() {
   const PROTOTYPE_MODE = true;
   if(PROTOTYPE_MODE){ openGrantModal(); return; }
 
-  // 유료 플랜 체크 (현재는 localStorage의 plan으로 판단)
+  // 유료 플랜 체크 (Pro만 허용)
   const plan = localStorage.getItem('r01_plan') || 'free';
-  if(plan === 'free') {
+  if(plan !== 'pro') {
     // 무료 회원 안내 모달
     const msg = document.createElement('div');
     msg.className = 'modal-bg open';
     msg.id = 'grant-access-modal';
     msg.innerHTML = `
-      <div class="modal" style="max-width:400px;text-align:center">
+      <div class="modal" style="max-width:420px;text-align:center">
         <button class="modal-close" onclick="document.getElementById('grant-access-modal').remove()">×</button>
         <div style="font-size:32px;margin-bottom:12px">🔒</div>
-        <div class="modal-title">유료 회원 전용 서비스</div>
-        <div class="modal-sub">지원사업 도우미는 <strong>Starter 플랜 이상</strong> 회원만 이용할 수 있어요.<br>월 9,900원으로 시작해 보세요.</div>
+        <div class="modal-title">Pro 플랜 전용 기능</div>
+        <div class="modal-sub">지원사업 도우미는 <strong>Pro 플랜</strong>에서 이용할 수 있어요.<br>월 19,900원으로 Route01의 전체 가치를 사용하세요.</div>
         <div style="margin:1.5rem 0;padding:16px;background:var(--bg);border-radius:var(--r);font-size:13px;color:var(--ink2);text-align:left;line-height:1.7">
-          <div><strong>✅ Starter (9,900원/월)</strong></div>
-          <div>· 월 100회 질문</div>
-          <div>· PDF 파일 업로드</div>
-          <div><strong style="color:var(--cta)">✅ 지원사업 도우미 포함</strong></div>
+          <div><strong>✅ Pro (₩19,900/월)</strong></div>
+          <div>· 무제한 질문</div>
+          <div>· 전체 멘토 5명 이용</div>
+          <div><strong style="color:var(--cta)">· 지원사업 도우미 포함</strong></div>
+          <div>· PDF 업로드 · DOCX/PDF 내보내기</div>
         </div>
         <div style="display:flex;gap:8px">
           <button class="modal-btn" onclick="document.getElementById('grant-access-modal').remove()" style="flex:1">닫기</button>
-          <button class="modal-btn pri" onclick="alert('요금제 페이지 준비 중입니다.');document.getElementById('grant-access-modal').remove()" style="flex:1">요금제 보기 →</button>
+          <button class="modal-btn pri" onclick="document.getElementById('grant-access-modal').remove();openPricingModal&&openPricingModal();" style="flex:1">요금제 보기 →</button>
         </div>
       </div>`;
     document.body.appendChild(msg);
@@ -5654,32 +5655,27 @@ function goHome() {
    마이페이지 & 요금제 & 비밀번호 변경
 ══════════════════════════════════════ */
 
-/* 요금제 정보 */
+/* 요금제 정보 — 2-tier 구조 (2026-04-24 개편).
+   Starter 폐지 → Pro로 통합. Team 플랜은 v2.0에서 재도입 예정.
+   이유: (1) Starter는 돈 내는데 PRO 멘토 못 쓰는 애매한 포지션 → 단순화
+        (2) Apple/Claude/Linear식 "선택 줄이기" 철학
+        (3) Pro 가격 29,000→19,900 인하로 진입 장벽 낮춤 + ChatGPT Plus와 유사한 시장 포지션 */
 const R01_PLANS = [
   {
     id:'free', name:'Free', price:0, priceText:'무료',
     desc:'가볍게 시작하기',
-    features:['월 10회 질문','추천 질문 이용','도메인별 자문'],
+    features:['월 10회 질문','추천 질문 이용','FREE 멘토 2명(Paul Graham · Peter Thiel)','도메인별 기본 자문'],
     limit:10, color:'#6e6e73', cta:'현재 플랜'
   },
   {
-    id:'starter', name:'Starter', price:9900, priceText:'₩9,900/월',
-    desc:'본격 자문 시작',
-    features:['월 100회 질문','PDF 파일 업로드','지원사업 도우미','DOCX/PDF 내보내기','이메일 지원'],
-    limit:100, color:'#0071e3', cta:'시작하기', highlight:true
-  },
-  {
-    id:'pro', name:'Pro', price:29000, priceText:'₩29,000/월',
-    desc:'무제한 집중 자문',
-    features:['무제한 질문','PDF 업로드 무제한','지원사업 도우미','전체 멘토 스타일','우선 응답','전담 이메일 지원'],
-    limit:99999, color:'#F26522', cta:'업그레이드'
-  },
-  {
-    id:'team', name:'Team', price:99000, priceText:'₩99,000/월',
-    desc:'팀 전체 자문',
-    features:['5인 계정 공유','Pro 기능 전체 포함','팀 질문 기록 공유','월 500회 질문','데디케이티드 지원'],
-    limit:500, color:'#1d1d1f', cta:'팀 시작'
+    id:'pro', name:'Pro', price:19900, priceText:'₩19,900/월',
+    desc:'Route01의 전체 가치',
+    features:['무제한 질문','전체 멘토 5명 이용 (PG · Thiel · Chesky · Huang · Naval)','지원사업 도우미','PDF 파일 업로드','DOCX/PDF 내보내기','우선 응답'],
+    limit:99999, color:'#8B1A1A', cta:'시작하기', highlight:true
   }
+  /* Team 플랜 — v2.0 도입 예정.
+     5인 공유 · 팀 질문 기록 공유 · 초대/권한 관리 · 팀 빌링 등
+     백엔드 복잡도가 커서 개인 Pro의 PMF 검증 후 도입이 합리적. */
 ];
 
 function getCurrentPlan(){
@@ -5880,7 +5876,7 @@ function pickMentorOrUpgrade(el, styleKey){
   if(PROTOTYPE_MODE){ pickChip('style', el); return; }
 
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
-  const isPaid = (plan === 'starter' || plan === 'pro' || plan === 'team');
+  const isPaid = (plan === 'pro');
   if(isPaid){ pickChip('style', el); return; }
   const m = document.createElement('div');
   m.className = 'modal-bg open';
@@ -5888,8 +5884,8 @@ function pickMentorOrUpgrade(el, styleKey){
   m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
     <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
     <div style="font-size:32px;margin-bottom:10px">🔒</div>
-    <div class="modal-title">Starter 이상 전용 멘토</div>
-    <div class="modal-sub">이 멘토 스타일은 Starter 플랜 이상에서 이용할 수 있어요.</div>
+    <div class="modal-title">Pro 전용 멘토</div>
+    <div class="modal-sub">이 멘토는 Pro 플랜에서 이용할 수 있어요.</div>
     <div style="display:flex;gap:8px;margin-top:1.25rem">
       <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
       <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
@@ -5916,8 +5912,8 @@ function checkUploadAccess(){
     m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
       <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
       <div style="font-size:32px;margin-bottom:10px">📎</div>
-      <div class="modal-title">Starter 이상 전용 기능</div>
-      <div class="modal-sub">파일 업로드는 Starter 플랜(₩9,900/월) 이상에서 이용할 수 있어요.</div>
+      <div class="modal-title">Pro 전용 기능</div>
+      <div class="modal-sub">파일 업로드는 Pro 플랜(₩19,900/월)에서 이용할 수 있어요.</div>
       <div style="display:flex;gap:8px;margin-top:1.25rem">
         <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
         <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
