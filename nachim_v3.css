@@ -1096,11 +1096,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   background:rgba(0,0,0,0.08);
   margin:2rem 0 1.75rem;
 }
-.report-card .report-bubble hr{
-  border:0;
-  height:1px;
-  background:rgba(0,0,0,0.08);
-  margin:1.75rem 0;
+/* 안전망: 답변 영역 hr 숨김.
+   DESIGN.md §7 Don't: 섹션 전환은 H2/H3 + 여백만. 모델 프롬프트에서도 --- 사용을
+   금지하지만, 과거 답변이나 프롬프트가 지켜지지 않은 답변 방어용으로 CSS로도 차단.
+   기존에는 margin:1.75rem + height:1px으로 얇은 선이 그려졌음. */
+.report-card .report-bubble hr,
+.m-bubble hr{
+  display:none !important;
 }
 
 .report-card .answer-actions{margin-top:0;padding:0 2.75rem 1.75rem;background:var(--filter-bg)}
@@ -1110,7 +1112,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:12.5px;background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-style:normal;line-height:inherit;vertical-align:baseline;white-space:normal;word-break:keep-all}
 .m-bubble pre{margin:.75rem 0;padding:12px 14px;border-radius:var(--r-lg);background:var(--bg);color:var(--ink);overflow:auto;border:1px solid var(--border);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;font-size:13.5px;font-style:normal;line-height:1.55}
 .m-bubble pre code{background:transparent;border:none;padding:0;color:inherit;font-family:inherit;font-style:normal;font-size:inherit;font-weight:400}
-.m-bubble hr{border:none;height:1px;background:var(--border);margin:1rem 0}
+/* .m-bubble hr은 위 .report-card .report-bubble hr와 함께 통합 규칙으로 숨김 처리됨 */
 .m-bubble a{color:#1d1d1f;text-decoration:underline;text-underline-offset:2px}
 .m-bubble a:hover{text-decoration-thickness:1.5px}
 .m-bubble table{width:100%;margin:1.2rem 0;border-collapse:collapse;border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--filter-bg);font-size:14.5px}
