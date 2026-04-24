@@ -559,20 +559,20 @@ header{
 .hb-pill.hb-plan-pill .hb-pill-name{
   max-width:none;
 }
-/* FREE — 밝은 네이비 outline + 투명 배경.
-   어두운 헤더 위에서 또렷하지만 튀지 않음. 업그레이드 화살표 없음 — 배지 역할은
-   '현재 상태 표시'가 우선이고 업그레이드 유도는 클릭 동작으로 이미 충분. */
+/* FREE — 정통 브랜드 네이비 솔리드. PRO 크림슨 솔리드와 '두 티어 = 두 색'
+   대칭 구조. 어두운 헤더 위에서 솔리드 대비가 가장 또렷하고 정체성 분명함. */
 .hb-pill.hb-plan-pill.hb-plan-free{
-  background:transparent;
-  border-color:rgba(140,180,230,0.55);
-  color:rgba(190,215,245,0.95);
-  box-shadow:none;
+  background:var(--brand-point);
+  border-color:var(--brand-point);
+  color:#ffffff;
+  box-shadow:0 1px 3px rgba(0,0,0,0.25);
 }
 .hb-pill.hb-plan-pill.hb-plan-free:hover{
-  background:rgba(140,180,230,0.12);
-  border-color:rgba(180,210,240,0.75);
+  background:#22467e;  /* brand-point를 살짝 밝게 — press 변주 */
+  border-color:#22467e;
   color:#ffffff;
   transform:translateY(-1px);
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 /* PRO — 크림슨 솔리드. 돈 낸 유저의 identity 표시 */
 .hb-pill.hb-plan-pill.hb-plan-pro{
