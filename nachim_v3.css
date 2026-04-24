@@ -495,6 +495,43 @@ header{
   border-color:rgba(255,159,10,0.55);
 }
 
+/* 헤더 플랜 배지 pill — 현재 요금제 표시 + 클릭 시 요금제 모달 열기.
+   2-tier: FREE (회색) / PRO (크림슨). 짧은 텍스트 pill이라 기본 폭 최소. */
+.hb-pill.hb-plan-pill{
+  cursor:pointer;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  padding-left:10px;
+  padding-right:10px;
+  min-width:auto;
+}
+.hb-pill.hb-plan-pill .hb-pill-name{
+  max-width:none;
+}
+/* FREE — 중립 회색 톤. 돈 안 냈다는 사실을 과하게 띄우지 않으면서 인지 가능 */
+.hb-pill.hb-plan-pill.hb-plan-free{
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.22);
+  color:rgba(255,255,255,0.85);
+}
+.hb-pill.hb-plan-pill.hb-plan-free:hover{
+  background:rgba(255,255,255,0.14);
+  border-color:rgba(255,255,255,0.35);
+  color:#fff;
+}
+/* PRO — 크림슨 톤. 돈 낸 유저의 identity 표시 (DESIGN.md 브랜드 일관성) */
+.hb-pill.hb-plan-pill.hb-plan-pro{
+  background:rgba(139,26,26,0.28);
+  border-color:rgba(192,60,60,0.5);
+  color:#ffd4d4;
+}
+.hb-pill.hb-plan-pill.hb-plan-pro:hover{
+  background:rgba(139,26,26,0.42);
+  border-color:rgba(192,60,60,0.7);
+  color:#fff;
+}
+
 .hb-pill-ico{opacity:.85;flex-shrink:0;}
 .hb-pill-caret{opacity:.7;flex-shrink:0;margin-left:1px;}
 .hb-pill-name{overflow:hidden;text-overflow:ellipsis;max-width:180px;}

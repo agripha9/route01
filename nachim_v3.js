@@ -4187,6 +4187,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
   updateKeyStatus();
   initDomainIcons();
+  /* 플랜 배지 pill 초기 라벨/색 반영 */
+  try{ syncHeaderPlanPill(); }catch(_){}
 });
 
 /* ─── exportAnswer (OOXML altChunk, standard) ─── */
@@ -5681,6 +5683,21 @@ const R01_PLANS = [
 function getCurrentPlan(){
   return localStorage.getItem('r01_plan') || 'free';
 }
+
+/* 헤더 플랜 배지 pill 동기화 — 현재 요금제에 맞게 라벨·색 업데이트.
+   호출 지점: 앱 초기화 직후, 플랜 변경 직후, 로그인·탈퇴 직후.
+   Pro 티어 pill은 크림슨, Free는 중립 회색. */
+function syncHeaderPlanPill(){
+  const pill = document.getElementById('header-plan-pill');
+  const label = document.getElementById('header-plan-name');
+  if(!pill || !label) return;
+  const plan = getCurrentPlan();
+  const isPro = plan === 'pro';
+  label.textContent = isPro ? 'PRO' : 'FREE';
+  pill.classList.toggle('hb-plan-pro', isPro);
+  pill.classList.toggle('hb-plan-free', !isPro);
+  pill.setAttribute('title', isPro ? 'PRO 플랜 · 요금제 관리' : 'FREE 플랜 · 업그레이드');
+}
 function getMonthlyUsage(){
   try{
     const key = 'r01_usage_' + new Date().toISOString().slice(0,7);
@@ -5772,7 +5789,7 @@ function openPricingModal(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
       ${R01_PLANS.map(p=>`
         <div style="border:2px solid ${p.id===cur?p.color:'var(--border)'};border-radius:14px;padding:16px;background:${p.highlight?'#fffbf7':'var(--card)'};position:relative">
-          ${p.highlight ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F26522;color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap">인기</div>' : ''}
+          ${p.highlight ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--brand-main);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap">인기</div>' : ''}
           <div style="font-weight:800;font-size:16px;color:${p.color};margin-bottom:2px">${p.name}</div>
           <div style="font-size:18px;font-weight:700;margin-bottom:2px">${p.priceText}</div>
           <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">${p.desc}</div>
@@ -5797,6 +5814,7 @@ function selectPlan(planId){
   if(!plan) return;
   if(plan.price === 0){
     localStorage.setItem('r01_plan','free');
+    try{ syncHeaderPlanPill(); }catch(_){}
     closePricingModal();
     alert('Free 플랜으로 변경됐습니다.');
     return;
@@ -6007,6 +6025,7 @@ function checkUploadAccess(){
     openPricingModal: openPricingModal,
     closePricingModal: closePricingModal,
     selectPlan: selectPlan,
+    syncHeaderPlanPill: syncHeaderPlanPill,
     openPwChange: openPwChange,
     closePwChange: closePwChange,
     submitPwChange: submitPwChange,
