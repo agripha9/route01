@@ -5780,29 +5780,58 @@ function closeMyPage(){
   document.getElementById('mypage-modal')?.classList.remove('open');
 }
 
-/* 요금제 모달 */
+/* 요금제 모달 — 2-tier (Free + Pro) 구조에 맞춘 카드 렌더링.
+   현재 플랜은 크림슨 반전 카드로 명확히 표시, Pro는 "추천" 리본 표시,
+   디자인 토큰은 전부 CSS 클래스로 관리 (DESIGN.md 일관성). */
 function openPricingModal(){
   const body = document.getElementById('pricing-body');
   if(!body) return;
   const cur = getCurrentPlan();
+
+  /* priceText를 가격과 단위로 분리: "₩19,900/월" → ["₩19,900", "/월"] */
+  const splitPrice = (txt)=>{
+    const m = /^(.+?)(\/.+)?$/.exec(String(txt||'').trim());
+    return m ? {amount: m[1].trim(), unit: m[2]||''} : {amount: txt, unit:''};
+  };
+
   body.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
-      ${R01_PLANS.map(p=>`
-        <div style="border:2px solid ${p.id===cur?p.color:'var(--border)'};border-radius:14px;padding:16px;background:${p.highlight?'#fffbf7':'var(--card)'};position:relative">
-          ${p.highlight ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--brand-main);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap">인기</div>' : ''}
-          <div style="font-weight:800;font-size:16px;color:${p.color};margin-bottom:2px">${p.name}</div>
-          <div style="font-size:18px;font-weight:700;margin-bottom:2px">${p.priceText}</div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">${p.desc}</div>
-          <ul style="margin:0;padding-left:16px;font-size:12px;color:var(--ink2);line-height:1.8;margin-bottom:12px">
-            ${p.features.map(f=>`<li>${esc(f)}</li>`).join('')}
-          </ul>
-          ${p.id===cur
-            ? `<button class="modal-btn" style="width:100%;font-size:12px" disabled>✓ 현재 플랜</button>`
-            : `<button class="modal-btn pri" style="width:100%;font-size:12px;background:${p.color}" onclick="selectPlan('${p.id}')">${p.cta} →</button>`
-          }
-        </div>`).join('')}
+    <div class="pricing-grid">
+      ${R01_PLANS.map(p => {
+        const isCurrent = p.id === cur;
+        const isPro = p.id === 'pro';
+        const price = splitPrice(p.priceText);
+        const cardCls = [
+          'pricing-card',
+          isPro ? 'pricing-card--featured' : '',
+          isCurrent ? 'pricing-card--current' : ''
+        ].filter(Boolean).join(' ');
+
+        let ctaHtml;
+        if(isCurrent){
+          ctaHtml = `<button class="pc-cta pc-cta--current" disabled>✓ 현재 플랜</button>`;
+        } else if(isPro){
+          ctaHtml = `<button class="pc-cta pc-cta--primary" onclick="selectPlan('${esc(p.id)}')">업그레이드 →</button>`;
+        } else {
+          ctaHtml = `<button class="pc-cta pc-cta--ghost" onclick="selectPlan('${esc(p.id)}')">Free로 변경</button>`;
+        }
+
+        return `
+          <div class="${cardCls}">
+            ${(isPro && !isCurrent) ? '<div class="pc-ribbon">추천</div>' : ''}
+            <div class="pc-name">${esc(p.name)}</div>
+            <div class="pc-price">
+              <span>${esc(price.amount)}</span>${price.unit ? `<span class="pc-price-unit">${esc(price.unit)}</span>` : ''}
+            </div>
+            <div class="pc-desc">${esc(p.desc)}</div>
+            <ul class="pc-features">
+              ${p.features.map(f=>`<li>${esc(f)}</li>`).join('')}
+            </ul>
+            ${ctaHtml}
+          </div>`;
+      }).join('')}
     </div>
-    <p style="font-size:12px;color:var(--ink3);margin-top:12px;text-align:center">결제는 토스페이먼츠를 통해 안전하게 처리됩니다. 언제든 해지 가능.</p>`;
+    <p class="pricing-note">결제는 토스페이먼츠를 통해 안전하게 처리됩니다. 언제든 해지할 수 있어요.</p>
+  `;
   document.getElementById('pricing-modal').classList.add('open');
 }
 function closePricingModal(){

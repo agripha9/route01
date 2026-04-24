@@ -496,40 +496,237 @@ header{
 }
 
 /* 헤더 플랜 배지 pill — 현재 요금제 표시 + 클릭 시 요금제 모달 열기.
-   2-tier: FREE (회색) / PRO (크림슨). 짧은 텍스트 pill이라 기본 폭 최소. */
+   2-tier: FREE (흰 배경, 업그레이드 유도) / PRO (크림슨, 브랜드 identity).
+   짧은 텍스트 pill이라 기본 폭 최소. */
 .hb-pill.hb-plan-pill{
   cursor:pointer;
-  font-size:11px;
+  font-size:11.5px;
   font-weight:700;
   letter-spacing:0.06em;
-  padding-left:10px;
-  padding-right:10px;
+  padding-left:11px;
+  padding-right:11px;
   min-width:auto;
+  gap:4px;
 }
 .hb-pill.hb-plan-pill .hb-pill-name{
   max-width:none;
 }
-/* FREE — 중립 회색 톤. 돈 안 냈다는 사실을 과하게 띄우지 않으면서 인지 가능 */
+/* FREE — 불투명 흰 배경 + 어두운 네이비 텍스트. 헤더 바(warm near-black) 위에서
+   확실한 대비로 눈에 띔. "업그레이드 버튼" 역할 명확화 목적. */
 .hb-pill.hb-plan-pill.hb-plan-free{
-  background:rgba(255,255,255,0.08);
-  border-color:rgba(255,255,255,0.22);
-  color:rgba(255,255,255,0.85);
+  background:#ffffff;
+  border-color:#ffffff;
+  color:var(--brand-point);  /* 네이비 — FREE는 브랜드 보조색 */
+  box-shadow:0 1px 3px rgba(0,0,0,0.25);
+}
+.hb-pill.hb-plan-pill.hb-plan-free::before{
+  content:"↑";
+  display:inline-block;
+  font-size:11px;
+  font-weight:800;
+  color:var(--brand-main);
+  line-height:1;
 }
 .hb-pill.hb-plan-pill.hb-plan-free:hover{
-  background:rgba(255,255,255,0.14);
-  border-color:rgba(255,255,255,0.35);
-  color:#fff;
+  background:#fff8f0;  /* 살짝 웜 틴트로 hover 피드백 */
+  border-color:#fff8f0;
+  color:var(--brand-main);  /* 호버 시 업그레이드 컬러 강조 */
+  transform:translateY(-1px);
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
-/* PRO — 크림슨 톤. 돈 낸 유저의 identity 표시 (DESIGN.md 브랜드 일관성) */
+/* PRO — 크림슨 솔리드. 돈 낸 유저의 identity 표시 */
 .hb-pill.hb-plan-pill.hb-plan-pro{
-  background:rgba(139,26,26,0.28);
-  border-color:rgba(192,60,60,0.5);
-  color:#ffd4d4;
+  background:var(--brand-main);
+  border-color:var(--brand-main);
+  color:#ffffff;
+  box-shadow:0 1px 3px rgba(0,0,0,0.25);
 }
 .hb-pill.hb-plan-pill.hb-plan-pro:hover{
-  background:rgba(139,26,26,0.42);
-  border-color:rgba(192,60,60,0.7);
+  background:var(--brand-main-press);
+  border-color:var(--brand-main-press);
   color:#fff;
+  transform:translateY(-1px);
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* ═══ 요금제 모달 — 2-tier (Free + Pro) 카드 ═══
+   DESIGN.md 원칙: typography-only hierarchy, warm-neutral 팔레트,
+   크림슨은 브랜드/인터랙티브 전용. 선택 상태는 반전으로 명확히. */
+.pricing-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:6px;
+}
+@media (max-width:560px){
+  .pricing-grid{grid-template-columns:1fr}
+}
+.pricing-card{
+  position:relative;
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:22px 20px 20px;
+  background:var(--filter-bg);
+  display:flex;
+  flex-direction:column;
+  transition:border-color .15s ease, background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.pricing-card--featured{
+  border-color:var(--brand-main);
+  border-width:1.5px;
+}
+/* 현재 플랜 — 반전으로 확실한 상태 표시 (멘토 선택 반전과 동일 패턴) */
+.pricing-card--current{
+  background:var(--brand-main);
+  border-color:var(--brand-main);
+  box-shadow:0 4px 16px rgba(139,26,26,0.22);
+}
+.pricing-card--current .pc-name,
+.pricing-card--current .pc-price,
+.pricing-card--current .pc-desc,
+.pricing-card--current .pc-features li,
+.pricing-card--current .pc-features li::before{
+  color:#ffffff !important;
+}
+.pricing-card--current .pc-desc{
+  color:rgba(255,255,255,0.82) !important;
+}
+
+/* "추천" 배지 — 가운데 위 띠 (DESIGN.md 멘토 추천 배지와 같은 골드 outline 대신,
+   여기선 요금제 맥락이라 크림슨 솔리드 풀 뱃지로 강조) */
+.pc-ribbon{
+  position:absolute;
+  top:-11px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--brand-main);
+  color:#ffffff;
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  padding:3px 12px;
+  border-radius:10px;
+  white-space:nowrap;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* 타이포그래피 — DESIGN.md 본문 스케일 기반 */
+.pc-name{
+  font-size:17px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:-0.018em;
+  margin:0 0 10px;
+  line-height:1.2;
+}
+.pc-price{
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  font-size:24px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:-0.028em;
+  margin:0 0 4px;
+  line-height:1.15;
+}
+.pc-price-unit{
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink3);
+  letter-spacing:-0.005em;
+}
+.pc-desc{
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink3);
+  margin:0 0 18px;
+  line-height:1.45;
+  letter-spacing:-0.008em;
+}
+/* 기능 리스트 — 좌측 체크 마커 (글자 위계만큼 강조, 체크는 부가) */
+.pc-features{
+  list-style:none;
+  padding:0;
+  margin:0 0 22px;
+  font-size:13.5px;
+  color:var(--ink);
+  line-height:1.55;
+  flex:1;
+}
+.pc-features li{
+  position:relative;
+  padding-left:22px;
+  margin-bottom:8px;
+  letter-spacing:-0.01em;
+}
+.pc-features li:last-child{margin-bottom:0;}
+.pc-features li::before{
+  content:"✓";
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:13px;
+  font-weight:700;
+  color:var(--brand-main);
+  line-height:1.55;
+}
+
+/* CTA 버튼 */
+.pc-cta{
+  display:block;
+  width:100%;
+  padding:11px 14px;
+  border-radius:10px;
+  border:1px solid transparent;
+  font-family:inherit;
+  font-size:13.5px;
+  font-weight:600;
+  letter-spacing:-0.005em;
+  cursor:pointer;
+  transition:background .15s ease, border-color .15s ease, color .15s ease;
+  text-align:center;
+}
+/* 업그레이드 CTA (Pro로 가는 버튼) — 크림슨 솔리드 */
+.pc-cta--primary{
+  background:var(--brand-main);
+  border-color:var(--brand-main);
+  color:#ffffff;
+}
+.pc-cta--primary:hover{
+  background:var(--brand-main-press);
+  border-color:var(--brand-main-press);
+}
+/* 다운그레이드 CTA (Free로 가는 버튼) — 중립 outline */
+.pc-cta--ghost{
+  background:var(--filter-bg);
+  border-color:var(--border2);
+  color:var(--ink);
+}
+.pc-cta--ghost:hover{
+  background:var(--bg2);
+  border-color:var(--ink3);
+}
+/* 현재 플랜 — disabled 상태 (반전 카드 안에서 half-transparent 흰 버튼) */
+.pc-cta--current{
+  background:rgba(255,255,255,0.18);
+  border-color:rgba(255,255,255,0.35);
+  color:#ffffff;
+  cursor:default;
+}
+.pc-cta--current:hover{
+  background:rgba(255,255,255,0.18);
+  border-color:rgba(255,255,255,0.35);
+}
+
+/* 모달 하단 안내 문구 */
+.pricing-note{
+  font-size:12px;
+  color:var(--ink3);
+  margin-top:16px;
+  text-align:center;
+  line-height:1.5;
+  letter-spacing:-0.005em;
 }
 
 .hb-pill-ico{opacity:.85;flex-shrink:0;}
