@@ -739,7 +739,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   padding:3rem 3rem 2.5rem;
   font-family:var(--font-text);
   font-size:15px;
-  line-height:1.62;
+  line-height:1.65;
   letter-spacing:-0.011em;
   color:#1d1d1f;
 }
@@ -748,12 +748,20 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     padding:2rem 1.5rem 1.75rem;
   }
 }
-/* 본문 단락 — 여유있는 세로 리듬 */
+/* 본문 단락 — 여유있는 세로 리듬 (단락 간 호흡 확대로 스캔 가독성) */
 .report-card .report-bubble p{
-  margin:0 0 1.4rem;
+  margin:0 0 1.15rem;
   color:#1d1d1f;
 }
 .report-card .report-bubble p:last-child{margin-bottom:0}
+/* 섹션 첫 단락 — 리드 톤 (살짝 더 크고 자간 여유) */
+.report-card .report-bubble h2 + p,
+.report-card .report-bubble h1 + p{
+  font-size:15.5px;
+  line-height:1.6;
+  color:#1d1d1f;
+  margin-bottom:1.35rem;
+}
 
 /* 제목 계층 — 컨설팅 리포트 톤 */
 .report-card .report-bubble h1,
@@ -765,38 +773,37 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   line-height:1.28;
   letter-spacing:-0.022em;
 }
-/* H1 — 답변 버블에선 주로 멘토의 한 줄 격언/선언 용도 (Naval·Paul Graham 오프닝).
-   크기·굵기는 H2와 동일. 차이점은 좌측 막대 없음 + 이탤릭 — 그래서 '섹션 제목'이 아니라 '선언'으로 읽힌다. */
+/* H1 — 멘토 오프닝 한 줄 격언. 이탤릭 + 막대 없음. */
 .report-card .report-bubble h1{
-  font-size:22px;
+  font-size:23px;
   font-weight:800;
   font-style:italic;
-  letter-spacing:-0.2px;
-  line-height:1.3;
-  margin:1rem 0 1.75rem;
+  letter-spacing:-0.024em;
+  line-height:1.32;
+  margin:0.5rem 0 2rem;
   color:#1d1d1f;
   padding:0;
 }
-.report-card .report-bubble h1:first-child{margin-top:0.35rem}
-/* H2 — 섹션 제목. 좌측 브랜드 레드 세로 막대는 유지하되 더 세련되게. 글자색은 검정. */
+.report-card .report-bubble h1:first-child{margin-top:0.25rem}
+/* H2 — 섹션 제목. 얇고 정제된 크림슨 막대 + 위에 여유, 아래는 타이트하게 (애플 섹션 리듬). */
 .report-card .report-bubble h2{
-  font-size:22px !important;
-  font-weight:800 !important;
-  margin:3rem 0 1.3rem;
-  padding:0.2rem 0 0.2rem 20px;
-  border-left:4px solid #8B1A1A;
-  line-height:1.28;
-  color:#1d1d1f !important;
-  letter-spacing:-0.028em;
-}
-.report-card .report-bubble h2:first-child{margin-top:0.35rem}
-/* H3 — 소제목. 색 검정으로 통일, 크기·굵기로만 구분(장식 제거). */
-.report-card .report-bubble h3{
-  font-size:17px !important;
+  font-size:21px !important;
   font-weight:700 !important;
-  margin:1.9rem 0 .8rem !important;
+  margin:3.25rem 0 1rem;
+  padding:0 0 0 16px;
+  border-left:3px solid #8B1A1A;
+  line-height:1.3;
   color:#1d1d1f !important;
-  letter-spacing:-0.02em !important;
+  letter-spacing:-0.026em;
+}
+.report-card .report-bubble h2:first-child{margin-top:0.5rem}
+/* H3 — 소제목. 크기·굵기로만 구분. 섹션 안의 하위 그룹 라벨. */
+.report-card .report-bubble h3{
+  font-size:16.5px !important;
+  font-weight:700 !important;
+  margin:2rem 0 .7rem !important;
+  color:#1d1d1f !important;
+  letter-spacing:-0.018em !important;
   line-height:1.4 !important;
   padding-left:0;
   display:block !important;
@@ -806,7 +813,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
 }
 .report-card .report-bubble h3[data-numbered]{
-  font-size:17px !important;
+  font-size:16.5px !important;
   font-weight:700 !important;
   color:#1d1d1f !important;
 }
@@ -815,32 +822,35 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
 }
 .report-card .report-bubble h4{
-  font-size:16px !important;
+  font-size:15px !important;
   font-weight:700 !important;
-  margin:1.6rem 0 .65rem !important;
+  margin:1.5rem 0 .55rem !important;
   color:#1d1d1f !important;
   letter-spacing:-0.015em !important;
   display:block !important;
 }
 .report-card .report-bubble h4[data-numbered]{
-  font-size:16px !important;
+  font-size:15px !important;
 }
 
-/* AI 답변에서 볼드 단독 단락을 비공식 섹션 제목처럼 처리:
-   한 단락 전체가 <strong>...</strong> 하나로만 채워진 경우 상단 여백과 굵기 강조. */
+/* 볼드-only 단락을 시간 구분자·비공식 섹션 제목으로 처리:
+   "이번 주", "이번 달", "3개월 후" 같은 리듬 구분자가 여기 해당됨.
+   크기는 H3급으로 키우고 자간을 넓혀 '섹션 라벨' 톤으로 만든다. */
 .report-card .report-bubble p > strong:only-child{
   display:inline-block;
   color:#1d1d1f;
+  font-size:15.5px;
+  font-weight:700;
+  letter-spacing:-0.015em;
 }
 .report-card .report-bubble p:has(> strong:only-child){
-  margin-top:1.4rem;
-  margin-bottom:.55rem;
-  font-weight:700;
+  margin-top:2.1rem;
+  margin-bottom:.7rem;
+  padding-bottom:0.35rem;
+  border-bottom:1px solid #f2f2f4;
 }
 
-/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우 시각적 위계 보정.
-   기본 방침은 JS에서 DOM을 들어올려 루트 레벨로 승격하는 것(normalizeOrderedListNumbering).
-   이 규칙은 승격이 실패한 예외 케이스에만 동작하는 fallback. 색은 본문 ink 유지. */
+/* 방어: AI가 제목을 ol/ul 항목으로 잘못 쓴 경우 시각적 위계 보정. */
 .report-card .report-bubble li[data-section-heading]{
   list-style:none !important;
   padding-left:0 !important;
@@ -872,7 +882,6 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   padding-left:0 !important;
   margin:.5rem 0 1rem;
 }
-/* 제목이 아닌 일반 li는 ul[data-has-heading] 안에서도 기존 들여쓰기 유지 */
 .report-card .report-bubble ol[data-has-heading] > li:not([data-section-heading]),
 .report-card .report-bubble ul[data-has-heading] > li:not([data-section-heading]){
   margin-left:0;
@@ -889,18 +898,22 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   color:#424245;
 }
 
-/* 리스트 — 컨설팅 리포트 들여쓰기. 
-   소제목(H3) 아래에 있을 때 계층이 시각적으로 명확하도록 충분히 들여씀. */
+/* 리스트 — 애플 컨설팅 리포트 들여쓰기.
+   2.2rem → 1.6rem (들여쓰기 절제), 항목 간 호흡 0.55 → 1.05rem (독립 스테이트먼트). */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) :is(ul, ol){
-  margin:.8rem 0 1.4rem;
+  margin:.9rem 0 1.5rem;
   margin-left:0;
-  padding-left:2.2rem !important;
+  padding-left:1.6rem !important;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li{
   list-style-position:outside !important;
-  padding-left:.5rem;
-  margin-bottom:.55rem;
-  line-height:1.65;
+  padding-left:.4rem;
+  margin-bottom:1.05rem;
+  line-height:1.6;
+}
+/* 마지막 항목은 하단 마진 최소화 (리스트 아래 요소와 붙지 않게) */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li:last-child{
+  margin-bottom:.2rem;
 }
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul{
   list-style-type:disc !important;
@@ -923,22 +936,31 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   content:none !important;
   display:none !important;
 }
-/* ul 마커: 중간 회색 점 (Apple 문서 스타일) */
+/* ul 마커: 옅은 회색 점 (Apple 문서 스타일) */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul > li::marker{
   color:#86868b !important;
   font-weight:400;
 }
-/* ol 마커: 검정, 숫자 정렬 — 실행 단계 명시성 유지 */
+/* ol 마커: 크림슨 600. "1." "2." 가 본문과 동일 굵기로 뭉쳐 보이던 문제 해소.
+   tabular-nums로 두자리수까지 정렬. 애플 누마브 리스트 감각. */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ol > li::marker{
-  color:#1d1d1f !important;
-  font-weight:700;
+  color:#8B1A1A !important;
+  font-weight:600 !important;
+  font-size:0.92em;
   font-variant-numeric:tabular-nums;
+}
+/* 리스트 아이템 첫 볼드 — "리드 단어" 강조.
+   예: "1. **X 계정과 블로그를 오늘 열어라.** 첫 글은..." 에서 앞 볼드를 선명하게 띄움. */
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li > strong:first-child,
+:where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li > p:first-child > strong:first-child{
+  font-weight:700;
+  color:#1d1d1f;
 }
 /* 중첩 리스트 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) li > :is(ul, ol){
-  margin-top:.4rem;
-  margin-bottom:.4rem;
-  margin-left:1rem;
+  margin-top:.5rem;
+  margin-bottom:.5rem;
+  margin-left:0.5rem;
 }
 /* 중첩 ul 2단계: 옅은 회색 */
 :where(.chat-msg-text, .report-bubble, .hist-block-body--answer) ul ul > li::marker{
@@ -993,6 +1015,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   margin-top:0 !important;
   margin-bottom:.5rem !important;
   font-weight:inherit !important;
+  border-bottom:none !important;
+  padding-bottom:0 !important;
 }
 .report-card .report-bubble blockquote p:last-child:has(> strong){
   margin-bottom:0 !important;
