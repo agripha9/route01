@@ -5742,6 +5742,18 @@ function syncHeaderPlanPill(){
         above = true;
       }
       let left = r.left + r.width / 2;
+      /* data-tip-align으로 정렬 방식 선택 가능:
+         - 기본(center): 대상 가운데
+         - "left": 대상 왼쪽 가장자리 근처 (넓은 컨테이너용 - 예: 로고)
+         - "right": 대상 오른쪽 가장자리 근처 */
+      const align = target.getAttribute('data-tip-align') || 'center';
+      if(align === 'left'){
+        /* 툴팁의 왼쪽 꼭지점이 대상 왼쪽에서 살짝 안쪽에 오도록.
+           translate(-50%)이 기본이므로, 중심을 대상 왼쪽 + 툴팁 반폭 위치로. */
+        left = r.left + Math.min(r.width * 0.15, tipRect.width / 2 + 12);
+      } else if(align === 'right'){
+        left = r.right - Math.min(r.width * 0.15, tipRect.width / 2 + 12);
+      }
       /* 좌우 뷰포트 경계 보정 — 툴팁 반폭 이상 확보 */
       const halfW = tipRect.width / 2;
       if(left - halfW < 8) left = halfW + 8;
