@@ -5781,11 +5781,15 @@ function syncHeaderPlanPill(){
   }
 
   function handleEnter(e){
-    const target = e.target.closest('[data-tip]');
+    /* e.target이 Element가 아닌 경우(텍스트 노드, document 등) closest 없음 → 방어.
+       capture 단계로 document 전체에 붙여서 가끔 이런 target이 들어올 수 있다. */
+    const el = e.target;
+    if(!el || el.nodeType !== 1 || typeof el.closest !== 'function') return;
+    const target = el.closest('[data-tip]');
     if(!target) return;
     /* 같은 [data-tip] 부모의 자식 간 이동이면 새 툴팁 안 띄움 (로고 내부 img/span 간 이동 방지) */
     const from = e.relatedTarget;
-    if(from && from.nodeType === 1 && from.closest && from.closest('[data-tip]') === target) return;
+    if(from && from.nodeType === 1 && typeof from.closest === 'function' && from.closest('[data-tip]') === target) return;
     /* 이미 같은 target에 대해 타이머/표시 중이면 그대로 둠 */
     if(currentTarget === target) return;
     const text = target.getAttribute('data-tip');
@@ -5806,11 +5810,13 @@ function syncHeaderPlanPill(){
   }
 
   function handleLeave(e){
-    const from = e.target.closest('[data-tip]');
+    const el = e.target;
+    if(!el || el.nodeType !== 1 || typeof el.closest !== 'function') return;
+    const from = el.closest('[data-tip]');
     if(!from) return;
     /* 자식으로의 이동은 leave로 취급 안 함 (relatedTarget 기반) */
     const to = e.relatedTarget;
-    if(to && from.contains(to)) return;
+    if(to && from.contains && from.contains(to)) return;
     /* title 속성 복원 (a11y·검색엔진·no-js fallback용 의미 보존) */
     if(from.hasAttribute('data-tip-title')){
       from.setAttribute('title', from.getAttribute('data-tip-title'));
