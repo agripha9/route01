@@ -543,7 +543,8 @@ header{
 }
 
 /* 헤더 플랜 배지 pill — 현재 요금제 표시 + 클릭 시 요금제 모달 열기.
-   2-tier: FREE (흰 배경, 업그레이드 유도) / PRO (크림슨, 브랜드 identity).
+   2-tier: FREE (네이비 outline) / PRO (크림슨 솔리드).
+   색상 언어: outline(잠금/기본) → solid(활성/identity) 관계로 읽힘.
    짧은 텍스트 pill이라 기본 폭 최소. */
 .hb-pill.hb-plan-pill{
   cursor:pointer;
@@ -558,28 +559,20 @@ header{
 .hb-pill.hb-plan-pill .hb-pill-name{
   max-width:none;
 }
-/* FREE — 불투명 흰 배경 + 어두운 네이비 텍스트. 헤더 바(warm near-black) 위에서
-   확실한 대비로 눈에 띔. "업그레이드 버튼" 역할 명확화 목적. */
+/* FREE — 밝은 네이비 outline + 투명 배경.
+   어두운 헤더 위에서 또렷하지만 튀지 않음. 업그레이드 화살표 없음 — 배지 역할은
+   '현재 상태 표시'가 우선이고 업그레이드 유도는 클릭 동작으로 이미 충분. */
 .hb-pill.hb-plan-pill.hb-plan-free{
-  background:#ffffff;
-  border-color:#ffffff;
-  color:var(--brand-point);  /* 네이비 — FREE는 브랜드 보조색 */
-  box-shadow:0 1px 3px rgba(0,0,0,0.25);
-}
-.hb-pill.hb-plan-pill.hb-plan-free::before{
-  content:"↑";
-  display:inline-block;
-  font-size:11px;
-  font-weight:800;
-  color:var(--brand-main);
-  line-height:1;
+  background:transparent;
+  border-color:rgba(140,180,230,0.55);
+  color:rgba(190,215,245,0.95);
+  box-shadow:none;
 }
 .hb-pill.hb-plan-pill.hb-plan-free:hover{
-  background:#fff8f0;  /* 살짝 웜 틴트로 hover 피드백 */
-  border-color:#fff8f0;
-  color:var(--brand-main);  /* 호버 시 업그레이드 컬러 강조 */
+  background:rgba(140,180,230,0.12);
+  border-color:rgba(180,210,240,0.75);
+  color:#ffffff;
   transform:translateY(-1px);
-  box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 /* PRO — 크림슨 솔리드. 돈 낸 유저의 identity 표시 */
 .hb-pill.hb-plan-pill.hb-plan-pro{
