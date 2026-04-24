@@ -5683,7 +5683,7 @@ const R01_PLANS = [
   {
     id:'free', name:'Free', price:0, priceText:'무료',
     desc:'가볍게 시작하기',
-    features:['월 10회 질문','추천 질문 이용','FREE 멘토 2명(Paul Graham · Peter Thiel)'],
+    features:['월 10회 질문','추천 질문 이용','Free 멘토 2명(Paul Graham · Peter Thiel)'],
     limit:10, color:'#6e6e73', cta:'현재 플랜'
   },
   {
@@ -5713,9 +5713,9 @@ function syncHeaderPlanPill(){
   label.textContent = isPro ? 'PRO' : 'FREE';
   pill.classList.toggle('hb-plan-pro', isPro);
   pill.classList.toggle('hb-plan-free', !isPro);
-  pill.setAttribute('data-tip', isPro ? 'PRO 플랜 · 요금제 관리' : 'FREE 플랜 · 업그레이드');
+  pill.setAttribute('data-tip', isPro ? 'Pro 플랜 · 요금제 관리' : 'Free 플랜 · 업그레이드');
   /* title도 같이 유지 — JS 꺼진 환경의 fallback */
-  pill.setAttribute('title', isPro ? 'PRO 플랜 · 요금제 관리' : 'FREE 플랜 · 업그레이드');
+  pill.setAttribute('title', isPro ? 'Pro 플랜 · 요금제 관리' : 'Free 플랜 · 업그레이드');
 }
 
 /* ─── 툴팁 시스템 (r01-tooltip) ───
