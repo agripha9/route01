@@ -196,7 +196,7 @@ body{
   max-width:100%;
   box-sizing:border-box
 }
-.auth-btn:hover{opacity:.92;border-color:#86868b;background:var(--filter-bg)}
+.auth-btn:hover{opacity:.92;border-color:var(--border2);background:var(--filter-bg)}
 .auth-btn.primary{
   background:var(--cta);
   border-color:var(--cta);
@@ -252,7 +252,7 @@ body{
 #auth0-modal .modal-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta)}
 #auth0-modal .modal-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
 #auth0-modal .modal-btn:not(.pri){background:#fff;border:1px solid var(--border);color:var(--ink)}
-#auth0-modal .modal-btn:not(.pri):hover{border-color:#86868b;background:var(--filter-bg)}
+#auth0-modal .modal-btn:not(.pri):hover{border-color:var(--border2);background:var(--filter-bg)}
 
 /* ONBOARDING */
 #onboarding{position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;animation:fadeIn .4s ease}
@@ -288,7 +288,7 @@ body{
   font-size:13px;font-weight:500;color:var(--ink2);background:var(--white);
   transition:border-color .15s,background .15s;user-select:none;letter-spacing:-0.224px
 }
-.ob-chip:hover{border-color:#86868b;background:var(--filter-bg)}
+.ob-chip:hover{border-color:var(--border2);background:var(--filter-bg)}
 /* 선택됨: 업종(.ind-tag.sel)·멘토(.ob-mentor-row.sel)와 동일한 네이비 꽉 찬 반전 */
 .ob-chip.sel{border-color:var(--brand-point);background:var(--brand-point);color:#fff;font-weight:600}
 .ob-chip .em{display:block;font-size:18px;margin-bottom:4px}
@@ -356,8 +356,8 @@ body{
 }
 .ob-btn:hover{opacity:.92}
 .ob-btn.sec{background:var(--white);color:var(--ink2)}
-.ob-btn.sec:hover{border-color:#86868b;background:var(--filter-bg)}
-.ob-btn.pri{background:#86868b;color:#fff;border-color:#86868b}
+.ob-btn.sec:hover{border-color:var(--border2);background:var(--filter-bg)}
+.ob-btn.pri{background:#86868b;color:#fff;border-color:var(--border2)}
 .ob-btn.pri:hover{background:#6e6e73;border-color:#6e6e73}
 .ob-btn:disabled{opacity:.4;cursor:not-allowed}
 .ind-tag{
@@ -366,7 +366,7 @@ body{
   transition:border-color .12s,background .12s;user-select:none;font-family:var(--font-text);
   letter-spacing:-0.12px
 }
-.ind-tag:hover{border-color:#86868b;background:var(--filter-bg);color:var(--ink)}
+.ind-tag:hover{border-color:var(--border2);background:var(--filter-bg);color:var(--ink)}
 .ind-tag.sel{border-color:var(--brand-point);background:var(--brand-point);color:#fff;font-weight:600}
 .ind-tag-other{border-style:dashed;}
 .ind-tag-other.sel{background:var(--cta);border-color:var(--cta);border-style:solid;color:#fff;}
@@ -532,7 +532,7 @@ aside.collapsed{width:0;border-right-color:transparent}
   display:inline-flex;align-items:center;justify-content:center;
   transition:color .12s, background .12s, border-color .12s;
 }
-.aside-toggle:hover{color:var(--ink);background:var(--filter-bg);border-color:#86868b}
+.aside-toggle:hover{color:var(--ink);background:var(--filter-bg);border-color:var(--border2)}
 /* '다시 열기' 부동 버튼 — 사이드바가 닫혔을 때만 노출. main 좌측 상단에 떠 있음.
    부동 상태에선 바깥(메인) 배경 위에 얹히므로 L1(흰색)으로 살짝 대비. */
 .aside-open-fab{
@@ -550,7 +550,7 @@ aside.collapsed{width:0;border-right-color:transparent}
   box-shadow:0 1px 4px rgba(0,0,0,.08);
   transition:background .12s, color .12s, border-color .12s;
 }
-.aside-open-fab:hover{background:var(--filter-bg);color:var(--ink);border-color:#86868b}
+.aside-open-fab:hover{background:var(--filter-bg);color:var(--ink);border-color:var(--border2)}
 /* 사이드바가 collapsed일 때만 부동 버튼 표시 */
 body.sidebar-collapsed .aside-open-fab{display:flex}
 .s-top{flex:1;overflow-y:auto;padding:0.75rem 0.75rem 1.25rem}
@@ -1113,16 +1113,16 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .m-bubble hr{border:none;height:1px;background:var(--border);margin:1rem 0}
 .m-bubble a{color:#1d1d1f;text-decoration:underline;text-underline-offset:2px}
 .m-bubble a:hover{text-decoration-thickness:1.5px}
-.m-bubble table{width:100%;margin:1.2rem 0;border-collapse:collapse;border:1px solid #d2d2d7;border-radius:8px;overflow:hidden;background:var(--filter-bg);font-size:14px}
-.m-bubble th,.m-bubble td{padding:11px 16px;border:1px solid #e5e5ea;vertical-align:middle;text-align:left;line-height:1.55}
-.m-bubble th{background:#8B1A1A;color:#fff;font-size:14px;font-weight:700;text-align:center;letter-spacing:-0.005em;padding:12px 16px;border-color:#8B1A1A}
-.m-bubble caption{caption-side:top;text-align:left;font-weight:700;color:#1d1d1f;margin:0 0 .5rem;font-size:14px}
-.m-bubble td{font-size:14px;color:#2c2c2e;line-height:1.55;letter-spacing:-0.01em}
-.m-bubble tbody td:first-child{font-weight:600;color:#1d1d1f}
-.m-bubble tbody tr:nth-child(even) td{background:#f4f4f6}
+.m-bubble table{width:100%;margin:1.2rem 0;border-collapse:collapse;border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--filter-bg);font-size:14.5px}
+.m-bubble th,.m-bubble td{padding:10px 14px;border:1px solid var(--border);vertical-align:middle;text-align:left;line-height:1.55}
+.m-bubble th{background:var(--brand-main);color:#fff;font-size:14.5px;font-weight:700;text-align:center;letter-spacing:-0.005em;padding:11px 14px;border-color:var(--brand-main)}
+.m-bubble caption{caption-side:top;text-align:left;font-weight:700;color:var(--ink);margin:0 0 .5rem;font-size:14px}
+.m-bubble td{font-size:14.5px;color:var(--ink);line-height:1.55;letter-spacing:-0.01em}
+.m-bubble tbody td:first-child{font-weight:600;color:var(--ink)}
+.m-bubble tbody tr:nth-child(even) td{background:#fbf9f3}
 .m-bubble tbody tr:nth-child(odd) td{background:var(--filter-bg)}
-.m-bubble tbody tr:hover td{background:#f0f0f3}
-.m-bubble blockquote{margin:1.5rem 0;padding:.9rem 1.25rem;border-left:3px solid #d2d2d7;background:#f7f8fb;border-radius:0 6px 6px 0;color:#1d1d1f;font-size:14px;line-height:1.65;font-style:italic}
+.m-bubble tbody tr:hover td{background:#f4f2ea}
+.m-bubble blockquote{margin:1.5rem 0;padding:.9rem 1.25rem;border-left:3px solid var(--border2);background:#f7f6ef;border-radius:0 8px 8px 0;color:var(--ink);font-size:14.5px;line-height:1.65;font-style:italic}
 .dots{display:flex;gap:4px;padding:4px 0}
 .dots span{width:5px;height:5px;border-radius:50%;background:var(--ink3);animation:bounce 1.1s infinite}
 .dots span:nth-child(2){animation-delay:.18s}
@@ -1248,7 +1248,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   border:1px solid var(--border);background:#fff;font-size:12px;font-weight:400;color:var(--ink);
   cursor:pointer;transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease)
 }
-.domain-banner .db-btn:hover{opacity:.92;border-color:#86868b;background:var(--filter-bg)}
+.domain-banner .db-btn:hover{opacity:.92;border-color:var(--border2);background:var(--filter-bg)}
 .domain-banner .db-btn.primary{background:var(--cta);border-color:var(--cta);color:#fff}
 .domain-banner .db-btn.primary:hover{opacity:.88;color:#fff}
 .domain-banner .db-btn.ghost{background:transparent}
@@ -1320,9 +1320,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   font-family:var(--font-text);letter-spacing:-0.15px;line-height:1.4;
   transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease),color .15s var(--ease);
 }
-.modal-btn:hover{border-color:#86868b;background:var(--filter-bg)}
+.modal-btn:hover{border-color:var(--border2);background:var(--filter-bg)}
 /* primary — 네이비 채움 (기본 색상 체계 일관) */
-.modal-btn.pri{background:#86868b;color:#fff;border-color:#86868b}
+.modal-btn.pri{background:#86868b;color:#fff;border-color:var(--border2)}
 .modal-btn.pri:hover{opacity:1;background:#6e6e73;border-color:#6e6e73}
 
 /* API 키 모달 필드 (HTML 인라인 보완) */
@@ -1450,7 +1450,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   padding-top:10px;
 }
 .hist-filter-btn{font-size:10px;font-weight:600;padding:3px 8px;border-radius:980px;border:1px solid var(--border);background:var(--white);color:var(--ink3);cursor:pointer;font-family:var(--font-text);transition:all .12s}
-.hist-filter-btn:hover{border-color:#86868b;color:var(--ink)}
+.hist-filter-btn:hover{border-color:var(--border2);color:var(--ink)}
 .hist-filter-btn.active{background:rgba(26,58,110,0.08);border-color:rgba(26,58,110,0.35);color:var(--ink);font-weight:600}
 
 .dl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:1rem}
@@ -1472,7 +1472,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   cursor:pointer;transition:opacity .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease);
   letter-spacing:-0.08px
 }
-.a-act:hover{opacity:.92;border-color:#86868b;background:var(--filter-bg)}
+.a-act:hover{opacity:.92;border-color:var(--border2);background:var(--filter-bg)}
 .a-act.gold{border-color:var(--brand-main);background:var(--brand-main);color:#fff}
 .a-act.gold:hover{opacity:.92;border-color:var(--brand-main-press);background:var(--brand-main-press)}
 .a-act:disabled{opacity:.45;cursor:not-allowed}
@@ -1587,7 +1587,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* 소셜 버튼 */
 .auth-social-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
 .auth-btn{display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;font-weight:500;color:var(--ink);transition:background .15s,border-color .15s,opacity .15s;width:100%;box-sizing:border-box;font-family:var(--font-text);}
-.auth-btn:hover{background:var(--filter-bg);border-color:#86868b;}
+.auth-btn:hover{background:var(--filter-bg);border-color:var(--border2);}
 .auth-submit-btn{background:var(--cta);border-color:var(--cta);color:#fff;font-size:15px;padding:12px;}
 .auth-submit-btn:hover{opacity:.9;background:var(--cta-press);}
 .auth-social-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -1758,7 +1758,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .unified-badges{display:flex;gap:8px;flex-shrink:0;}
 .sug-domain-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
 .sug-dc{padding:5px 12px;border-radius:980px;border:1px solid var(--border);background:var(--white);font-size:12px;font-weight:500;color:var(--ink2);cursor:pointer;transition:background .12s,border-color .12s;font-family:var(--font-text);}
-.sug-dc:hover{border-color:#86868b;background:var(--filter-bg);}
+.sug-dc:hover{border-color:var(--border2);background:var(--filter-bg);}
 .sug-dc.active{background:var(--ink);border-color:var(--ink);color:#fff;}
 .sug-dc-grant{border-color:var(--cta);color:var(--cta);}
 .sug-dc-grant:hover{background:rgba(139,26,26,.06);}
@@ -2317,11 +2317,11 @@ main {
 .report-bubble blockquote {
   margin: 1.5rem 0;
   padding: .9rem 1.25rem;
-  border-left: 3px solid #d2d2d7;
-  background: #f7f8fb;
-  border-radius: 0 6px 6px 0;
-  color: #1d1d1f;
-  font-size: 14px;
+  border-left: 3px solid var(--border2);
+  background: #f7f6ef;
+  border-radius: 0 8px 8px 0;
+  color: var(--ink);
+  font-size: 14.5px;
   line-height: 1.65;
   font-style: italic;
 }
@@ -2823,58 +2823,55 @@ main {
   letter-spacing: -0.2px !important;
 }
 
-/* ── 표 최종 override (위 :where 규칙과 동일 값으로 통일, 캐스케이드 충돌 방지) */
+/* ── 표 최종 override (위 :where 규칙과 동일 값으로 통일, 캐스케이드 충돌 방지)
+   DESIGN.md §4 Tables에 맞춘 웜톤 토큰. 이 블록이 마지막에 와서 캐스케이드 승자가 됨. */
 .report-bubble table,
 .m-bubble table {
   width: 100% !important;
   border-collapse: collapse !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-  border: 1px solid #d2d2d7 !important;
+  border: 1px solid var(--border2) !important;
   margin: 1.2rem 0 !important;
-  font-size: 14px !important;
+  font-size: 14.5px !important;
   background: var(--filter-bg) !important;
 }
 .report-bubble th,
 .m-bubble th {
-  background: #8B1A1A !important;
+  background: var(--brand-main) !important;
   color: #fff !important;
   font-weight: 700 !important;
-  font-size: 14px !important;
-  padding: 12px 16px !important;
+  font-size: 14.5px !important;
+  padding: 11px 14px !important;
   text-align: center !important;
-  border: 1px solid #8B1A1A !important;
+  border: 1px solid var(--brand-main) !important;
   letter-spacing: -0.005em !important;
-  /* 헤더 줄바꿈 방지: '순서' 같은 2글자가 세로로 쪼개지는 현상 차단.
-     헤더가 길면 해당 열이 자연스럽게 더 넓어지도록 브라우저에 맡김. */
+  /* 헤더 줄바꿈 방지 */
   white-space: nowrap !important;
   word-break: keep-all !important;
   -webkit-print-color-adjust: exact;
 }
 .report-bubble td,
 .m-bubble td {
-  padding: 11px 16px !important;
-  border: 1px solid #e5e5ea !important;
+  padding: 10px 14px !important;
+  border: 1px solid var(--border) !important;
   vertical-align: middle !important;
-  font-size: 14px !important;
+  font-size: 14.5px !important;
   line-height: 1.55 !important;
-  color: #2c2c2e !important;
+  color: var(--ink) !important;
   text-align: left !important;
-  /* 한국어 단어 단위 줄바꿈 — 의미 단위 보존.
-     단, 매우 긴 영문 단어·URL은 어쩔 수 없이 쪼갬(overflow-wrap). */
   word-break: keep-all !important;
   overflow-wrap: anywhere !important;
 }
-/* 첫 열 — 굵기만 강조, 배경은 행 단위 스트라이프에서 결정 */
 .report-bubble tbody td:first-child,
 .m-bubble tbody td:first-child {
   font-weight: 600 !important;
-  color: #1d1d1f !important;
+  color: var(--ink) !important;
 }
-/* 짝수 행 — L1 기준 한 단계 진하게 */
+/* 짝수 행 — 웜 크림 */
 .report-bubble tbody tr:nth-child(even) td,
 .m-bubble tbody tr:nth-child(even) td {
-  background: #f4f4f6 !important;
+  background: #fbf9f3 !important;
 }
 /* 홀수 행 — L1 */
 .report-bubble tbody tr:nth-child(odd) td,
@@ -2882,15 +2879,15 @@ main {
   background: var(--filter-bg) !important;
 }
 
-/* ── blockquote (최종 override — 위 규칙과 일치시켜 캐스케이드 충돌 방지) */
+/* ── blockquote (최종 override — 웜 parchment + 웜 border) */
 .report-bubble blockquote {
   margin: 1.5rem 0 !important;
   padding: .9rem 1.25rem !important;
-  border-left: 3px solid #d2d2d7 !important;
-  background: #f7f8fb !important;
-  border-radius: 0 6px 6px 0 !important;
-  color: #1d1d1f !important;
-  font-size: 14px !important;
+  border-left: 3px solid var(--border2) !important;
+  background: #f7f6ef !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: var(--ink) !important;
+  font-size: 14.5px !important;
   line-height: 1.65 !important;
   font-style: italic !important;
   max-width: none !important;
