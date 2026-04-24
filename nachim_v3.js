@@ -633,7 +633,11 @@ async function submitGrantHelper(){
 
   const extractText=(j)=> (j?.content||[]).filter(c=>c?.type==='text'&&typeof c?.text==='string').map(c=>c.text).join('');
   const callOnce=async (msgs,maxTokens)=>{
-    const model=(await resolveModelId('sonnet')) || 'claude-sonnet-4-5-20250929';
+    /* 지원사업 도우미는 PRO 전용 기능 (checkGrantAccess가 FREE 차단).
+       작업 특성: 긴 공고문·양식 이해 + 수십 페이지 계획서 초안 생성 → Opus 4.7 고정.
+       Sonnet으로 돌리면 평가기준 놓치고 일반적 서술 나와 가치 떨어짐.
+       복잡도 판단 생략 — 이 기능은 본질적으로 복잡함. */
+    const model=(await resolveModelId('opus')) || 'claude-opus-4-7';
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
