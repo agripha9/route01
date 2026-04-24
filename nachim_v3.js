@@ -5666,7 +5666,7 @@ const R01_PLANS = [
   {
     id:'free', name:'Free', price:0, priceText:'무료',
     desc:'가볍게 시작하기',
-    features:['월 10회 질문','추천 질문 이용','FREE 멘토 2명(Paul Graham · Peter Thiel)','도메인별 기본 자문'],
+    features:['월 10회 질문','추천 질문 이용','FREE 멘토 2명(Paul Graham · Peter Thiel)'],
     limit:10, color:'#6e6e73', cta:'현재 플랜'
   },
   {
