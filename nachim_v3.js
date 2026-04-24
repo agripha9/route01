@@ -387,6 +387,20 @@ function readFile(file){
     const r=new FileReader();
     r.onload=e=>{
       const b64=e.target.result.split(',')[1];
+      /* [Phase 2-B 관찰] PDF 업로드 통계 로그 —
+         향후 캐싱 정책·RAG 필요성 판단용. 사용자에겐 노출 안 됨.
+         추정: PDF 1KB ≈ 약 250 토큰 (한국어 혼합 기준 경험치).
+         이는 추정치이며 정확한 값은 API [cache] 로그에서 확인 가능. */
+      const sizeKB = Math.round(file.size / 1024);
+      const estTokens = Math.round(file.size / 4.1);  /* 대략 4바이트당 1토큰 */
+      try{
+        console.log('[pdf]', 'upload', {
+          name: file.name,
+          sizeKB,
+          estTokens,
+          cacheable: true  /* buildUserContent에서 cache_control 붙임 */
+        });
+      }catch(_){}
       res({type:'document',b64,mime:'application/pdf',name:file.name,size:file.size});
     };
     r.onerror=rej;
@@ -464,9 +478,26 @@ function buildUserContent(text, pendingFiles){
   if(obFiles.length) docsSentOnce=true;
   const allFiles=[...obFiles,...chatFiles];
   if(!allFiles.length) return text;
+
+  /* [Phase 2-B] PDF 캐싱 정책:
+     - 채팅 첨부 PDF: cache_control: 'ephemeral' 부여. 같은 PDF로 재질문 시 2번째부터 90% 할인.
+     - 온보딩 PDF: 첫 질문에만 1회 주입되므로 캐싱 의미 없음 → 부여하지 않음.
+     - 텍스트·이미지: 현재 정책에선 캐싱 안 붙임 (대개 작아서 이득 미미).
+     캐시 TTL 5분. 사용자가 5분 안에 추가 질문 시 캐시 히트. */
+  const obFileSet = new Set(obFiles);
+
   const parts=[];
   for(const d of allFiles){
-    if(d.type==='document') parts.push({type:'document',source:{type:'base64',media_type:d.mime,data:d.b64}});
+    const isChatAttached = !obFileSet.has(d);  /* 온보딩이 아니면 채팅 첨부 */
+    if(d.type==='document'){
+      const block = {
+        type:'document',
+        source:{type:'base64',media_type:d.mime,data:d.b64}
+      };
+      /* 채팅 첨부 PDF에만 캐싱 어노테이션 부여 (cache hits는 [cache] 로그에서 확인) */
+      if(isChatAttached) block.cache_control = {type:'ephemeral'};
+      parts.push(block);
+    }
     else if(d.type==='image') parts.push({type:'image',source:{type:'base64',media_type:d.mime,data:d.b64}});
     else if(d.type==='text') parts.push({type:'text',text:`[첨부: ${d.name}]\n${d.text}`});
   }
