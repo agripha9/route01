@@ -428,9 +428,11 @@ route01/
 - 긴 PDF가 자주 올라오면 full RAG(TF-IDF 청크) 추진 판단
 - 드물게만 쓰이면 여기서 종료
 
-### 🔴 다음 세션 최우선: 제품 기능 — 백엔드 + 로그인·유료화 통합 (Supabase)
+### 🔴 다음 세션 최우선 — 백엔드 + 로그인·유료화 통합 (2026-04-24 확정)
 
-기술 인프라(Phase 1·2-A·2-B) 작업은 일단락. 이제 실사용자 확보를 위한 제품 기능 단계.
+**사용자가 2026-04-24 세션 마무리 시 방향 A로 결정.** 상세 계획은 §31 참조.
+
+기술 인프라(Phase 1·2-A·2-B)·UX 폴리시 작업은 일단락. 이제 실사용자 확보를 위한 제품 기능 단계.
 
 현재 구조의 근본적 한계: API 키가 클라이언트에 노출되어 유료 서비스 불가능.
 **오픈 전 반드시 해결해야 할 과제**이며, 여러 로드맵 항목을 한 번에 해결하는 토대:
@@ -640,5 +642,161 @@ route01/
 - **URL 정책**: `route01.kr/` 루트만 사용자에게 보임. 옛 `/nachim_v3.html` 링크는 `/`로 301 리다이렉트
 - **Phase 2-A 라우팅 작동 중** — FREE 멘토 Sonnet, PRO + 복잡 질문 Opus 4.7
 - **Phase 2-B PDF 캐싱 적용** — 채팅 첨부 PDF `cache_control: ephemeral`. 5분 TTL 내 재질문 시 PDF 토큰 90% 할인. 관찰 로그 `[pdf]` + `[cache]`로 확인. 본격 RAG 여부는 클로즈 베타 데이터로 판단.
-- **Phase 1 Step 3 스트리밍 SKIP** — 백엔드 도입 시점에 재검토
-- **롤백 앵커**: 원격 태그 `pre-design-refactor-v2` + `pre-apple-style-refresh`
+---
+
+## 30. 2026-04-24 오후~저녁 세션 작업 로그 (추가 20+ 커밋)
+
+오전 세션에서 Apple 리팩터·Phase 2-A·2-B 끝낸 후, 오후부터 UX 세부 폴리시·요금제 구조 정리·툴팁 시스템·디자인 미세 조정이 이어짐. 총 **50+ 커밋/1일 기록**.
+
+### A. URL 정리 (`2f7ef06`)
+- `nachim_v3.html` → `index.html` 리네임. Cloudflare Pages가 `/`에서 자동 서빙
+- 옛 `/nachim_v3.html`·`/nachim_v3` URL은 `_redirects`로 301 하위호환
+- CSS/JS 파일명 `nachim_v3.*`는 유지 (외부 노출 없음)
+
+### B. 온보딩 필수 라벨 재디자인 (`0e8b0e3`)
+- 네이비 풀 배지 9.5px → **붉은 점(●) + 크림슨 텍스트 11px**
+- Apple form-asterisk 톤. 폼 덩어리감 제거 + 필수 신호 명확
+
+### C. 지원사업 도우미 Opus 4.7 라우팅 (`89c4328`)
+- PRO 전용 기능(`checkGrantAccess`) 성격에 맞게 Sonnet → Opus
+- 긴 공고문·양식 이해 + 수십 페이지 초안 생성에 Opus 품질 필수
+- pickModel 우회, 항상 Opus 고정
+
+### D. 요금제 2-tier 통합 (`98e9e26` + 후속 `5786c35`·`40ed4d1`·`22922d9`)
+- **Starter 폐지 → Pro 19,900원 단일화**. Team은 v2.0으로 연기
+- isPaid 체크 3곳 `'starter' || 'pro' || 'team'` → `'pro'` 단일 조건
+- Pro features 재정리: 양 → 질 → 멘토 → 기능 순서
+  1. 무제한 질문 / 2. 더 깊이 있는 답변 품질 / 3. 전체 멘토 5명 / 4. 지원사업 도우미 / 5. PDF 업로드 / 6. DOCX/PDF 내보내기
+- Free features에서 "도메인별 기본 자문" 제거 (Pro도 당연히 됨 → 오해 소지)
+- "우선 응답" → "더 깊이 있는 답변 품질" (구현 안 된 약속 제거, 진짜 가치 명시)
+- Pro highlight 색 #F26522 오렌지 → `var(--brand-main)` 크림슨 (DESIGN.md 일관성)
+- 요금제 모달 전면 재디자인: 인라인 스타일 전부 CSS 클래스로, 현재 플랜 크림슨 반전, "인기" → "추천", ✓ 크림슨 체크마커
+
+### E. IR덱 기능 보류 문서화 (`03a5ca7`)
+- 논의 후 보류 결정 → CONTEXT.md §26에 "⏸ 검토 후 보류" 섹션 신설
+- 재검토 시점: Phase 3 KB 후 + Pro 베타 피드백. v1.3+
+
+### F. 헤더 플랜 pill 시스템 (`8844e7c` + 후속 `c6ce2a7`·`00af291`)
+- 헤더에 FREE/PRO 배지 pill 추가 (홈 버튼 오른쪽, 마이페이지 왼쪽)
+- 클릭 시 openPricingModal 열림
+- **디자인 변천 3단계** (사용자 피드백으로 계속 조정):
+  1. 흰 배경 + 네이비 텍스트 + `↑` 크림슨 화살표 (너무 튐)
+  2. 밝은 sky-navy outline, 화살표 제거 (색이 브랜드랑 안 맞음)
+  3. **네이비 솔리드 (최종)**: FREE `var(--brand-point)` 솔리드 + 흰 글씨 / PRO `var(--brand-main)` 솔리드 + 흰 글씨 → **두 티어 대칭 구조**
+- syncHeaderPlanPill() 헬퍼로 플랜 변경 시 라벨·색 자동 동기화
+- 배지 라벨은 대문자(FREE/PRO), 문장 속에서는 카멜케이스(Free/Pro) 규칙 정립
+
+### G. 프로필 pill 설정 아이콘 (`aa9793f`)
+- 헤더 상단 회사명 pill 앞에 Feather Icons settings 톱니바퀴 SVG
+- "클릭 가능" 어포던스 명확화 + 홈 아이콘·마이페이지 아이콘과 시각적 일관성
+
+### H. 커스텀 툴팁 시스템 (`51f4763` + 후속 `eb4e848`·`55b7595`·`89cb11f`·`13e2d7a`)
+- **r01-tooltip** — 멘토 전환 토스트와 동일 디자인 언어:
+  - Ink `#1d1d1f` 배경 + 흰 글씨 12px/500
+  - 10px radius, cubic-bezier(.34,1.56,.64,1) 바운스
+  - 8px 회전 사각형 화살표, 150ms 딜레이
+- `[data-tip]` 속성 + JS IIFE가 document 캡처로 이벤트 처리
+- getBoundingClientRect 기반 위치, 뷰포트 경계 자동 클램프, 상단 전환 지원
+- `data-tip-align="left"` 옵션으로 넓은 컨테이너(로고) 좌측 정렬
+- 적용 범위: 헤더 pill 7개 + 로고 + 사이드바 접기/열기 2개 + 좌하단 배지 2개
+- **버그 수정 4건**:
+  - title과 r01-tooltip 중복 표시 → hover 중 title을 data-tip-title로 이동
+  - 로고 내부 자식 이동 시 다중 툴팁 → relatedTarget 같은 parent 검사로 skip
+  - e.target이 Element 아닐 때 `closest is not a function` TypeError → nodeType 1 가드
+  - 넓은 컨테이너 중앙 정렬 위치 이상 → data-tip-align='left' 지원 추가
+
+### I. 스크롤바 전역 통일 (`e4f1591`)
+- 평상시 투명, hover 시 rgba(0,0,0,0.22) 얇은 8px 썸 페이드인
+- Chrome/Safari/Edge (webkit) + Firefox 둘 다 대응
+- 2px 투명 border + background-clip:padding-box로 macOS 스크롤바 톤
+- `.ob-card` 기존 전용 규칙 제거 → 전역에 위임 (일관성)
+- 썸 hover 시 rgba(0,0,0,0.35)로 진해짐 (드래그 피드백)
+
+### J. 사이드바 폭 확장 (`b931d08`)
+- 데스크탑 240px → 272px (한국어 긴 질문 제목이 2줄로 말리던 문제 해결)
+- 모바일(≤900px)은 240px 유지 (좁은 화면 희생 방지)
+
+### K. 온보딩 슬로건 위계 뒤집기 + (N초) 제거 (`dd179a1`)
+- `AI Startup Advisory`(크고 굵음) / `Finding your Route...`(작고 얇음) → **뒤집기**
+- Finding 줄이 메인 브랜드 약속으로 부각, AI Startup Advisory는 카테고리 라벨
+- Step 1·2·3 서브 문구의 "(30초)" / "(20초)" ETA 캐주얼 전부 제거 (Apple 톤과 안 맞음)
+
+### L. 사이드바 배지 각자 스텝으로 (`b4e2f83` + `e865cc0`)
+- "사업 요약" 배지 → 온보딩 Step 1 (기본 동작)
+- "핵심 고민" 배지 → **온보딩 Step 2 직행** (editProfile(2) 인자 추가)
+- **hydrateOnboardingFromOb 숨은 버그 발견**: 폼 채우기 함수가 step=1로 강제 리셋하고 있어서 editProfile(2)가 무시됨
+- **해결**: `hydrateOnboardingFromOb(opts)` — `opts.keepStep: true` 플래그로 선택적 리셋 스킵. editProfile에서 이 옵션 전달
+- 부수 버그 수정: 기존 `['sec1','sec2']` 토글 루프가 sec3 빠뜨려서 Step 3 잔존 가능 → 3 섹션 전부 통일
+
+### M. 홈 버튼 둥근 사각형 (`ea4be54`)
+- `.hb-icon-only` border-radius 완전 원형 → 10px 둥근 사각형
+- 30x30 사각 버튼에 자연스러운 비율 (iOS 앱 아이콘 톤)
+- 텍스트 pill들은 기존 알약 모양 유지
+
+### N. 로그인 히어로 카피 굵기 강화 (`f482978`)
+- "Finding your Route from Zero to One" weight 900 + **text-stroke 0.5px currentColor**
+- 크기 clamp(26~44) → clamp(30~50) 소폭 증가
+- 폰트 교체 없이 SF Pro 그대로 두고 시각 굵기만 증폭
+- 모바일은 stroke 0.3px로 완화 (26px 고정 크기에서 뭉침 방지)
+- CSS 두 곳 중복 정의 동일 값으로 통일 (기술 부채 일부 정리)
+
+### O. 카피 일관성 정리 (`d30a7b1`)
+- 배지는 대문자(`FREE`/`PRO`) 유지 — 짧은 상태 라벨에 적합
+- 문장 속은 카멜케이스(`Free`/`Pro`)로 통일 — 긴 문맥에서 소리 지르는 느낌 제거
+- 4곳 정리: 온보딩 안내 / 플랜 pill 초기 툴팁 / Free features / syncHeaderPlanPill 툴팁
+
+---
+
+## 31. 다음 세션 최우선 — 백엔드 + 로그인·유료화 통합 (방향 A 확정)
+
+사용자 2026-04-24 세션 마무리 시 결정: **이 작업부터 시작한다**.
+
+### 현재의 근본 블로커
+- **API 키가 클라이언트에 노출**되어 있음
+- 이대로 오픈하면 누구나 DevTools로 키 추출 → 무단 사용 가능
+- 유료 서비스 불가능, 실제 오픈 전 반드시 해결
+
+### 이 작업이 한꺼번에 해결하는 것들
+- #1 이메일/PW 로그인 + 이메일 인증
+- #1 네이버·카카오 소셜 로그인
+- #4 약관·개인정보처리방침 (유료 서비스 기준)
+- #11 토스페이먼츠/포트원 결제 연동
+- #12 마이페이지 (PW 변경·탈퇴·요금제 관리)
+- PROTOTYPE_MODE 실제 해제 → 진짜 유료화 게이트 작동
+- 스트리밍 A방식 재검토 (백엔드 경유 시 타임아웃 방지용)
+
+### 기술 선택 후보 (다음 세션 초반 논의)
+- **Supabase** — 인증·DB·Edge Functions·결제 웹훅 통합. 한국어 문서·레퍼런스 많음. 제 1순위 추천
+- Node(Express/Hono) + Vercel — 세밀한 제어, 복잡도 ↑
+- 조합형 (Clerk Auth + Neon DB + Vercel Functions) — 고려 가능
+
+### 예상 규모
+집중 **1주~10일** 작업. 인증·약관·결제·마이페이지 한 번에 끝내는 덩어리.
+
+### 시작 전 결정 필요 사항
+1. Supabase vs 다른 스택
+2. 결제 공급자 토스페이먼츠 vs 포트원 vs 둘 다 지원
+3. 이메일 인증 방식 (Supabase 기본 / 별도 SMTP)
+4. 약관·개인정보처리방침 초안 (템플릿 생성 후 법무 검토)
+5. API 키 관리 전략 (Supabase Edge Function에서 Anthropic API 프록시)
+
+---
+
+## 32. 2026-04-25 새 세션 시작 체크리스트 (내일용)
+
+**다음 세션 시작 시 순서대로**:
+
+1. **CONTEXT.md 읽기** — 특히 §30 (이번 세션 로그), §31 (방향 A 최우선 결정), §29 (핵심 팩트)
+2. **DESIGN.md 읽기** — UI 건드릴 일 있을 때만, 하지만 항상 업데이트 상태 유지
+3. `git log --oneline -20` — 이번 세션 마지막 커밋 확인
+4. **방향 A 본격 시작**:
+   - Supabase vs 다른 스택 결정
+   - 아키텍처 스케치 (사용자 요청 흐름: 브라우저 → 백엔드 → Anthropic API)
+   - 단계별 로드맵 쪼개기 (인증 → 유료화 → 결제 → 마이페이지)
+5. 사용자 지시 대기
+
+### 주의할 사항
+- **이 작업은 큰 덩어리** — 한 세션에 다 못 끝냄. 마일스톤 쪼개고 단계별 검증
+- **기존 PROTOTYPE_MODE 로직 다 있음** — 이미 `isPaid`, `checkGrantAccess`, `pickMentorOrUpgrade` 등 게이트 함수들 존재. 백엔드 붙일 때 이 진입점들로 바꿔 끼우기만 하면 됨
+- **프론트 UI는 준비됨** — 요금제 모달, 마이페이지 모달, 결제 안내 alert 다 존재. 백엔드 연결만 남음
+- 사용자 선호: ask_user_input_v0 버튼 비선호, 한국어 응답, 큰 결정엔 확인 후 진행
