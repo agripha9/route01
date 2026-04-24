@@ -450,7 +450,7 @@
 <!-- ── APP ──────────────────────────────── -->
 <div id="app">
   <header>
-    <div class="logo" onclick="goHome()" title="홈으로" style="cursor:pointer;">
+    <div class="logo" onclick="goHome()" title="Route01 홈" data-tip="Route01 홈" style="cursor:pointer;">
       <img src="./logo.png" style="height:32px;width:auto;display:block;" alt="Route01"/>
       <span class="brand-name">Route01</span>
       <span class="logo-tagline">
@@ -518,7 +518,7 @@
     <aside id="sidebar">
       <div class="aside-hdr">
         <span class="aside-hdr-title">질문 기록</span>
-        <button class="aside-toggle" id="aside-toggle-close" onclick="toggleSidebar()" aria-label="사이드바 접기">
+        <button class="aside-toggle" id="aside-toggle-close" onclick="toggleSidebar()" aria-label="사이드바 접기" title="사이드바 접기" data-tip="사이드바 접기">
           <svg width="18" height="14" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="10,14 4,8 10,2"/>
             <polyline points="17,14 11,8 17,2"/>
@@ -531,18 +531,18 @@
       </div>
       <!-- 사이드바 하단 상태 배지 (2개로 축소 — 멘토는 상단으로 이동) -->
       <div class="aside-status-badges">
-        <div class="aside-status-item" onclick="editProfile()">
+        <div class="aside-status-item" onclick="editProfile()" title="사업 정보 편집" data-tip="사업 정보 편집">
           <span class="aside-status-label">사업 요약</span>
           <span class="aside-status-val" id="ub-biz">미설정</span>
         </div>
-        <div class="aside-status-item" onclick="editProfile()">
+        <div class="aside-status-item" onclick="editProfile()" title="핵심 고민 편집" data-tip="핵심 고민 편집">
           <span class="aside-status-label">핵심 고민</span>
           <span class="aside-status-val" id="ub-concern">미설정</span>
         </div>
       </div>
     </aside>
     <!-- 사이드바가 닫혔을 때만 보이는 "다시 열기" 부동 버튼 -->
-    <button class="aside-open-fab" id="aside-toggle-open" onclick="toggleSidebar()" aria-label="사이드바 열기">
+    <button class="aside-open-fab" id="aside-toggle-open" onclick="toggleSidebar()" aria-label="사이드바 열기" title="사이드바 열기" data-tip="사이드바 열기">
       <svg width="18" height="14" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="4,14 10,8 4,2"/>
         <polyline points="11,14 17,8 11,2"/>
