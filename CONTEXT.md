@@ -2,7 +2,9 @@
 
 > **Claude에게**: 새 세션 시작 시 이 파일을 가장 먼저 읽고, 맥락을 파악한 뒤 작업하세요. 세션이 끝날 때(사용자가 "오늘 마무리" 또는 유사 표현) 이 파일을 업데이트하고 commit·push 하세요. 사용자에게 워크플로를 다시 설명하지 마세요 — 이미 알고 있습니다.
 
-최종 업데이트: 2026-04-23
+최종 업데이트: 2026-04-24
+
+> **참고**: 디자인·UI 관련 결정은 `DESIGN.md`(프로젝트 루트)를 source of truth로 삼으세요. CONTEXT.md는 세션 로그·로드맵·이슈 추적 중심, DESIGN.md는 색·타이포·레이아웃 사양.
 
 ---
 
@@ -390,85 +392,183 @@ route01/
 
 ---
 
-## 25. 알려진 이슈 (2026-04-23 시점)
+## 25. 알려진 이슈 (2026-04-24 시점)
 
-1. **DOCX 표 헤더 흰 줄** — altChunk 파서가 `line-height`로 배경 안 칠함. CSS로는 해결 불가, `docx.js` OOXML 직생성 마이그레이션 필요 (로드맵 #12 일부)
-2. **숫자 리스트 들여쓰기** — `1. 2.` 정렬 불일치 케이스 있음 (2026-04-22부터 표류)
-3. **표 화면/DOCX/PDF 렌더 높이 차이** — 4-23 Apple 리팩터에서 11pt/1.62로 화면과 동기화했으나 실사용 검증 미완
-4. **Paul Graham 에세이 부족한 H2·표** — 멘토별 포맷 차별화로 `## 지금 할 일` 1개만 남은 구조. `838670c`에서 공통 규칙에 H3·표 활용 보강했지만 실사용 모니터링 필요
-5. **다른 멘토 답변 톤 체감 확인 미완** — Peter Thiel/Chesky/Huang/Naval 실제 답변에서 포맷·톤이 의도대로 나오는지 사용자 체감 관찰 필요
+1. **DOCX 표 헤더 흰 줄** — altChunk 파서 한계, `docx.js` OOXML 직생성 마이그레이션 필요 (장기)
+2. **숫자 리스트 들여쓰기** — `1. 2.` 정렬 불일치 케이스 산발적 발생
+3. **번호 리스트 마커 색 체감 약함** — 2026-04-24 DESIGN.md 리팩터에서 크림슨 `#8B1A1A` 600 0.92em으로 설정했으나 사용자 스크린샷 확인 결과 "거의 검정"처럼 보임. 사용자 판단 "그대로 나둬도 됨". 나중에 더 밝은 크림슨(`#B52828` 등) 마커 전용 변수 고려 가능
+4. **멘토 답변 톤 실사용 관찰 지속 필요** — Peter Thiel/Chesky/Huang/Naval 체감 검증
+5. **H2 밑줄 재발 주의** — 2026-04-24 `60eaac5`에서 `.report-bubble h2`의 late !important 중복 정의 제거했으나, 향후 누가 또 중복 규칙을 추가하면 재발 가능. CSS 편집 시 DESIGN.md 참조 필수
 
 ---
 
-## 26. 다음 세션 시작 시 권장 순서
+## 26. 로드맵 — 사용자 우선순위 (2026-04-24 최신)
 
-### 🔴 최우선: Phase 1 / Step 3 — 스트리밍 (1~2시간 작업)
+### ✅ 완료된 것 (이전 로드맵에서 빠짐)
+- Phase 1 Step 1·2·3 전부: 모델 업그레이드, 프롬프트 캐싱, **스트리밍(건너뛰기 결정)**
+  - 스트리밍은 사용자 검토 후 "리포트 완성도 우선"으로 SKIP 결정 (2026-04-24 세션 초반)
+  - 백엔드 도입 시점에 A방식 스트리밍 재검토 예정
+- Phase 2-A 복잡도 기반 모델 라우팅 (`a48a275`, 2026-04-24)
+- **Apple 컨설팅 리포트 UI/UX 리팩터 완료** (2026-04-24 세션)
+  - DESIGN.md 프로젝트 루트에 추가 — 앞으로 UI 변경의 source of truth
+  - :root 팔레트 웜톤 전환 (쿨 blue-gray → warm-neutral Claude 톤)
+  - 답변 버블 H2 크림슨 막대 제거, typography-only hierarchy
+  - H3 색 shift `var(--ink2)` #3d3d3a로 위계 명확화
+  - 볼드-only 단락 border-bottom 제거 (두 줄 artifact 해결)
+  - 수평선(`---`) 프롬프트+CSS 양쪽에서 차단
+  - DOCX/PDF export 동기화
 
-Phase 1의 3단계 중 마지막. **체감 대기 시간 극적 단축**이 목표.
+### 🔴 다음 세션 최우선: Phase 2-B — 업로드 PDF 경량 RAG
 
-**범위**:
-- 메인 답변 경로만 스트리밍 (가장 체감 큰 경로)
-- 지원사업 도우미·추천 질문 생성은 non-stream 유지
-- 로더 → 스트리밍 전환: 첫 토큰 도착 시 로더 제거하고 답변 버블 노출 시작
-- 점진적 마크다운 렌더: 토큰 올 때마다 버블 내용 업데이트
-- `continue` 루프(`max_tokens` 도달 시 이어쓰기)도 스트리밍 유지
-
-**구현 포인트**:
-- `fetch`로 SSE 수신 → ReadableStream 파싱
-- Anthropic 이벤트 포맷: `message_start` → `content_block_delta` (여러 개) → `content_block_stop` → `message_delta` → `message_stop`
-- 스트리밍 중에는 `preprocessMarkdown`의 중복 헤딩 제거 로직이 부분 텍스트에서 오작동할 수 있음 → **스트리밍 중 최소 파이프라인으로 렌더**하고 **완료 시 전체 재렌더**하는 2패스 구조
-- stream 응답은 usage 정보가 `message_start.usage`와 `message_delta.usage`로 분산됨 → cache hit 로깅 코드 함께 수정
-
-### 🟡 다음: Phase 2 — 복잡도 기반 모델 라우팅 + RAG 경량화 (1~2주)
-
-**2-A. Sonnet/Opus 라우팅**
-- 판단 기준: 첨부 파일 있음 → Opus / 질문에 "분석·전략·시나리오·비교·계획" 포함 or 토큰 > 200 → Opus / 나머지 Sonnet 4.6
-- Opus 4.7 `$5/$25` (예전 4.1 대비 67% 인하), 평균 비용 +20~30% 증가 예상
-- 유료 플랜과 연결: FREE=Sonnet only, PRO=Opus 자동 라우팅
-
-**2-B. 업로드 PDF 경량 RAG**
 - 현재: PDF 전체 텍스트를 매 요청마다 프롬프트에 주입 → 토큰 낭비
 - 개선: 청크 분할 → 브라우저 로컬 벡터 검색(TF-IDF or 경량 임베딩) → 질문 관련 청크만 주입
 - **기대 효과**: 토큰 70~90% 절감 + 관련성 향상
-- 저장은 localStorage/IndexedDB, API 호출 없이 클라이언트 측 구현 가능
+- localStorage/IndexedDB, 클라이언트 측 구현 (백엔드 불필요)
 
-### 🟢 장기: Phase 3 — Route01 지식 베이스 구축 (2~4주)
+### 🟡 그 다음: 백엔드 + 로그인·유료화 통합 (Supabase)
 
-**경쟁 서비스가 따라올 수 없는 해자 만들기**
+현재 구조의 근본적 한계: API 키가 클라이언트에 노출되어 유료 서비스 불가능.
+**오픈 전 반드시 해결해야 할 과제**이며, 여러 로드맵 항목을 한 번에 해결하는 토대:
 
-**3-A. 한국 스타트업 KB 수집**
-- 한국 VC 리스트·투자 트렌드
-- K-스타트업·TIPS·예비창업패키지 상세 정보
-- 한국 스타트업법·개인정보보호법·공정거래법 동향
-- 국내 IR 덱 사례·PMF 사례·피보팅 사례
-- 업종별 벤치마크 (SaaS CAC·LTV·Churn)
-- 멘토 에세이·인터뷰 transcript (법적 허용 범위)
+- **#1 이메일/PW 로그인 + 이메일 인증** + **#1 네이버/카카오 로그인**
+- **#4 약관·개인정보처리방침** (유료 서비스 기준)
+- **#11 유료화 정책·결제 연동** (토스페이먼츠/포트원)
+  - 기본 무료, 일정 질문 이상 유료
+  - FREE=Sonnet only (Paul Graham·Thiel), PRO=Opus 라우팅(Chesky·Huang·Naval)
+- **#12 마이페이지** (PW 변경, 탈퇴, 요금제 확인/변경)
+- 스트리밍(A방식) 재검토 — 백엔드 경유 시 타임아웃 방지용으로 필요해짐
 
-**3-B. 벡터화 + 검색 파이프라인**
-- 선택지: Anthropic Contextual Retrieval (임베딩 + BM25 + rank fusion) 또는 Claude Projects의 자동 RAG
-- **Contextual Retrieval** = 검색 실패율 67% 감소 (Anthropic 공식 발표 기법)
+### 🟢 장기: Phase 3 — 스타트업 버티컬 차별화
 
-**3-C. 답변 citation 표시**
-- 답변에 근거 자료 인용(출처 hover·링크)
-- 신뢰도 극대화
+**#13 사용자 가장 중요하게 여기는 항목.** 기존 LLM·유사 서비스 대비 차별화.
 
-### 로드맵 나머지 (시점 미정)
+- 한국 스타트업 KB 수집 (K-스타트업·TIPS·예비창업패키지, 한국 VC, IR 사례, PMF 사례, 업종별 벤치마크)
+- Anthropic Contextual Retrieval (임베딩 + BM25 + rank fusion, 67% 검색 실패율 감소)
+- 답변 citation 표시
 
-- **#4 약관·개인정보처리방침**: 유료 서비스 기준 문서 초안 + 접근 동의 UI
-- **#9 유료화 정책·결제 연동**: Free vs PRO 요금제 확정 → 토스페이먼츠/포트원 연동
-- **#10 마이페이지**: PW 변경, 탈퇴, 요금제 확인/변경 화면
-- **#12 Apple UI/UX 리팩터 지속** (진행 중)
+---
 
-### 세션 시작 체크리스트
+## 27. 세션 시작 체크리스트 + 사용자 선호
 
-1. 이 CONTEXT.md 읽기
-2. `git log --oneline -10`으로 최근 커밋 확인
-3. **가장 최근 세션의 "알려진 이슈"와 "다음 세션 권장 순서" 블록** 재확인
-4. 사용자 지시 대기 (또는 권장 순서의 최우선 작업 제안)
-5. **한국어로 응답, ask_user_input 버튼 비선호**
+### 체크리스트
+1. 이 CONTEXT.md 읽기 (특히 직전 세션 작업 로그)
+2. `git log --oneline -15`으로 최근 커밋 확인
+3. **DESIGN.md 읽기** — UI 관련 작업 전 필수. Apple/Claude 원칙 기반 디자인 시스템 정본
+4. "알려진 이슈"와 "로드맵" 블록 재확인
+5. 사용자 지시 대기 (또는 로드맵 최우선 작업 제안)
+6. **한국어로 응답, `ask_user_input` 버튼 비선호**
 
 ### 사용자 선호·설정
 - Chrome "창 닫으면 사이트 데이터 삭제" OFF + `[*.]route01.kr` 쿠키 예외 추가됨
 - 품질 향상 시 가격 인상 의향 있음 (Opus 라우팅 OK)
-- 정식 오픈 전 Supabase 백엔드 도입 필요 (Phase 2 이후)
-- Apple 스타일, 네이비 `#1a3a6e` / 크림슨 `#8B1A1A`, 이모지·장식 아이콘 금지
+- 정식 오픈 전 Supabase 백엔드 도입 필요
+- Apple 스타일, warm-neutral 팔레트 (DESIGN.md 참조), 이모지·장식 아이콘 금지
+- 로컬 preview 파일 만들지 말 것 — 바로 push해서 route01.kr로 확인
+- 롤백 포인트 사전 준비 선호 (큰 리팩터 전 태그 생성)
+
+### 롤백 앵커 (원격에 존재하는 태그)
+- `pre-apple-style-refresh` (`c05b6d9`) — 2026-04-23 Apple 리팩터 이전
+- `pre-design-refactor-v2` (`93edd2d` 바로 전) — 2026-04-24 warm-neutral 디자인 리팩터 이전
+- 개별 커밋 revert로 세부 롤백 가능
+
+---
+
+## 28. 2026-04-24 세션 작업 로그 (11커밋)
+
+### A. 오전: Phase 2-A 복잡도 기반 라우팅 (`a48a275`)
+- 5명 멘토를 FREE(PG·Thiel) / PRO(Chesky·Huang·Naval) tier로 구분 (`MENTOR_META.free`)
+- `pickModel(ctx)` 헬퍼: FREE 멘토 → 항상 Sonnet 4.5 / PRO + 복잡질문(파일·키워드·200자+) → Opus 4.7
+- 복잡도 키워드 20개: 분석/전략/시나리오/비교/계획/설계/구조/리서치/로드맵/경쟁/포지셔닝/피보팅/IR/투자유치/사업계획/밸류에이션/차별화/플랫폼/생태계/독점
+- 메인 `doSend` 경로에만 적용, 지원사업 도우미·추천질문 생성은 Sonnet/Haiku 고정 유지
+- `[route]` 콘솔 로그로 관측성 확보 (`[cache]` 로그와 함께)
+
+### B. 1차 Apple 복원 시도 (`efa38e9` + `b030b9d` + `386de75`)
+- `efa38e9`: 답변 번호 리스트 크림슨 마커 도입, H2 여백·두께 조정, 애플 톤 복원 1차
+- `b030b9d`: 5명 멘토 `[금지]` 블록에 "지정된 H2 외 생성 금지" 조항 — 스크린샷에서 Naval이 "이번 주/이번 달/3개월 후" H2 만든 문제 대응
+- `386de75`: 사이드바 "질문 기록" Apple Notes 톤 (헤더 자간·시간대 라벨·항목 호흡)
+
+### C. 스트리밍 건너뛰기 결정 (커밋 없음, 대화 결정)
+- 사용자 의향 확인: "B방식 스트리밍은 체감 변화 없음, Route01은 Cloudflare Pages + 클라이언트 직접 API라 서버 부담 개념 없음"
+- 결론: Phase 1 Step 3 **SKIP**, Phase 2로 직행
+- 백엔드 도입 시점에 A방식(화면에 토큰 순차) 재검토 예정 — 타임아웃 방지 + 체감 속도 + 동시접속 처리
+
+### D. 오후: DESIGN.md 기반 전면 디자인 리팩터 (5커밋)
+
+사용자가 awesome-design-md 레포 공유 → Apple/Claude/Notion 공식 디자인 시스템 문서 분석 → Route01 전용 DESIGN.md 작성.
+
+**롤백 태그**: `pre-design-refactor-v2` 생성 (원격 푸시됨). `git reset --hard pre-design-refactor-v2` + force push로 전체 복구 가능.
+
+1. **`e633f16`** docs: DESIGN.md 추가
+   - 프로젝트 루트 `/DESIGN.md` — 322줄
+   - 9개 섹션: Visual Theme / Color Palette / Typography / Components / Layout / Depth / Do's & Don'ts / Responsive / Export
+   - **크림슨은 brand/interactive only 원칙 명문화** — "H2 좌측 막대 금지"
+   - warm-neutral 팔레트 5단계 정의
+   - 세션 간 일관성 규칙 10단계 명문화
+
+2. **`5a5f4c6`** style(tokens): `:root` warm-neutral 전환
+   - bg L3 `#dfdfe4` → `#e8e6dc` Warm Sand
+   - bg L2 `#e8e8ec` → `#f2f0ea`
+   - bg L4 `#d4d4da` → `#ddd9cd` warm taupe
+   - nav glass rgba(0,0,0,.8) → rgba(20,20,19,.8) warm near-black
+   - ink2 `#424245` → `#3d3d3a` (Claude Dark Warm)
+   - ink3 `#6e6e73` → `#5e5d59` (Olive Gray)
+   - **신규 `--ink4` `#87867f`** Stone Gray (ul 마커용)
+   - border `#d2d2d7` → `#e5e2d7` / `#c7c7cc` → `#d1cdbf`
+   - 신규 `--ring-crimson` 포커스 halo
+
+3. **`dd2ee32`** style(answer): `.report-bubble` typography-only 위계
+   - H2 크림슨 좌측 막대 **완전 제거**
+   - H2 크기 21→24px, weight 700→600
+   - H3 색 shift `var(--ink2)` #3d3d3a
+   - H1 크기 23→24px, weight 800→700
+   - 본문 15→15.5px
+   - 볼드-only 단락 border-bottom 제거 (두 줄 artifact 해결)
+   - 표 짝수행 `#f4f4f6` 쿨핑크 → `#fbf9f3` 웜크림
+   - 블록쿼트 `#f7f8fb` → `#f7f6ef` 웜 parchment
+
+4. **`336dc02`** style(export): DOCX/PDF 동기화
+   - `EXPORT_DOC_STYLES` + `htmlStyle` 배열 양쪽 웜톤·H2 막대 제거 적용
+   - Word change-bar 방어 규칙에 h2도 포함 (막대 없으니 더 이상 예외 안 둠)
+
+5. **`93edd2d`** style(ui): 주변 UI 쿨톤 청소
+   - 15개 hover border `#86868b` → `var(--border2)` 일괄 sed 교체
+   - `.m-bubble` 표·블록쿼트 웜톤 동기화
+   - **치명적 발견**: late `!important` override 블록이 앞선 변경을 덮어쓰고 있었음. 표·블록쿼트도 여기서 강제 통일
+   - `.ob-btn.pri`/`.modal-btn.pri`의 `#86868b` bg는 **의도된 neutral gray 버튼**이라 보존
+
+### E. H2 밑줄 재발견 + 완전 제거 (`60eaac5`)
+
+사용자 스크린샷 추가 확인 → "오늘부터 10년" H2 밑에 가로선 발견.
+
+- 원인: `.report-bubble h2`가 3곳에 중복 정의됨 (795 / 2288 / 2809)
+- 2288: `border-bottom:1px solid var(--border)` (중복, 그러나 non-important)
+- 2809: `border-bottom:2px solid var(--brand-main) !important` — **이게 진짜 범인**
+- 2288 블록 삭제, 2809 블록을 DESIGN.md 사양(24px/600/no border)으로 업데이트
+- `dd2ee32`의 795줄 변경이 실제로는 late cascade에 가려져 일부만 적용되고 있었음이 드러남
+
+### F. 수평선(`---`) 금지 (`34f38bf`)
+
+스크린샷 비교: 3장 중 1장만 가로선 존재 → 모델이 랜덤하게 `---` 넣는 게 원인.
+
+- 프롬프트: 5명 멘토 `[금지]` + buildSys 공통 블록 모두에 "`---` `***` `___` 사용 금지" 조항 추가
+- CSS: `.report-bubble hr`, `.m-bubble hr`, `EXPORT_DOC_STYLES hr`, `htmlStyle hr` 2곳 모두 `display:none !important`
+- 이중 방어 (프롬프트 근본 해결 + CSS 안전망)
+- 중복 `.m-bubble hr` 정의 제거
+
+### G. CONTEXT.md 업데이트 (이 커밋)
+
+오늘 11커밋 전체 정리 + 알려진 이슈/로드맵 최신화 + DESIGN.md 참조 안내 추가
+
+---
+
+## 29. 2026-04-24 끝난 시점의 핵심 팩트 (다음 세션용)
+
+- **DESIGN.md가 프로젝트 루트에 존재** — UI 작업 전 반드시 읽기
+- **warm-neutral 팔레트 확정**: L1 #fff / L2 #f2f0ea / L3 #e8e6dc / L4 #ddd9cd / L5 rgba(20,20,19,.8)
+- **크림슨 `#8B1A1A` = 브랜드 only**: 표 헤더, 번호 마커, 로고, PRO tier, 포커스 링, CTA. **섹션 장식 금지**
+- **H2 위계는 typography + whitespace 단독** (크기 24px, weight 600, margin 3.5rem/1rem, **no border**)
+- **H3 색 shift** `var(--ink2)` #3d3d3a로 H2와 차별화
+- **수평선 `---` 금지** — 프롬프트·CSS 양쪽
+- **Phase 2-A 라우팅 작동 중** — FREE 멘토 Sonnet, PRO + 복잡 질문 Opus 4.7
+- **Phase 1 Step 3 스트리밍 SKIP** — 백엔드 도입 시점에 재검토
+- **롤백 앵커**: 원격 태그 `pre-design-refactor-v2` + `pre-apple-style-refresh`
