@@ -1251,16 +1251,25 @@ function finishOnboarding() {
   localStorage.setItem('vd_profile',JSON.stringify(profile));
   launch();
 }
-function editProfile(){
+function editProfile(targetStep){
   closeModal();
-  ob={...profile}; step=1;
+  /* targetStep 미지정 → 1 (기존 동작).
+     좌하단 배지 클릭: 사업 요약 → 1 / 핵심 고민 → 2.
+     유효 범위 1~3, 그 외는 1로 클램프. */
+  const s = (targetStep === 2 || targetStep === 3) ? targetStep : 1;
+  ob={...profile}; step=s;
   document.getElementById('onboarding').classList.remove('hidden');
   /* app은 숨기지 않음 — 뒤 배경으로 남아 있어야 온보딩 카드 주변의
      rgba(0,0,0,.4)+blur dim 효과가 일반 모달과 동일하게 보임. */
-  ['sec1','sec2'].forEach((s,i)=>document.getElementById(s).classList.toggle('active',i===0));
+  /* 3 섹션(sec1/sec2/sec3) 중 target만 active로 */
+  ['sec1','sec2','sec3'].forEach((id,i)=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('active', (i+1) === s);
+  });
+  /* 진행 dot — 지금까지 도달한 스텝은 done 처리 (현재 스텝 포함) */
   for(let i=1;i<=3;i++){
     const dot=document.getElementById('s'+i);
-    if(dot) dot.classList.toggle('done',i<=1);
+    if(dot) dot.classList.toggle('done', i<=s);
   }
   hydrateOnboardingFromOb();
 }
