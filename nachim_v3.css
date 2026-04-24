@@ -549,6 +549,56 @@ header{
   box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
+/* ═══ 툴팁 시스템 — 멘토 토스트와 같은 언어
+   Ink 배경, 흰 글씨, 12.5px, 12px round. 애니메이션 바운스도 동일.
+   JS가 [data-tip] 요소 위치 계산해서 아래에 띄움. */
+.r01-tooltip{
+  position:fixed;
+  z-index:9999;
+  pointer-events:none;
+  background:#1d1d1f;
+  color:#fff;
+  padding:7px 12px;
+  border-radius:10px;
+  font-family:var(--font-text);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:-0.12px;
+  line-height:1.35;
+  white-space:nowrap;
+  box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  opacity:0;
+  transform:translate(-50%, -4px);
+  transition:opacity .15s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
+}
+.r01-tooltip.show{
+  opacity:1;
+  transform:translate(-50%, 0);
+}
+/* 위쪽 향한 작은 꼭지 — 툴팁이 pill 아래에 뜰 때 pill 방향을 가리킴 */
+.r01-tooltip::before{
+  content:"";
+  position:absolute;
+  top:-4px;
+  left:50%;
+  transform:translateX(-50%) rotate(45deg);
+  width:8px;
+  height:8px;
+  background:#1d1d1f;
+  border-radius:1px;
+}
+/* 툴팁이 상단에 뜨는 경우 (뷰포트 하단에 공간 부족 시) — 꼭지 방향 반대 */
+.r01-tooltip.r01-tooltip--above{
+  transform:translate(-50%, 4px);
+}
+.r01-tooltip.r01-tooltip--above.show{
+  transform:translate(-50%, 0);
+}
+.r01-tooltip.r01-tooltip--above::before{
+  top:auto;
+  bottom:-4px;
+}
+
 /* ═══ 요금제 모달 — 2-tier (Free + Pro) 카드 ═══
    DESIGN.md 원칙: typography-only hierarchy, warm-neutral 팔레트,
    크림슨은 브랜드/인터랙티브 전용. 선택 상태는 반전으로 명확히. */

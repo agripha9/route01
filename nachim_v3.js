@@ -5696,8 +5696,99 @@ function syncHeaderPlanPill(){
   label.textContent = isPro ? 'PRO' : 'FREE';
   pill.classList.toggle('hb-plan-pro', isPro);
   pill.classList.toggle('hb-plan-free', !isPro);
+  pill.setAttribute('data-tip', isPro ? 'PRO 플랜 · 요금제 관리' : 'FREE 플랜 · 업그레이드');
+  /* title도 같이 유지 — JS 꺼진 환경의 fallback */
   pill.setAttribute('title', isPro ? 'PRO 플랜 · 요금제 관리' : 'FREE 플랜 · 업그레이드');
 }
+
+/* ─── 툴팁 시스템 (r01-tooltip) ───
+   멘토 전환 토스트와 동일한 디자인 언어(Ink bg, 흰 글씨, 바운스).
+   [data-tip] 속성을 가진 요소에 호버/포커스 시 자동 표시.
+   단일 DOM 엘리먼트를 재사용해서 성능 부담 최소화. */
+(function initTooltipSystem(){
+  let tooltip = null;
+  let showTimer = null;
+  let currentTarget = null;
+
+  function ensureTooltip(){
+    if(tooltip) return tooltip;
+    tooltip = document.createElement('div');
+    tooltip.className = 'r01-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tooltip);
+    return tooltip;
+  }
+
+  function positionAndShow(target, text){
+    const t = ensureTooltip();
+    t.textContent = text;
+    t.classList.remove('show', 'r01-tooltip--above');
+    /* 먼저 보이지 않는 상태에서 측정 */
+    t.style.top = '-9999px';
+    t.style.left = '-9999px';
+    /* 다음 프레임에 위치 계산 — textContent 반영 후 실측 */
+    requestAnimationFrame(()=>{
+      if(currentTarget !== target) return;  /* race: 이미 다른 target으로 이동했으면 스킵 */
+      const r = target.getBoundingClientRect();
+      const tipRect = t.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const gap = 10;  /* pill과 툴팁 사이 여백 */
+      /* 기본: 아래 배치. 공간 부족 시 위쪽으로 전환. */
+      let top = r.bottom + gap;
+      let above = false;
+      if(top + tipRect.height > vh - 8){
+        top = r.top - gap - tipRect.height;
+        above = true;
+      }
+      let left = r.left + r.width / 2;
+      /* 좌우 뷰포트 경계 보정 — 툴팁 반폭 이상 확보 */
+      const halfW = tipRect.width / 2;
+      if(left - halfW < 8) left = halfW + 8;
+      if(left + halfW > vw - 8) left = vw - halfW - 8;
+      t.style.top = top + 'px';
+      t.style.left = left + 'px';
+      if(above) t.classList.add('r01-tooltip--above');
+      t.classList.add('show');
+    });
+  }
+
+  function hide(){
+    if(showTimer){ clearTimeout(showTimer); showTimer = null; }
+    currentTarget = null;
+    if(tooltip) tooltip.classList.remove('show');
+  }
+
+  function handleEnter(e){
+    const target = e.target.closest('[data-tip]');
+    if(!target) return;
+    const text = target.getAttribute('data-tip');
+    if(!text) return;
+    currentTarget = target;
+    if(showTimer) clearTimeout(showTimer);
+    /* 150ms 딜레이 — 마우스 스쳐 지나갈 때 툴팁 안 뜨게 */
+    showTimer = setTimeout(()=>{
+      if(currentTarget === target) positionAndShow(target, text);
+    }, 150);
+  }
+
+  function handleLeave(e){
+    const from = e.target.closest('[data-tip]');
+    if(!from) return;
+    /* 자식으로의 이동은 leave로 취급 안 함 (relatedTarget 기반) */
+    const to = e.relatedTarget;
+    if(to && from.contains(to)) return;
+    hide();
+  }
+
+  document.addEventListener('mouseenter', handleEnter, true);
+  document.addEventListener('mouseleave', handleLeave, true);
+  document.addEventListener('focusin', handleEnter);
+  document.addEventListener('focusout', handleLeave);
+  /* 스크롤/리사이즈 시 툴팁 위치 꼬임 방지 — 그냥 숨김 */
+  window.addEventListener('scroll', hide, true);
+  window.addEventListener('resize', hide);
+})();
 function getMonthlyUsage(){
   try{
     const key = 'r01_usage_' + new Date().toISOString().slice(0,7);
