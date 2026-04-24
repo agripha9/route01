@@ -2474,20 +2474,35 @@ main {
 ══════════════════════════════════════ */
 
 /* 필수 배지 — 네이비 채움 + 흰 글씨 (멘토 FREE 배지와 동일 언어) */
+/* 온보딩 "필수" 라벨 — DESIGN.md §4 원칙대로: 강한 색 덩어리 대신
+   작은 붉은 점 + 크림슨 텍스트로 주의 환기만. Apple 폼 asterisk 방식.
+   배경 덩어리가 없어서 폼 전체가 산만해지지 않음. */
 .ob-required {
-  display: inline-block;
-  font-size: 9.5px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--brand-point);
-  border: 1px solid var(--brand-point);
-  border-radius: 980px;
-  padding: 3px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand-main);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   margin-left: 6px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   line-height: 1.2;
   vertical-align: middle;
   text-transform: none;
+}
+/* 앞 붉은 점(●) — 4px 크림슨 원. 라벨에 시선 고정. */
+.ob-required::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--brand-main);
+  flex-shrink: 0;
 }
 
 /* 컴팩트 칩 그리드 — 위아래 폭 최소화 */
