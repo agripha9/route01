@@ -74,6 +74,53 @@ body{
 #app :where(button:focus-visible,input:focus-visible,textarea:focus-visible){box-shadow:var(--ring-blue)}
 #auth :where(.auth-btn:focus-visible){box-shadow:0 0 0 3px rgba(26,58,110,0.35)}
 
+/* ═══ 전역 스크롤바 — Apple/macOS 톤
+   평상시: 완전히 안 보임. 스크롤 영역에 마우스 올리면 얇은 회색 썸이 페이드인.
+   적용 대상: 모든 overflow:auto/scroll 요소 (사이드바, 답변, 모달 내부 등).
+   Claude·macOS Notes·Apple Mail과 같은 동작. */
+
+/* Firefox — 기본적으로 thin + 투명/호버 조절 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(0,0,0,0.22) transparent;
+}
+
+/* WebKit (Chrome·Safari·Edge) — 얇은 8px, 썸만 표시 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  /* 2px 투명 테두리로 '안쪽에 쏙 들어간' 느낌 (macOS와 유사) */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color .2s ease;
+}
+/* 호버 시 썸 페이드인 — 스크롤 영역에 마우스 올려야 보임 */
+*:hover > ::-webkit-scrollbar-thumb,
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.22);
+  background-clip: padding-box;
+}
+/* 스크롤바 자체 호버(드래그 준비) — 살짝 더 진하게 */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.35) !important;
+  background-clip: padding-box;
+}
+/* 스크롤바 코너(세로·가로 교차점) 투명 */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .brand-name{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em}
 /* 브랜드명 통일: 'Route01'이 본문·라벨·공지 어디에 쓰이든 동일한 폰트 스타일.
    사이즈와 색상은 부모 컨텍스트를 그대로 상속받음 */
@@ -268,9 +315,6 @@ body{
 .ob-logo-text{display:flex;flex-direction:column;gap:4px}
 .ob-logo-slogan-main{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-0.02em;word-spacing:0.18em}
 .ob-logo-slogan-sub{font-size:13px;font-weight:400;color:var(--gray-80);line-height:1.4;letter-spacing:-0.12px}
-.ob-card::-webkit-scrollbar{width:8px}
-.ob-card::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:8px;border:2px solid transparent;background-clip:content-box}
-.ob-card::-webkit-scrollbar-track{background:transparent}
 .ob-title{font-family:var(--font-display);font-size:28px;font-weight:600;line-height:1.14;letter-spacing:0.196px;margin-bottom:.5rem;color:var(--ink);text-align:center}
 .ob-sub{font-size:14px;color:var(--gray-80);margin-bottom:1.75rem;line-height:1.43;letter-spacing:-0.224px;text-align:center}
 .ob-steps{display:flex;gap:6px;margin-bottom:1.75rem}
