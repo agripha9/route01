@@ -2744,7 +2744,12 @@ async function doSend(text){
   }
 
   try{
-    const model=(await resolveModelId('sonnet')) || 'claude-sonnet-4-5-20250929';
+    /* [Phase 2-A] 복잡도·티어 기반 라우팅. FREE 멘토=항상 Sonnet, PRO 멘토+복잡=Opus, 그 외 Sonnet. */
+    const model = await pickModel({
+      mentor: profile.style || 'Paul Graham (YC)',
+      question: text || '',
+      hasFiles: filesToSend.length > 0
+    });
     const system=buildSys();
 
     const extractText=(j)=> (j?.content||[]).filter(c=>c?.type==='text'&&typeof c?.text==='string').map(c=>c.text).join('');
@@ -2859,6 +2864,70 @@ function renderAnswerActions(id){
 const ANSWER_RAW = new Map();
 
 let MODEL_CACHE = {sonnet:null, haiku:null, opus:null, ts:0};
+/* ─────────────────────────────────────────────────────────────
+   [Phase 2-A] 복잡도 기반 모델 라우팅 (2026-04-24)
+
+   두 축으로 결정:
+     1) 멘토 티어 (FREE/PRO) — MENTOR_META[mentor].free
+     2) 질문 복잡도 (파일/키워드/길이)
+
+   규칙 (우선순위 순):
+     - FREE 멘토(Paul Graham, Peter Thiel)      → 항상 Sonnet
+     - PRO 멘토 + 복잡한 질문(파일/키워드/200자+) → Opus
+     - PRO 멘토 + 단순 질문                      → Sonnet
+
+   이유: FREE 멘토는 저렴·빠른 답변 가치, PRO 멘토는 깊은 통찰 가치.
+         PRO라도 단순 질문("안녕")에 Opus 쓰면 비용 낭비이고 체감 차이 없음.
+
+   유료화 붙일 때: PROTOTYPE_MODE 플래그처럼 ROUTING_MODE 전환 지점으로 확장 가능.
+   롤백: 이 블록 + callOnce 직전 pickModel 호출부 되돌리면 끝. */
+const COMPLEX_QUERY_PATTERNS = [
+  /분석/, /전략/, /시나리오/, /비교/, /계획/, /설계/, /구조/, /리서치/,
+  /로드맵/, /경쟁/, /포지셔닝/, /피보팅/, /IR/, /투자\s*유치/, /사업\s*계획/,
+  /밸류에이션/, /차별화/, /플랫폼/, /생태계/, /독점/
+];
+async function pickModel(ctx){
+  const mentor = (ctx && ctx.mentor) || 'Paul Graham (YC)';
+  const question = String((ctx && ctx.question) || '');
+  const hasFiles = !!(ctx && ctx.hasFiles);
+
+  /* 1축: 멘토 티어 — FREE는 무조건 Sonnet (비용·속도 우선) */
+  const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[mentor] : null;
+  const isFreeMentor = !!(meta && meta.free === true);
+
+  /* 2축: 복잡도 — 파일 첨부·키워드 매치·긴 질문 중 하나라도 해당 시 복잡 */
+  const isComplex =
+    hasFiles ||
+    question.length > 200 ||
+    COMPLEX_QUERY_PATTERNS.some(rx => rx.test(question));
+
+  const useOpus = !isFreeMentor && isComplex;
+  const family = useOpus ? 'opus' : 'sonnet';
+
+  const resolved = await resolveModelId(family);
+  const fallback = useOpus
+    ? 'claude-opus-4-7'           /* opus 최신으로 resolve 실패 시 폴백 — resolveModelId가 실제 최신을 반환하므로 비상용. 4.7 출시(2026-04-16 기준). */
+    : 'claude-sonnet-4-5-20250929';
+  const model = resolved || fallback;
+
+  /* 관측 로그 — 실제 라우팅이 의도대로 되는지 확인용 (초기 안정화 후 제거 가능) */
+  try{
+    console.log('[route]', {
+      model: model,
+      tier: isFreeMentor ? 'free' : 'pro',
+      complex: isComplex,
+      reason: isFreeMentor ? 'free_mentor_always_sonnet'
+            : isComplex ? (hasFiles ? 'has_files' : (question.length > 200 ? 'long_question' : 'complex_keyword'))
+            : 'pro_mentor_simple',
+      mentor,
+      qlen: question.length,
+      files: hasFiles
+    });
+  }catch(_){}
+
+  return model;
+}
+
 async function resolveModelId(family){
   const fam=String(family||'').toLowerCase();
   const now=Date.now();
