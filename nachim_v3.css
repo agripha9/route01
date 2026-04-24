@@ -845,7 +845,7 @@ header{
 .app-body{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-aside{width:240px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s var(--ease), border-color .22s var(--ease)}
+aside{width:272px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .22s var(--ease), border-color .22s var(--ease)}
 /* 접힌 상태: 폭 0, 우측 경계선 숨김. 내부 내용은 overflow:hidden으로 자연스럽게 가려짐. */
 aside.collapsed{width:0;border-right-color:transparent}
 /* 사이드바 상단 '접기' 버튼 — 사이드바 배경(#d4d4da, L4)보다 한 단계 밝은 #e8e8ec(L2) 사용.
