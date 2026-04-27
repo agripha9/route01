@@ -4342,25 +4342,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
 /* ─── exportAnswer (OOXML altChunk, standard) ─── */
 async function exportAnswer(type, id /*, btn */){
-  /* Pro 게이트 (2026-04-27 v3): DOCX/PDF 내보내기는 Pro 전용.
-     무료 사용자 클릭 시 결제 안내 모달 → 요금제 모달로 유도. */
+  /* Pro 게이트 (2026-04-27 v3 + paywall unification):
+     무료 사용자 클릭 → 안내 모달 거치지 않고 바로 요금제 모달.
+     버튼 자체에 PRO 배지가 있어 Pro 기능임을 사용자가 이미 인지한 상태. */
   const _plan = (typeof getCurrentPlan === 'function') ? getCurrentPlan() : 'free';
   if(_plan !== 'pro'){
-    const m = document.createElement('div');
-    m.className = 'modal-bg open';
-    m.style.zIndex = '9999';
-    m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
-      <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
-      <div style="font-size:32px;margin-bottom:10px">📄</div>
-      <div class="modal-title">Pro 전용 기능</div>
-      <div class="modal-sub">DOCX·PDF 내보내기는 Pro 플랜에서 이용할 수 있어요.<br>무료 플랜에서는 <strong>복사</strong> 버튼으로 답변을 옮길 수 있습니다.</div>
-      <div style="display:flex;gap:8px;margin-top:1.25rem">
-        <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
-        <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
-      </div>
-    </div>`;
-    document.body.appendChild(m);
-    m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+    try{ openPricingModal(); }catch(_){}
     return;
   }
   const Zip=typeof JSZip!=='undefined'?JSZip:(typeof window!=='undefined'?window.JSZip:undefined);
@@ -5767,36 +5754,15 @@ function wsSend() {
 
 
 function checkGrantAccess() {
-  /* 정책 (2026-04-27 v3): 지원사업 도우미는 Pro 전용 기능 */
+  /* 정책 (2026-04-27 v3 + paywall unification):
+     무료 → 안내 모달 없이 바로 요금제 모달. 헤더 PRO 배지 + 진입점 시각으로
+     이미 사용자가 인지한 상태이므로 마찰 줄임. */
   const plan = localStorage.getItem('r01_plan') || 'free';
   if(plan !== 'pro') {
-    // 무료 회원 안내 모달
-    const msg = document.createElement('div');
-    msg.className = 'modal-bg open';
-    msg.id = 'grant-access-modal';
-    msg.innerHTML = `
-      <div class="modal" style="max-width:420px;text-align:center">
-        <button class="modal-close" onclick="document.getElementById('grant-access-modal').remove()">×</button>
-        <div style="font-size:32px;margin-bottom:12px">🔒</div>
-        <div class="modal-title">Pro 플랜 전용 기능</div>
-        <div class="modal-sub">지원사업 도우미는 <strong>Pro 플랜</strong>에서 이용할 수 있어요.<br>월 19,900원으로 Route01의 전체 가치를 사용하세요.</div>
-        <div style="margin:1.5rem 0;padding:16px;background:var(--bg);border-radius:var(--r);font-size:13px;color:var(--ink2);text-align:left;line-height:1.7">
-          <div><strong>✅ Pro (₩19,900/월)</strong></div>
-          <div>· 무제한 질문</div>
-          <div>· 전체 멘토 5명 이용</div>
-          <div><strong style="color:var(--cta)">· 지원사업 도우미 포함</strong></div>
-          <div>· PDF 업로드 · DOCX/PDF 내보내기</div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="modal-btn" onclick="document.getElementById('grant-access-modal').remove()" style="flex:1">닫기</button>
-          <button class="modal-btn pri" onclick="document.getElementById('grant-access-modal').remove();openPricingModal&&openPricingModal();" style="flex:1">요금제 보기 →</button>
-        </div>
-      </div>`;
-    document.body.appendChild(msg);
-    msg.addEventListener('click', e => { if(e.target===msg) msg.remove(); });
-  } else {
-    openGrantModal();
+    try{ openPricingModal(); }catch(_){}
+    return;
   }
+  openGrantModal();
 }
 
 /* ═══════════════════════════════════════════════
@@ -6290,51 +6256,25 @@ function submitWithdraw(){
 }
 /* PRO 잠금 멘토 클릭 시 (온보딩용) */
 function pickMentorOrUpgrade(el, styleKey){
-  /* 정책 (2026-04-27 v3): 무료 사용자가 Pro 멘토 클릭 시 결제 안내 */
+  /* 정책 (2026-04-27 v3 + paywall unification):
+     무료 → Pro 멘토 클릭 시 안내 모달 없이 바로 요금제 모달.
+     Free 가능 멘토(PG·Thiel)면 그대로 선택. */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   const isPaid = (plan === 'pro');
   if(isPaid){ pickChip('style', el); return; }
-  /* 무료 사용자 + Pro 멘토 → 잠금 안내 */
-  /* 단, Free 멘토(PG·Thiel)는 styleKey가 free:true이므로 그대로 선택 허용 */
   const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[styleKey] : null;
   if(meta && meta.free === true){ pickChip('style', el); return; }
-  const m = document.createElement('div');
-  m.className = 'modal-bg open';
-  m.style.zIndex = '9999';
-  m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
-    <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
-    <div style="font-size:32px;margin-bottom:10px">🔒</div>
-    <div class="modal-title">Pro 전용 멘토</div>
-    <div class="modal-sub">이 멘토는 Pro 플랜에서 이용할 수 있어요.</div>
-    <div style="display:flex;gap:8px;margin-top:1.25rem">
-      <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
-      <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
-    </div>
-  </div>`;
-  document.body.appendChild(m);
-  m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+  /* 무료 사용자 + Pro 멘토 → 바로 요금제 모달 */
+  try{ openPricingModal(); }catch(_){}
 }
 
 /* 파일 업로드 접근 제어 */
 function checkUploadAccess(){
-  /* 정책 (2026-04-27 v3): PDF 업로드는 Pro 전용 기능 */
+  /* 정책 (2026-04-27 v3 + paywall unification):
+     무료 → 안내 모달 없이 바로 요금제 모달. */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   if(plan === 'free'){
-    const m = document.createElement('div');
-    m.className = 'modal-bg open';
-    m.style.zIndex = '9999';
-    m.innerHTML = `<div class="modal" style="max-width:380px;text-align:center">
-      <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
-      <div style="font-size:32px;margin-bottom:10px">📎</div>
-      <div class="modal-title">Pro 전용 기능</div>
-      <div class="modal-sub">파일 업로드는 Pro 플랜(₩19,900/월)에서 이용할 수 있어요.</div>
-      <div style="display:flex;gap:8px;margin-top:1.25rem">
-        <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
-        <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
-      </div>
-    </div>`;
-    document.body.appendChild(m);
-    m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+    try{ openPricingModal(); }catch(_){}
     return;
   }
   document.getElementById('ob-file-input')?.click();

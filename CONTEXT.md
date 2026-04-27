@@ -1250,3 +1250,42 @@ C. 캐시 버스터 v7: `?v=20260427-mentor-plan-sync-v7`
 | 부팅 잔존 정리 | — | ensureMentorPlanSync ✓ |
 | Pro → Free 변경 | — | ensureMentorPlanSync + alert ✓ |
 
+
+---
+
+## 40. 2026-04-27 Paywall UX 통일 — 모든 Pro 게이트 1단계 직행
+
+### 배경
+사용자가 §38 내보내기 게이트 검증 중 지적: "안내 창이 하나 더 뜨는데 바로 요금제 안내로 가는게 낫지 않을까?" 전수 점검 결과 5곳 중 4곳이 2단계(안내 모달 → 요금제 모달), 1곳(멘토 변경 모달)만 1단계로 일관성 깨짐.
+
+### 적용 변경
+
+**롤백 태그**: `pre-paywall-unification`
+
+4곳 모두 안내 모달 제거 → `openPricingModal()` 직행:
+
+| 진입점 | 함수 | 라인 |
+|---|---|---|
+| DOCX/PDF 내보내기 | `exportAnswer` | 4344 |
+| 지원사업 도우미 | `checkGrantAccess` | 5757 |
+| 온보딩 멘토 picker | `pickMentorOrUpgrade` | 6258 |
+| PDF 업로드 | `checkUploadAccess` | 6271 |
+
+각 함수에서 무료 사용자 분기를 다음 한 줄로 단순화:
+```js
+try{ openPricingModal(); }catch(_){}
+return;
+```
+
+### 통일된 UX 패턴
+**모든 Pro 게이트**: 시각적 표시(PRO 배지·잠금 아이콘·Pro 멘토 잠금 카드) → 클릭 → 요금제 모달.
+사용자는 진입점에서 이미 Pro 기능임을 인지한 상태이므로 안내 모달은 잉여 마찰.
+
+### 코드 영향
+- 4개 안내 모달 코드 블록 제거 (~80줄 감소)
+- 일관성 확보 — 어디서 막히든 같은 흐름
+- 결제 모달까지 1클릭 단축
+
+### 캐시 버스터 v8
+`?v=20260427-paywall-unification-v8`
+
