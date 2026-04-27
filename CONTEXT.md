@@ -1009,3 +1009,70 @@ E. 캐시 버스터 v3
 5. 헤더 PRO pill 클릭 → "Free로 변경" → plan 다시 free
 6. Free 상태에서 답변 받기 → 콘솔 `[route] {model: 'claude-sonnet-...', plan: 'free', ...}` 확인
 
+
+---
+
+## 36. 2026-04-27 §35 검증 결과 + H1 오프닝 패턴 명시
+
+### §35 검증 결과 (라우팅 정상, 본문 차별화 정상, H1 오프닝만 수렴)
+
+사용자가 PMF 질문으로 4개 시나리오 검증:
+1. Naval Pro → `claude-opus-4-7, plan: pro` ✓
+2. Paul Graham Pro → `claude-opus-4-7, plan: pro` ✓ (핵심 검증 — Pro 사용자가 PG 선택해도 Opus)
+3. Peter Thiel Pro → `claude-opus-4-7, plan: pro` ✓
+4. Paul Graham Free → `claude-sonnet-4-6, plan: free` ✓
+
+**라우팅 정책 완벽하게 작동**.
+
+### 발견 — H1 오프닝 패턴이 5명 모두 수렴
+
+4개 답변 첫 문장:
+- Naval Pro: "PMF는 측정하는 게 아니라 느끼는 것이다."
+- Paul Pro: "PMF는 검증하는 게 아니라, 느끼는 거다."
+- Thiel Pro: "PMF는 측정하는 게 아니다. 설계하는 것이다."
+- Paul Free: "PMF는 측정하는 게 아니라 느끼는 것이다."
+
+본문은 멘토별로 차별화 잘됨 (각자 시그니처 어휘·사례 사용). H1 오프닝만 정형 패턴으로 수렴.
+
+### 원인 진단
+
+1. **프롬프트의 "반직관적·통념을 뒤집는 한 줄" 강조**가 5명에게 동일하게 작용
+2. PMF + 통념 뒤집기 = Marc Andreessen "felt, not measured" 변형이 가장 매력적인 LLM 출력
+3. 결과: 본문은 갈라지지만 첫 문장은 같은 안전지대로 수렴
+
+### 적용 변경
+
+**롤백 태그**: `pre-opening-patterns`
+
+A. **5명 멘토 각각에 [오프닝 패턴 — 시그니처] 블록 추가**
+- **Paul Graham**: 명령형 단언 / 창업자 본능 정정 / 시간 단위 직설 / YC 패턴 인용. 추천: "Don't ~" 영문 한 줄
+- **Peter Thiel**: 질문 재정의 / 전제 도전 / 소크라테스 질문 / Zero to One 7가지 질문. 추천: "당신이 묻는 건 X가 아니라 Y다"
+- **Brian Chesky**: 시나리오 직진입 / 감정·경험 단언 / 11성급 환기 / 디자인 단언. 추천: "Imagine your user..."
+- **Jensen Huang**: 시간 축 직진입 / plateau→탈출 / Pain 재해석 / 플랫폼 단언 / Impossible 한 줄. 추천: "30년 뒤..."
+- **Naval**: 이분법 한 줄 / Twitter 격언 / 본질 질문 / 레버리지 단언. 추천: "Pull인가, Push인가" (이전 검증에서 작동)
+
+B. **각 멘토에 명시적 H1 금지 패턴**
+- "[X]는 [측정/검증]하는 게 아니라 [느끼는] 것이다" — Andreessen 인용형, 멘토 시그니처 아님
+- "[질문 키워드]는 X가 아니라 Y다" — LLM 정형 출력
+- 추상적 단언만 있고 멘토 색 없음
+
+C. **buildSys 정체성 강제 5번 추가** — 위 두 정형 패턴 모두 회피하고 [오프닝 패턴 — 시그니처]에서 선택
+
+D. **입력창 아래 안내 한 줄로 통합**
+- 이전: `.disclaimer`(면책) + `.hint`(2줄: Enter 전송, PDF 첨부)
+- 현재: `.disclaimer` 안에 `.disclaimer-main` + `.disclaimer-hint` flex 배치
+- 모바일(640px 이하)에선 자연스럽게 줄바꿈
+
+E. 캐시 버스터 v4: `?v=20260427-opening-patterns-v4`
+
+### 다음 검증
+
+같은 PMF 질문으로 5명 멘토 답변 받아서 H1 오프닝이 다 다른지 확인:
+- Paul Graham → "Don't ~" 또는 시간 단위 명령
+- Peter Thiel → "당신이 묻는 건 X가 아니라 Y다"
+- Brian Chesky → "Imagine your user..."
+- Jensen Huang → "30년 뒤..."
+- Naval → 이분법 한 줄 또는 격언
+
+검증 통과 시 자유화·정체성 강제 챕터 완전 종결. 다음 세션부터 §31 방향 A(백엔드 + 인증 + 유료화) 본격 시작.
+
