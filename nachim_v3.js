@@ -2862,6 +2862,17 @@ async function send(){
 async function quickAsk(t){if(!busy)await doSend(t);}
 
 async function doSend(text){
+  /* 안전망: 멘토-plan 정합성 검사. Free 사용자가 어떤 경로로든 Pro 멘토를 보유하면
+     송신 직전에 Free 가능 멘토(PG)로 자동 리셋. 토스트로 사용자에게 알림. */
+  try{
+    const sync = ensureMentorPlanSync({silent:false});
+    if(sync && sync.changed){
+      /* 멘토가 바뀐 직후엔 시스템 프롬프트도 새 멘토로 가야 하니, 잠시 기다려
+         applyProfile()의 UI 업데이트가 반영되게 한 뒤 송신 */
+      await new Promise(r=>setTimeout(r, 50));
+    }
+  }catch(_){}
+
   /* 요금제 한도 체크 — 프로토타입 단계에서는 비활성화.
      사용자가 직접 자기 Claude API 키를 입력해서 쓰므로 우리가 횟수를 제한할 근거가 없고,
      실서비스 전환 시(서버/DB 도입 시점) 다시 켜면 됨. */
@@ -4324,6 +4335,9 @@ document.addEventListener('DOMContentLoaded', function(){
   initDomainIcons();
   /* 플랜 배지 pill 초기 라벨/색 반영 */
   try{ syncHeaderPlanPill(); }catch(_){}
+  /* 멘토-plan 정합성 — 이전 세션에서 Pro로 멘토 선택 후 Free로 떨어진 경우 정리.
+     silent:true (부팅 시점은 토스트 띄우지 않음, 사용자 액션과 무관하므로) */
+  try{ ensureMentorPlanSync({silent:true}); }catch(_){}
 });
 
 /* ─── exportAnswer (OOXML altChunk, standard) ─── */
@@ -5870,6 +5884,44 @@ function syncHeaderPlanPill(){
   pill.setAttribute('title', isPro ? 'Pro 플랜 · 요금제 관리' : 'Free 플랜 · 업그레이드');
 }
 
+/* 멘토-plan 정합성 검사·동기화.
+   Free 사용자가 Pro 멘토를 보유한 상태(예: Pro에서 선택 후 Free 복귀)를 감지해
+   Free 가능 멘토(PG)로 자동 리셋하고 사용자에게 토스트로 알림.
+   호출 지점:
+   - 앱 부팅 직후 (이전 세션의 잔존 상태 정리)
+   - selectPlan으로 Pro → Free 변경 직후
+   - doSend 진입부 (안전망 — 어떤 경로로든 정합성이 깨졌으면 송신 직전에 잡음)
+   반환값: { changed: boolean, oldMentor, newMentor } */
+function ensureMentorPlanSync(opts){
+  try{
+    const plan = getCurrentPlan();
+    if(plan === 'pro') return { changed:false }; /* Pro는 모든 멘토 OK */
+    const cur = (typeof profile !== 'undefined' && profile && profile.style) || null;
+    if(!cur) return { changed:false };
+    const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[cur] : null;
+    if(meta && meta.free === true) return { changed:false }; /* Free 가능 멘토 */
+    /* Pro 전용 멘토 보유 — 무료 가능 첫 멘토(Paul Graham)로 리셋 */
+    const fallback = 'Paul Graham (YC)';
+    const oldMentor = cur;
+    profile.style = fallback;
+    try{ localStorage.setItem('vd_profile', JSON.stringify(profile)); }catch(_){}
+    try{ if(typeof applyProfile === 'function') applyProfile(); }catch(_){}
+    /* 토스트 안내 — 조용히 하기보다 사용자가 알게 함 */
+    if(opts && opts.silent !== true){
+      try{
+        const toast = document.createElement('div');
+        toast.className = 'mentor-toast';
+        toast.textContent = `Free 플랜에서는 ${oldMentor.split(' (')[0]} 사용 불가 — Paul Graham으로 변경됐어요`;
+        toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 18px;border-radius:12px;font-size:12.5px;letter-spacing:-0.12px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:90vw;text-align:center;';
+        document.body.appendChild(toast);
+        requestAnimationFrame(()=>{ toast.style.opacity = '1'; });
+        setTimeout(()=>{ toast.style.opacity = '0'; setTimeout(()=>toast.remove(), 300); }, 3500);
+      }catch(_){}
+    }
+    return { changed:true, oldMentor, newMentor: fallback };
+  }catch(e){ return { changed:false }; }
+}
+
 /* ─── 툴팁 시스템 (r01-tooltip) ───
    멘토 전환 토스트와 동일한 디자인 언어(Ink bg, 흰 글씨, 바운스).
    [data-tip] 속성을 가진 요소에 호버/포커스 시 자동 표시.
@@ -6139,9 +6191,14 @@ function selectPlan(planId){
   if(plan.price === 0){
     localStorage.setItem('r01_plan','free');
     try{ syncHeaderPlanPill(); }catch(_){}
+    const mentorSync = (function(){ try{ return ensureMentorPlanSync({silent:true}); }catch(_){ return {changed:false}; } })();
     try{ refreshAnswerActionsForPlan(); }catch(_){}
     closePricingModal();
-    alert('Free 플랜으로 변경됐습니다.');
+    if(mentorSync && mentorSync.changed){
+      alert(`Free 플랜으로 변경됐습니다.\n\nFree에서는 ${mentorSync.oldMentor.split(' (')[0]} 멘토 사용이 불가능해 Paul Graham으로 자동 변경됐어요.`);
+    } else {
+      alert('Free 플랜으로 변경됐습니다.');
+    }
     return;
   }
   /* PROTOTYPE_MODE: 결제 백엔드가 아직 없는 단계에서 Pro 라우팅(Opus)을

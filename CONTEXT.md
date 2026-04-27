@@ -1194,3 +1194,59 @@ E. 캐시 버스터 v6: `?v=20260427-export-gate-v6`
 
 남은 미구현: doSend 일일 5건 카운터 (백엔드 작업 시 구현 — §31 방향 A)
 
+
+---
+
+## 39. 2026-04-27 멘토-plan 정합성 안전망
+
+### 발견 — 게이트 우회 시나리오
+
+사용자 검증 중 발견: Free 사용자가 Jensen Huang(Pro 전용 멘토)으로 답변 받는 사례.
+콘솔: `model: 'claude-sonnet-4-6', plan: 'free', mentor: 'Jensen Huang (NVIDIA)'`
+
+재현 경로: Pro 토글 → Jensen 선택 → Free로 복귀 → 멘토 설정이 그대로 유지
+
+§35 정책: Free는 PG·Thiel만 선택 가능. 게이트는 "선택 시점"에만 있고 plan 변경 시 멘토 정합성 검증이 없어 우회 가능.
+
+### 적용 변경
+
+**롤백 태그**: `pre-mentor-plan-sync`
+
+A. **`ensureMentorPlanSync(opts)` 헬퍼 추가** (syncHeaderPlanPill 직후)
+   - getCurrentPlan() === 'free'인데 profile.style이 Pro 멘토면 → Paul Graham으로 자동 리셋
+   - localStorage vd_profile 갱신 + applyProfile() 호출 → UI 즉시 반영
+   - opts.silent === false면 토스트 안내: "Free 플랜에서는 [멘토] 사용 불가 — Paul Graham으로 변경됐어요"
+   - 반환값: `{changed, oldMentor, newMentor}`
+
+B. **3곳에서 호출 — 다층 안전망**
+   1. **부팅 시** (DOMContentLoaded 끝부분, syncHeaderPlanPill 직후): `silent:true`. 이전 세션 잔존 상태 정리
+   2. **selectPlan free 변경 시**: alert 메시지에 멘토 변경 사실 포함 (toast 대신 alert로 통합)
+   3. **doSend 진입부** (안전망): `silent:false`. 어떤 경로로든 정합성 깨졌으면 송신 직전에 잡고 토스트로 알림. 50ms 대기 후 송신해 시스템 프롬프트가 새 멘토로 재구성될 시간 확보
+
+C. 캐시 버스터 v7: `?v=20260427-mentor-plan-sync-v7`
+
+### 검증
+
+1. **재현 시나리오 차단**:
+   - 헤더 FREE → Pro 토글 → Jensen 선택 → Free 복귀 → alert에 "Paul Graham으로 자동 변경" 포함, 헤더 멘토 pill도 PG로
+   - 송신 시 콘솔 `[route]`: `mentor: 'Paul Graham (YC)', plan: 'free', model: 'claude-sonnet-...'`
+
+2. **부팅 시 자동 정리**:
+   - 옛날 세션에서 Pro+Jensen 상태로 새로고침/재방문 → 헤더 즉시 PG로 표시 (토스트 없음, silent)
+
+3. **Pro 사용자 영향 없음**:
+   - Pro 상태에서 5명 멘토 모두 정상 작동, 정합성 검사 패스
+
+### 정책 게이트 — 모든 진입점 점검 완료
+
+| 진입점 | 게이트 | 안전망 |
+|---|---|---|
+| 멘토 모달 클릭 | meta.free 검사 | ensureMentorPlanSync (doSend) |
+| 온보딩 멘토 picker | meta.free 검사 | 동일 |
+| 지원사업 도우미 | plan 검사 | — |
+| PDF 업로드 | plan 검사 | — |
+| DOCX/PDF 내보내기 | plan 검사 | — |
+| 답변 송신 (어떤 경로든) | — | ensureMentorPlanSync ✓ |
+| 부팅 잔존 정리 | — | ensureMentorPlanSync ✓ |
+| Pro → Free 변경 | — | ensureMentorPlanSync + alert ✓ |
+
