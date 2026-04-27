@@ -2939,56 +2939,47 @@ let MODEL_CACHE = {sonnet:null, haiku:null, opus:null, ts:0};
      2) 질문 복잡도 (파일/키워드/길이)
 
    규칙 (우선순위 순):
-/* 라우팅 정책 (2026-04-27 갱신, 멘토 자유화 후 검증 결과 반영):
-   - FREE 멘토 (Paul Graham, Peter Thiel) → 항상 Sonnet
-   - PRO 멘토 (Brian Chesky, Jensen Huang, Naval) → 항상 Opus
+/* 라우팅 정책 (2026-04-27 v3, 유료화 정책 정합성 반영):
+   - 무료 사용자 → 항상 Sonnet (멘토 무관)
+   - Pro 사용자  → 항상 Opus  (멘토 무관, 5명 모두)
 
-   이전 정책(2026-04-24): PRO 멘토 + 복잡 질문일 때만 Opus, 단순 질문은 Sonnet
-   변경 이유: 멘토 자유화(c2cf3f9) 후 사용자 A/B 검증 결과, PMF 같은 표준 질문에서
-   Sonnet은 두 PRO 멘토(Thiel·Naval)의 답변 본문을 70% 동일하게 생성하고 시그니처
-   어휘를 거의 사용하지 않음. 멘토 정체성이 모델 한계에 묻힘. Opus는 같은
-   프롬프트로도 멘토별 차별화가 또렷이 나옴(외부 A/B에서 검증).
-   PRO 멘토의 가치 약속 = "더 깊이 있고 차별화된 답변"이므로, 복잡도 체크 없이
-   항상 Opus로 가야 그 약속이 실제로 작동함.
+   변천:
+   v1 (~2026-04-22): PRO 멘토 + 복잡 질문 → Opus, 외엔 Sonnet
+   v2 (2026-04-27 b2e96da): PRO 멘토 → 항상 Opus, FREE 멘토 → 항상 Sonnet
+   v3 (현재): user tier 기반. 멘토 카테고리(free:true/false)는 "어떤 사용자가
+       선택할 수 있는가"의 의미만 갖고, 모델 라우팅은 user tier로 결정.
 
-   유료화 붙일 때: 게이트는 isPaid 체크. PRO 멘토 라우팅 자체는 유지.
-   롤백: 이 블록을 pre-identity-enforcement 태그 시점으로 되돌리면 끝. */
-const COMPLEX_QUERY_PATTERNS = [
-  /분석/, /전략/, /시나리오/, /비교/, /계획/, /설계/, /구조/, /리서치/,
-  /로드맵/, /경쟁/, /포지셔닝/, /피보팅/, /IR/, /투자\s*유치/, /사업\s*계획/,
-  /밸류에이션/, /차별화/, /플랫폼/, /생태계/, /독점/
-];
+   변경 이유: Pro 사용자가 Paul Graham/Peter Thiel(원래 FREE 멘토)을 선택했을 때
+   Sonnet으로 가면 Pro의 가치 약속("더 깊이 있는 답변")이 일관되지 않음.
+   Pro 사용자에겐 5명 멘토 모두 Opus가 맞음.
+
+   사용자 tier 진입점: getCurrentPlan() → 'free' | 'pro'
+   - 현재(PROTOTYPE_MODE 단계): localStorage 'r01_plan' 값. 헤더 pill 클릭으로
+     pricing modal 열어 임시 토글 가능
+   - 백엔드 붙은 후: getCurrentPlan()이 Supabase에서 실제 결제 상태 조회
+
+   롤백: 이 블록을 pre-tier-routing 태그 시점으로 되돌리면 끝. */
 async function pickModel(ctx){
   const mentor = (ctx && ctx.mentor) || 'Paul Graham (YC)';
   const question = String((ctx && ctx.question) || '');
   const hasFiles = !!(ctx && ctx.hasFiles);
 
-  /* 멘토 티어 — FREE는 Sonnet, PRO는 Opus (복잡도 체크 없음) */
-  const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[mentor] : null;
-  const isFreeMentor = !!(meta && meta.free === true);
+  /* 사용자 tier가 라우팅의 유일한 분기 기준 */
+  const plan = (typeof getCurrentPlan === 'function') ? getCurrentPlan() : 'free';
+  const isPro = plan === 'pro';
 
-  /* 복잡도는 더 이상 라우팅 분기 기준이 아님. 관측 로그 용도로만 계산 유지 */
-  const isComplex =
-    hasFiles ||
-    question.length > 200 ||
-    COMPLEX_QUERY_PATTERNS.some(rx => rx.test(question));
-
-  const useOpus = !isFreeMentor;
-  const family = useOpus ? 'opus' : 'sonnet';
-
+  const family = isPro ? 'opus' : 'sonnet';
   const resolved = await resolveModelId(family);
-  const fallback = useOpus
-    ? 'claude-opus-4-7'           /* opus 최신으로 resolve 실패 시 폴백 — resolveModelId가 실제 최신을 반환하므로 비상용 */
-    : 'claude-sonnet-4-5-20250929';
+  const fallback = isPro
+    ? 'claude-opus-4-7'             /* opus 최신 resolve 실패 시 폴백 */
+    : 'claude-sonnet-4-5-20250929'; /* sonnet 폴백 */
   const model = resolved || fallback;
 
-  /* 관측 로그 — 실제 라우팅이 의도대로 되는지 확인용 */
+  /* 관측 로그 — 라우팅이 의도대로 가는지 검증용 */
   try{
     console.log('[route]', {
       model: model,
-      tier: isFreeMentor ? 'free' : 'pro',
-      complex: isComplex,
-      reason: isFreeMentor ? 'free_mentor_always_sonnet' : 'pro_mentor_always_opus',
+      plan: plan,
       mentor,
       qlen: question.length,
       files: hasFiles
@@ -4028,10 +4019,10 @@ function openStyleModal(){
   if(!grid) return;
   const cur=profile.style||'Paul Graham (YC)';
   pendingMentor = cur; // 모달 열 때 현재 멘토로 초기화
-  /* 프로토타입 단계: 전체 멘토 개방 */
-  const PROTOTYPE_MODE = true;
+  /* 정책 (2026-04-27 v3): 무료 사용자는 free:true 멘토(PG, Thiel)만 선택 가능,
+     Pro 사용자는 5명 모두 가능. 모델은 user tier로 결정 (pickModel 참조). */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
-  const isPaid = PROTOTYPE_MODE ? true : (plan === 'pro');
+  const isPaid = (plan === 'pro');
 
   grid.innerHTML = Object.keys(MENTOR_META).map(k => {
     const m = MENTOR_META[k];
@@ -4054,15 +4045,13 @@ function openStyleModal(){
     btn.addEventListener('click',()=>{
       const s = btn.getAttribute('data-style');
       const meta = MENTOR_META[s];
-      /* 유료 플랜 검증 (프로토타입 단계엔 우회) */
-      if(!PROTOTYPE_MODE){
-        const pl = getCurrentPlan ? getCurrentPlan() : 'free';
-        const paid = (pl === 'pro');
-        if(meta && !meta.free && !paid){
-          closeStyleModal(true /* cancel */);
-          openPricingModal();
-          return;
-        }
+      /* 무료 사용자가 Pro 멘토(Chesky/Huang/Naval) 클릭 시 결제 안내 */
+      const pl = getCurrentPlan ? getCurrentPlan() : 'free';
+      const paid = (pl === 'pro');
+      if(meta && !meta.free && !paid){
+        closeStyleModal(true /* cancel */);
+        openPricingModal();
+        return;
       }
       /* 선택만 업데이트 — 실제 적용은 닫기 버튼 */
       pendingMentor = s;
@@ -5620,11 +5609,7 @@ function wsSend() {
 
 
 function checkGrantAccess() {
-  /* 프로토타입 단계: 모든 회원 접근 허용 */
-  const PROTOTYPE_MODE = true;
-  if(PROTOTYPE_MODE){ openGrantModal(); return; }
-
-  // 유료 플랜 체크 (Pro만 허용)
+  /* 정책 (2026-04-27 v3): 지원사업 도우미는 Pro 전용 기능 */
   const plan = localStorage.getItem('r01_plan') || 'free';
   if(plan !== 'pro') {
     // 무료 회원 안내 모달
@@ -5685,18 +5670,35 @@ function goHome() {
    이유: (1) Starter는 돈 내는데 PRO 멘토 못 쓰는 애매한 포지션 → 단순화
         (2) Apple/Claude/Linear식 "선택 줄이기" 철학
         (3) Pro 가격 29,000→19,900 인하로 진입 장벽 낮춤 + ChatGPT Plus와 유사한 시장 포지션 */
+/* 요금제 정책 (2026-04-27 v3 결정):
+   - Free: 일 5회, PG·Thiel 2명, Sonnet 모델
+   - Pro: 일 한도 미정(무제한 표기), 5명 전체, Opus 모델
+   - 가격(19,900): 추후 시장 검증 후 조정 예정
+   - 일일 한도 카운터는 백엔드 작업 시 구현 (현재 limit:5는 표시용) */
 const R01_PLANS = [
   {
     id:'free', name:'Free', price:0, priceText:'무료',
     desc:'가볍게 시작하기',
-    features:['월 10회 질문','추천 질문 이용','Free 멘토 2명(Paul Graham · Peter Thiel)'],
-    limit:10, color:'#6e6e73', cta:'현재 플랜'
+    features:[
+      '일 5회 질문',
+      'Free 멘토 2명 (Paul Graham · Peter Thiel)',
+      'Claude Sonnet 모델',
+      '추천 질문 이용'
+    ],
+    limit:5, limitUnit:'day', color:'#6e6e73', cta:'현재 플랜'
   },
   {
     id:'pro', name:'Pro', price:19900, priceText:'₩19,900/월',
     desc:'Route01의 전체 가치',
-    features:['무제한 질문','더 깊이 있는 답변 품질','전체 멘토 5명 이용 (PG · Thiel · Chesky · Huang · Naval)','지원사업 도우미','PDF 파일 업로드','DOCX/PDF 내보내기'],
-    limit:99999, color:'#8B1A1A', cta:'시작하기', highlight:true
+    features:[
+      '무제한 질문',
+      '전체 멘토 5명 (PG · Thiel · Chesky · Huang · Naval)',
+      'Claude Opus 모델 (더 깊이 있는 답변)',
+      '지원사업 도우미',
+      'PDF 파일 업로드',
+      'DOCX/PDF 내보내기'
+    ],
+    limit:99999, limitUnit:'day', color:'#8B1A1A', cta:'시작하기', highlight:true
   }
   /* Team 플랜 — v2.0 도입 예정.
      5인 공유 · 팀 질문 기록 공유 · 초대/권한 관리 · 팀 빌링 등
@@ -5987,7 +5989,7 @@ function closePricingModal(){
   document.getElementById('pricing-modal')?.classList.remove('open');
 }
 function selectPlan(planId){
-  // 토스페이먼츠 결제 (현재는 데모 — 실제 연동 시 서버 필요)
+  /* 토스페이먼츠 결제 (현재는 데모 — 실제 연동은 방향 A 백엔드 작업 시) */
   const plan = R01_PLANS.find(p=>p.id===planId);
   if(!plan) return;
   if(plan.price === 0){
@@ -5997,7 +5999,25 @@ function selectPlan(planId){
     alert('Free 플랜으로 변경됐습니다.');
     return;
   }
-  // 결제 안내 (실제 구현 시 토스페이먼츠 SDK 호출)
+  /* PROTOTYPE_MODE: 결제 백엔드가 아직 없는 단계에서 Pro 라우팅(Opus)을
+     검증할 수 있도록, 결제 시뮬레이션으로 즉시 plan을 'pro'로 전환.
+     실제 결제·백엔드 붙으면 이 분기를 토스페이먼츠 SDK 호출로 교체. */
+  const PROTOTYPE_MODE = true;
+  if(PROTOTYPE_MODE){
+    const ok = confirm(
+      `[프로토타입 모드] ${plan.name} 플랜 결제 시뮬레이션\n\n` +
+      `실제 결제 없이 Pro 플랜으로 즉시 전환됩니다.\n` +
+      `(라우팅 검증용 — Opus 모델로 답변 가능)\n\n` +
+      `진행하시겠어요?`
+    );
+    if(!ok) return;
+    localStorage.setItem('r01_plan','pro');
+    try{ syncHeaderPlanPill(); }catch(_){}
+    closePricingModal();
+    alert(`✓ Pro 플랜으로 전환됐습니다 (시뮬레이션)\n\n이제 5명 멘토 모두 Opus 모델로 답변합니다.\n해제: 헤더 PRO 배지 → "Free로 변경"`);
+    return;
+  }
+  /* 실 결제 (백엔드 도입 후 활성화) */
   alert(`[준비 중] ${plan.name} 플랜 결제 기능은 곧 오픈됩니다.\n\n문의: contact@route01.kr`);
 }
 
@@ -6067,13 +6087,14 @@ function submitWithdraw(){
 }
 /* PRO 잠금 멘토 클릭 시 (온보딩용) */
 function pickMentorOrUpgrade(el, styleKey){
-  /* 프로토타입 단계: 모든 멘토 스타일 무료 개방 (유료 UI는 추후 서버 연동 시 되살림) */
-  const PROTOTYPE_MODE = true;
-  if(PROTOTYPE_MODE){ pickChip('style', el); return; }
-
+  /* 정책 (2026-04-27 v3): 무료 사용자가 Pro 멘토 클릭 시 결제 안내 */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   const isPaid = (plan === 'pro');
   if(isPaid){ pickChip('style', el); return; }
+  /* 무료 사용자 + Pro 멘토 → 잠금 안내 */
+  /* 단, Free 멘토(PG·Thiel)는 styleKey가 free:true이므로 그대로 선택 허용 */
+  const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[styleKey] : null;
+  if(meta && meta.free === true){ pickChip('style', el); return; }
   const m = document.createElement('div');
   m.className = 'modal-bg open';
   m.style.zIndex = '9999';
@@ -6093,13 +6114,7 @@ function pickMentorOrUpgrade(el, styleKey){
 
 /* 파일 업로드 접근 제어 */
 function checkUploadAccess(){
-  /* 프로토타입 단계: 파일 업로드 자유 허용 */
-  const PROTOTYPE_MODE = true;
-  if(PROTOTYPE_MODE){
-    document.getElementById('ob-file-input')?.click();
-    return;
-  }
-
+  /* 정책 (2026-04-27 v3): PDF 업로드는 Pro 전용 기능 */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
   if(plan === 'free'){
     const m = document.createElement('div');

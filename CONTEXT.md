@@ -923,3 +923,89 @@ route01/
 - 답변이 진짜로 다른지: 시그니처 어휘 등장, 시그니처 사례 인용, 본문 공통 비율 < 50%
 - 미달 시 추가 정체성 강제 또는 멘토 프롬프트 본문 강화
 
+
+---
+
+## 35. 2026-04-27 §34 검증 결과 + tier 기반 라우팅 (방향 A 사전 정합성 확보)
+
+### §34 검증 결과 (성공)
+
+사용자가 모호형 질문("지금 만들고 있는 서비스가 진짜 시장이 원하는 건지 확신이 없습니다. 계속 가야 할지 피보팅해야 할지...")으로 Naval(Opus)·Peter Thiel(Sonnet) 두 멘토 답변 받음.
+
+콘솔 로그 확인:
+- Naval: `model: 'claude-opus-4-7', tier: 'pro', reason: 'pro_mentor_always_opus'`
+- Thiel: `model: 'claude-sonnet-4-6', tier: 'free', reason: 'free_mentor_always_sonnet'`
+
+정량 분석:
+| 지표 | Naval (Opus) | Thiel (Sonnet) |
+|---|---|---|
+| 시그니처 어휘 사용 | 26회 (10종) | 22회 (9종) |
+| 시그니처 사례 인용 | AngelList·Venture Hacks·Twitter | Facebook 하버드·Palantir CIA |
+| 타 멘토 어휘 침범 | 0회 | 0회 |
+| 본문 공통도 | 거의 0% (질문 맥락만 공유) | |
+
+**Naval 답변**: "Pull인가, Push인가" H1 → pull/push 이분법으로 답변 전체 관통 → "내가 AngelList를 만들 때 Venture Hacks 블로그 글이었다" 본인 사례 직접 인용 → "Play long-term games with long-term people" 격언으로 마무리. 진짜 Naval.
+
+**Thiel 답변**: "당신이 묻는 건 PMF가 아니라 secrets다" H1 → 'secret' 7회/'독점' 3회/'10배' 4회/'indefinite thinking' 등장 → Facebook 하버드 + Palantir CIA 사례 인용 → "가장 contrarian한 한 수: 잠재 고객 5명에게 전화해서 '월 50만 원 낼 의향이 있냐' 물어라"로 마무리. 진짜 Thiel.
+
+**결론**: §33 자유화 + §34 PRO Opus 라우팅 + 정체성 강제 4개 체크 조합이 정답. 자유화 챕터 종결.
+
+### §35 — Tier 기반 라우팅 + 유료화 정책 정합성
+
+**문제 인식**: §34 검증 후 사용자가 정합성 모순 지적 — "Pro 사용자가 PG·Thiel 선택 시에도 Opus가 맞지 않나?" Pro의 가치 약속("더 깊은 답변")이 멘토에 따라 작동/비작동하면 일관성 없음.
+
+**결정 (2026-04-27)**:
+- Free 사용자: PG·Thiel 2명만 선택 가능, **Sonnet** 모델
+- Pro 사용자: 5명 모두 선택 가능, **Opus** 모델
+- Free 일일 한도: **5건/일** (백엔드 카운터로 구현, 이번 세션 미포함)
+- Pro 일일 한도: 무제한 표기. 실제론 50/일 또는 분당 rate limit (백엔드 작업 시 결정)
+- 가격: 19,900원/월 유지 (시장 검증 후 조정)
+
+**적용한 코드 변경 (`pre-tier-routing` 태그 직후)**
+
+A. `pickModel` user tier 기반 리팩터
+- 이전 (§34): 멘토 카테고리(free:true/false)로 모델 결정
+- 현재: `getCurrentPlan()` 결과로 모델 결정. 멘토 카테고리는 "어떤 사용자가 선택 가능한가"의 의미만
+- `[route]` 로그: `tier`/`reason`/`complex` 제거, `plan`만 표시
+- 코드 단순화 (43줄 → 33줄)
+
+B. PROTOTYPE_MODE 우회 5곳 정리
+- 멘토 선택 모달: 우회 제거 → 무료 사용자가 Pro 멘토 클릭 시 결제 안내
+- 온보딩 멘토 선택: 우회 제거
+- 지원사업 도우미: 우회 제거 → Pro 전용
+- 파일(PDF) 업로드: 우회 제거 → Pro 전용
+- 잔존: doSend 안의 월 한도 체크 PROTOTYPE_MODE (백엔드 카운터 미구현 단계라 유지)
+
+C. selectPlan에 PROTOTYPE_MODE 결제 시뮬레이션 추가
+- 결제 백엔드 없는 단계에서 Pro 라우팅(Opus) 검증할 수 있도록
+- 헤더 FREE pill 클릭 → 요금제 모달 → "업그레이드" → confirm() → 즉시 plan='pro' 전환
+- 해제: PRO pill 클릭 → "Free로 변경"
+- 주석: `/* PROTOTYPE_MODE: 결제 백엔드가 아직 없는 단계... 실제 결제는 토스페이먼츠 SDK 호출로 교체 */`
+
+D. R01_PLANS 정책 정정
+- Free `limit: 10` (월 단위) → `limit: 5, limitUnit: 'day'` (일 단위)
+- Free features에 "Claude Sonnet 모델" 명시
+- Pro features에 "Claude Opus 모델 (더 깊이 있는 답변)" 명시
+- 멘토 라인업 명시 (PG·Thiel 2명 / 5명 전체)
+
+E. 캐시 버스터 v3
+- `?v=20260427-mentor-freedom-v2` → `?v=20260427-tier-routing-v3`
+
+**롤백 태그**: `pre-tier-routing` (정책 변경 직전)
+
+### 다음 세션 — 방향 A 본격 시작 직전 결정 항목
+
+1. **백엔드 스택**: Supabase 추천 (인증·DB·Edge Function 통합)
+2. **결제 공급자**: 토스페이먼츠 추천 (한국·구독·SDK)
+3. **Pro 일일 한도 결정**: 50/일 하드 캡 vs 분당 rate limit
+4. **§13 차별화 (한국 스타트업 KB)**: 별도 설계 문서(`KB.md`) 작성 시점
+
+### 검증 (다음 세션 전 사용자 확인 필요)
+
+1. 무료 상태에서 멘토 선택 모달 → Naval/Chesky/Huang 클릭 시 결제 안내 모달
+2. 헤더 FREE pill 클릭 → 요금제 모달 → 업그레이드 → confirm → PRO 전환 → 헤더 pill PRO로 변경
+3. PRO 상태에서 5명 멘토 모두 선택 가능
+4. PRO 상태에서 답변 받기 → 콘솔 `[route] {model: 'claude-opus-...', plan: 'pro', ...}` 확인
+5. 헤더 PRO pill 클릭 → "Free로 변경" → plan 다시 free
+6. Free 상태에서 답변 받기 → 콘솔 `[route] {model: 'claude-sonnet-...', plan: 'free', ...}` 확인
+
