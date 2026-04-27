@@ -1814,6 +1814,21 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   vertical-align:1px;
 }
 
+/* PDF 첨부 버튼 PRO 코너 닷지
+   작은 아이콘 버튼이라 텍스트형 배지 대신 우상단 코너에 작은 PRO 닷지.
+   기본 표시(Free 사용자), Pro 사용자에겐 plan-pro-user 클래스로 숨김.
+   plan 변경 시 refreshPdfAttachButtonsForPlan() 헬퍼가 클래스 토글. */
+.pdf-attach-btn{position:relative;}
+.pdf-pro-dot{
+  position:absolute;top:-3px;right:-4px;
+  display:inline-block;padding:1px 4.5px;border-radius:980px;
+  font-size:8.5px;font-weight:800;letter-spacing:0.3px;line-height:1.2;
+  background:var(--brand-main);color:#fff;
+  pointer-events:none;
+  box-shadow:0 0 0 1.5px var(--bg2);
+}
+.pdf-attach-btn.is-pro .pdf-pro-dot{display:none;}
+
 /* FILE UPLOAD */
 .upload-zone{
   border:1px dashed var(--border);border-radius:var(--r-lg);padding:18px;text-align:center;cursor:pointer;

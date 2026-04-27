@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="./vendor/auth0-spa-js.production.js"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260427-pdf-gate-layers-v9">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260427-pdf-pro-badge-v10">
 </head>
 <body>
 
@@ -593,8 +593,9 @@
             <div class="ws-input-card" id="ws-input-card">
               <textarea class="ws-input" id="ws-input" rows="1" placeholder="스타트업 관련 무엇이든 질문하세요..." onkeydown="wsOnKey(event)" oninput="wsResize(this)"></textarea>
               <div class="ws-input-actions">
-                <button class="ws-file-btn" title="PDF 첨부" onclick="checkUploadAccess('ws-file-input')">
+                <button class="ws-file-btn pdf-attach-btn" title="PDF 첨부" onclick="checkUploadAccess('ws-file-input')">
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                  <span class="pdf-pro-dot" aria-label="Pro 전용">PRO</span>
                 </button>
                 <input type="file" id="ws-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
                 <button class="ws-send-btn" id="ws-send-btn" onclick="wsSend()">
@@ -636,8 +637,9 @@
         <div class="domain-banner" id="domain-banner" style="display:none" aria-hidden="true"></div>
         <div class="chat-files-preview" id="chat-files-preview"></div>
         <div class="input-row">
-          <button class="chat-file-btn" title="PDF 첨부 (파일당 최대 20MB)" onclick="checkUploadAccess('chat-file-input')">
+          <button class="chat-file-btn pdf-attach-btn" title="PDF 첨부 (파일당 최대 20MB)" onclick="checkUploadAccess('chat-file-input')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            <span class="pdf-pro-dot" aria-label="Pro 전용">PRO</span>
           </button>
           <input type="file" id="chat-file-input" multiple accept=".pdf,application/pdf" style="display:none" onchange="chatFileSelect(this.files)"/>
           <textarea class="chat-in" id="input" rows="1" placeholder="자문이 필요한 내용을 입력하세요..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
@@ -886,6 +888,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260427-pdf-gate-layers-v9"></script>
+<script src="./nachim_v3.js?v=20260427-pdf-pro-badge-v10"></script>
 </body>
 </html>

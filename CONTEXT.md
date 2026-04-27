@@ -1355,3 +1355,51 @@ PDF 정책 자체는 §24-I에서 결정 완료:
 - 토큰 효율: prompt caching (90% 할인)
 - Full RAG: 클로즈 베타 데이터로 판단
 
+
+---
+
+## 42. 2026-04-27 PDF 첨부 버튼 PRO 코너 닷지
+
+### 발견
+
+§38에서 내보내기 버튼에는 PRO 배지가 있는데 PDF 첨부 버튼(웰컴·채팅 두 곳)엔 없어 일관성 깨짐. 사용자가 일관성 지적.
+
+### 해결 — 코너 닷지 패턴
+
+내보내기 버튼은 텍스트형이라 옆에 `<span>PRO</span>` 인라인 배지를 박았지만 PDF 첨부 버튼은 작은 아이콘 버튼이라 인라인 공간 없음. **우상단 코너에 작은 PRO 닷지** 패턴으로 처리.
+
+### 적용 변경
+
+**롤백 태그**: `pre-pdf-pro-badge`
+
+A. **HTML — 두 버튼에 PRO 닷지 자식 + `pdf-attach-btn` 클래스**
+   - 웰컴 화면 📎: `<span class="pdf-pro-dot" aria-label="Pro 전용">PRO</span>` 추가
+   - 채팅 화면 📎: 동일
+
+B. **CSS — `.pdf-attach-btn` + `.pdf-pro-dot`**
+   - `.pdf-attach-btn{position:relative;}` (닷지 absolute 기준점)
+   - `.pdf-pro-dot`: 우상단 코너(top:-3px, right:-4px), 8.5px / 800 / 크림슨 배경 / 흰 글씨 / box-shadow로 버튼 배경과 분리
+   - `.pdf-attach-btn.is-pro .pdf-pro-dot{display:none}` — Pro 사용자에겐 숨김
+
+C. **JS — `refreshPdfAttachButtonsForPlan()` 헬퍼**
+   - 모든 `.pdf-attach-btn` 요소에 plan에 따라 `is-pro` 클래스 토글
+   - 호출 지점:
+     - 부팅 시 (DOMContentLoaded 끝, 다른 plan 동기화와 함께)
+     - selectPlan free 변경 시
+     - selectPlan pro 변경 시
+
+D. 캐시 버스터 v10: `?v=20260427-pdf-pro-badge-v10`
+
+### 통일된 Pro 가시화 패턴
+
+| 위치 | 표시 방식 |
+|---|---|
+| 답변 카드 [내보내기 (DOCX)] | 인라인 텍스트 배지 `<span>PRO</span>` |
+| 답변 카드 [내보내기 (PDF)] | 동일 |
+| 입력창 📎 PDF 첨부 (웰컴) | 우상단 코너 닷지 |
+| 입력창 📎 PDF 첨부 (채팅) | 동일 |
+| 멘토 모달 Pro 멘토 행 | 행 우측 PRO 배지 (기존) |
+| 헤더 plan pill | FREE/PRO 색·라벨 |
+
+전 진입점에서 사용자가 "이건 Pro 기능"임을 시각적으로 인지한 상태에서 클릭 → §40 통일된 1단계 요금제 모달.
+

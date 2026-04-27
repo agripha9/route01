@@ -3089,6 +3089,18 @@ function refreshAnswerActionsForPlan(){
   }catch(e){}
 }
 
+/* PDF 첨부 버튼(.pdf-attach-btn)의 PRO 닷지를 plan에 맞게 토글.
+   웰컴 화면 📎 버튼 + 채팅 화면 📎 버튼 둘 다 적용.
+   호출 지점: 부팅 시, selectPlan free→pro / pro→free 전환 시. */
+function refreshPdfAttachButtonsForPlan(){
+  try{
+    const isPro = (typeof getCurrentPlan === 'function' && getCurrentPlan() === 'pro');
+    document.querySelectorAll('.pdf-attach-btn').forEach(btn => {
+      btn.classList.toggle('is-pro', isPro);
+    });
+  }catch(e){}
+}
+
 const ANSWER_RAW = new Map();
 
 let MODEL_CACHE = {sonnet:null, haiku:null, opus:null, ts:0};
@@ -4365,6 +4377,8 @@ document.addEventListener('DOMContentLoaded', function(){
   /* 멘토-plan 정합성 — 이전 세션에서 Pro로 멘토 선택 후 Free로 떨어진 경우 정리.
      silent:true (부팅 시점은 토스트 띄우지 않음, 사용자 액션과 무관하므로) */
   try{ ensureMentorPlanSync({silent:true}); }catch(_){}
+  /* PDF 첨부 버튼 PRO 닷지 — 현재 plan에 맞춰 표시/숨김 */
+  try{ refreshPdfAttachButtonsForPlan(); }catch(_){}
 });
 
 /* ─── exportAnswer (OOXML altChunk, standard) ─── */
@@ -6186,6 +6200,7 @@ function selectPlan(planId){
     try{ syncHeaderPlanPill(); }catch(_){}
     const mentorSync = (function(){ try{ return ensureMentorPlanSync({silent:true}); }catch(_){ return {changed:false}; } })();
     try{ refreshAnswerActionsForPlan(); }catch(_){}
+    try{ refreshPdfAttachButtonsForPlan(); }catch(_){}
     closePricingModal();
     if(mentorSync && mentorSync.changed){
       alert(`Free 플랜으로 변경됐습니다.\n\nFree에서는 ${mentorSync.oldMentor.split(' (')[0]} 멘토 사용이 불가능해 Paul Graham으로 자동 변경됐어요.`);
@@ -6209,6 +6224,7 @@ function selectPlan(planId){
     localStorage.setItem('r01_plan','pro');
     try{ syncHeaderPlanPill(); }catch(_){}
     try{ refreshAnswerActionsForPlan(); }catch(_){}
+    try{ refreshPdfAttachButtonsForPlan(); }catch(_){}
     closePricingModal();
     alert(`✓ Pro 플랜으로 전환됐습니다 (시뮬레이션)\n\n이제 5명 멘토 모두 Opus 모델로 답변합니다.\n해제: 헤더 PRO 배지 → "Free로 변경"`);
     return;
