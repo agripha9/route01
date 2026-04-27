@@ -414,6 +414,12 @@ function obDragLeave(e){document.getElementById('ob-drop-zone').classList.remove
 function obDrop(e){e.preventDefault();obDragLeave(e);obFileSelect(e.dataTransfer.files);}
 
 async function obFileSelect(files){
+  /* 게이트 2차 안전망 — 드래그앤드롭 등 다른 경로로 진입한 경우 차단.
+     버튼 클릭은 checkUploadAccess()에서 이미 차단. */
+  if((typeof getCurrentPlan === 'function' ? getCurrentPlan() : 'free') !== 'pro'){
+    try{ openPricingModal(); }catch(_){}
+    return;
+  }
   for(const f of files){
     if(f.size>MAX_UPLOAD_BYTES){alert(`${f.name}: 파일 크기가 20MB를 초과합니다.`);continue;}
     const id='f'+Date.now()+Math.random().toString(36).slice(2);
@@ -447,6 +453,12 @@ function removeObFile(id){uploadedDocs=uploadedDocs.filter(f=>f.id!==id);renderO
 
 /* ── 채팅창 파일 첨부 ── */
 async function chatFileSelect(files){
+  /* 게이트 2차 안전망 — 버튼 클릭은 checkUploadAccess()에서 이미 차단됐겠지만,
+     onchange가 직접 호출되는 다른 경로(브라우저 자동 다이얼로그 등) 대응. */
+  if((typeof getCurrentPlan === 'function' ? getCurrentPlan() : 'free') !== 'pro'){
+    try{ openPricingModal(); }catch(_){}
+    return;
+  }
   for(const f of files){
     if(f.size>MAX_UPLOAD_BYTES){alert(`${f.name}: 파일 크기가 20MB를 초과합니다.`);continue;}
     try{
@@ -2870,6 +2882,21 @@ async function doSend(text){
       /* 멘토가 바뀐 직후엔 시스템 프롬프트도 새 멘토로 가야 하니, 잠시 기다려
          applyProfile()의 UI 업데이트가 반영되게 한 뒤 송신 */
       await new Promise(r=>setTimeout(r, 50));
+    }
+  }catch(_){}
+
+  /* 안전망: PDF 첨부 게이트 (3차). 1차=📎 버튼 onclick, 2차=핸들러 진입부.
+     여기까지 새어나온 경우 — 사용자에게 요금제 안내, 첨부 파일은 비우고 차단.
+     chatPendingFiles(채팅 첨부) + uploadedDocs(온보딩 첨부) 둘 다 검사. */
+  try{
+    const _plan = (typeof getCurrentPlan === 'function') ? getCurrentPlan() : 'free';
+    const hasChatPdf = Array.isArray(chatPendingFiles) && chatPendingFiles.length > 0;
+    const hasObPdf = Array.isArray(uploadedDocs) && uploadedDocs.length > 0;
+    if(_plan !== 'pro' && (hasChatPdf || hasObPdf)){
+      if(hasChatPdf){ chatPendingFiles = []; try{ renderChatFiles && renderChatFiles(); }catch(_){} }
+      if(hasObPdf){ uploadedDocs = []; try{ renderObFiles && renderObFiles(); }catch(_){} }
+      try{ openPricingModal(); }catch(_){}
+      return;
     }
   }catch(_){}
 
@@ -6268,8 +6295,10 @@ function pickMentorOrUpgrade(el, styleKey){
   try{ openPricingModal(); }catch(_){}
 }
 
-/* 파일 업로드 접근 제어 */
-function checkUploadAccess(){
+/* 파일 업로드 접근 제어
+   inputId 인자: 'ob-file-input' / 'chat-file-input' / 'ws-file-input' 등.
+   생략 시 기존 동작(온보딩 input)으로 폴백 — 호환성 유지. */
+function checkUploadAccess(inputId){
   /* 정책 (2026-04-27 v3 + paywall unification):
      무료 → 안내 모달 없이 바로 요금제 모달. */
   const plan = getCurrentPlan ? getCurrentPlan() : 'free';
@@ -6277,7 +6306,8 @@ function checkUploadAccess(){
     try{ openPricingModal(); }catch(_){}
     return;
   }
-  document.getElementById('ob-file-input')?.click();
+  const targetId = inputId || 'ob-file-input';
+  document.getElementById(targetId)?.click();
 }
 
 (function exposeGlobals() {

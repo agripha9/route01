@@ -1289,3 +1289,69 @@ return;
 ### 캐시 버스터 v8
 `?v=20260427-paywall-unification-v8`
 
+
+---
+
+## 41. 2026-04-27 PDF 업로드 게이트 누수 차단 (다층 안전망)
+
+### 발견 — 게이트 누수 3가지 진입점
+
+사용자 점검 — "Free 사용자가 입력창의 📎 클릭하면 그냥 첨부됨?"
+전수 조사 결과 4개 진입점 중 1곳만 게이트 있고 3곳 누수:
+
+| 진입점 | 게이트 상태 |
+|---|---|
+| 온보딩 PDF 박스(커다란 드롭존) | ✅ `checkUploadAccess()` |
+| 웰컴 화면 📎 버튼 | ❌ `document.getElementById('ws-file-input').click()` 직호출 |
+| 채팅 화면 📎 버튼 | ❌ `document.getElementById('chat-file-input').click()` 직호출 |
+| 파일 선택 핸들러(`chatFileSelect`/`obFileSelect`) | ❌ plan 검사 없음 |
+| `doSend` 송신 직전 | ❌ 첨부 파일 plan 검사 없음 |
+
+→ Free 사용자가 PDF 첨부해서 송신 가능. Anthropic API로 PDF 토큰까지 그대로 전송. Pro 게이트 무력화.
+
+### 적용 변경 (§39 멘토 동기화와 동일한 다층 패턴)
+
+**롤백 태그**: `pre-pdf-gate-layers`
+
+A. **1차 게이트 — 📎 버튼 onclick** (`index.html`)
+   - 웰컴 화면(line 596): `checkUploadAccess('ws-file-input')`
+   - 채팅 화면(line 639): `checkUploadAccess('chat-file-input')`
+
+B. **`checkUploadAccess(inputId)` 확장**
+   - 인자로 input id 받아 해당 input의 `.click()` 호출
+   - 인자 생략 시 'ob-file-input' 폴백 (호환성)
+
+C. **2차 게이트 — 핸들러 진입부**
+   - `obFileSelect`: 진입 시 plan 검사. 무료면 요금제 모달 + return
+   - `chatFileSelect`: 동일
+   - 드래그앤드롭(`obDrop`)·다른 우회 경로 모두 차단
+
+D. **3차 게이트 — `doSend` 송신 직전 안전망**
+   - `chatPendingFiles` + `uploadedDocs` 둘 다 검사
+   - 무료인데 첨부 있으면 → 비우고 + `renderChatFiles`/`renderObFiles` UI 갱신 + 요금제 모달 + return
+
+E. 캐시 버스터 v9: `?v=20260427-pdf-gate-layers-v9`
+
+### 통일된 Pro 게이트 구조 (§39 + §41)
+
+| 진입점 | 1차 (UI 클릭) | 2차 (핸들러) | 3차 (doSend) |
+|---|---|---|---|
+| 멘토 선택 | meta.free 검사 | — | ensureMentorPlanSync ✓ |
+| PDF 업로드 | `checkUploadAccess()` ✓ | `obFileSelect`/`chatFileSelect` plan 검사 ✓ | `chatPendingFiles`+`uploadedDocs` 검사 ✓ |
+| 지원사업 도우미 | `checkGrantAccess()` plan 검사 → 요금제 모달 | — | — |
+| 내보내기 | `exportAnswer` plan 검사 → 요금제 모달 | — | — |
+
+### 검증
+
+1. Free 상태에서 입력창 📎 클릭 → 요금제 모달 즉시 (파일 다이얼로그 안 열림)
+2. 온보딩 박스 클릭 → 요금제 모달 (이미 작동 중)
+3. (이론적 우회) 콘솔에서 `chatFileSelect([fakeFile])` 직호출 → 요금제 모달 + 첨부 안됨
+4. (3차 안전망) 콘솔에서 `chatPendingFiles.push({...})` → 입력 후 송신 → doSend가 잡아서 비우고 요금제 모달
+
+### 잔존 사항
+
+PDF 정책 자체는 §24-I에서 결정 완료:
+- 접근: Pro 전용
+- 토큰 효율: prompt caching (90% 할인)
+- Full RAG: 클로즈 베타 데이터로 판단
+
