@@ -2694,6 +2694,23 @@ H2 섹션 내부에서, 내용이 다층적이거나 여러 논점을 품을 때
 - 도메인이 ${mentorName}의 강점 밖이라도 답을 회피하지 말 것. 본인 철학으로 먼저 프레임을 제시한 뒤, 실무 정보를 충분히 제공하라
 - 수평선(\`---\`, \`***\`, \`___\`) 사용 금지. 섹션 전환은 H2/H3 제목과 여백으로만
 - "Executive Summary", "핵심 결론 및 권고사항" 같은 MBA 컨설팅 포맷을 절대 쓰지 말 것
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[정체성 강제 — 답변 검수 시 반드시 확인]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+답변을 작성한 후, 자기 답변을 다시 읽으며 다음을 확인하라. 미달하면 다시 써라:
+
+1. **시그니처 어휘 3개 이상** — ${mentorName}의 [어휘·프레임] 블록에 명시된 어휘를 답변 본문에 자연스럽게 3개 이상 녹여라. 머리에 박힌 표준 답변을 그대로 쓰면서 어휘만 끼워 넣지 말 것 — 사고 자체가 그 어휘들을 통해 흘러야 한다.
+   (예: Peter Thiel이라면 monopoly·secrets·10배·contrarian·definite optimism·network effects·last mover advantage 중 3개+. Naval이라면 leverage·specific knowledge·pull vs push·복리·long-term game·judgment·permission-less 중 3개+.)
+
+2. **시그니처 사례 1개 이상** — ${mentorName}의 [자주 인용하는 사례]에서 1개 이상을 답변에 구체적으로 인용하라. 단순 언급이 아니라 그 사례가 답변의 논리에 기여해야 한다.
+   (예: Thiel이라면 PayPal·Facebook 하버드·Palantir·SpaceX 중 1개+. Naval이라면 AngelList·Buffett 복리·Twitter 스레드 중 1개+. Brian Chesky라면 Airbnb 에어매트리스/시리얼박스·Disney·Apple Store 중 1개+. Jensen이라면 Denny's 1993·CUDA 10년 적자·RIVA 위기 중 1개+. PG라면 Airbnb 에어매트리스·Stripe Collison installation·Dropbox MVP 중 1개+.)
+
+3. **표준 답변 안전지대 회피** — "Sean Ellis 테스트", "고객 인터뷰", "MVP 빨리 만들기", "PMF는 retention", "Lean Startup", "Build-Measure-Learn" 같은 모든 멘토가 말할 법한 일반 창업 교과서 콘텐츠로만 채우지 말 것. 그런 일반론이 필요하면 ${mentorName}만의 프레임으로 재해석하거나 ${mentorName}의 사례로 입증하라.
+
+4. **답변이 다른 멘토 답변과 어떻게 다른지 자문** — 만약 같은 질문을 Paul Graham/Thiel/Chesky/Huang/Naval 중 다른 멘토에게 했다면 어떻게 다르게 답할까? 내 답변이 그들의 답변과 명확히 구분되는가? 구분이 안 되면 ${mentorName}의 색이 부족한 것이다 — 다시 써라.
+
+이 4개 체크가 통과되지 않으면, 답변은 표면적으로 그럴듯해 보여도 ${mentorName}이 아니라 "AI 일반 창업 자문"의 답변이 된다. ${mentorName}의 [사고 순서]를 머릿속으로 따랐다면 1·2·3은 자연스럽게 충족되어야 한다 — 만약 충족이 안 됐다면 사고 순서를 형식적으로만 따르고 본문은 표준답을 쓴 것이다.
 `;
   return sys;
 }
@@ -2922,15 +2939,20 @@ let MODEL_CACHE = {sonnet:null, haiku:null, opus:null, ts:0};
      2) 질문 복잡도 (파일/키워드/길이)
 
    규칙 (우선순위 순):
-     - FREE 멘토(Paul Graham, Peter Thiel)      → 항상 Sonnet
-     - PRO 멘토 + 복잡한 질문(파일/키워드/200자+) → Opus
-     - PRO 멘토 + 단순 질문                      → Sonnet
+/* 라우팅 정책 (2026-04-27 갱신, 멘토 자유화 후 검증 결과 반영):
+   - FREE 멘토 (Paul Graham, Peter Thiel) → 항상 Sonnet
+   - PRO 멘토 (Brian Chesky, Jensen Huang, Naval) → 항상 Opus
 
-   이유: FREE 멘토는 저렴·빠른 답변 가치, PRO 멘토는 깊은 통찰 가치.
-         PRO라도 단순 질문("안녕")에 Opus 쓰면 비용 낭비이고 체감 차이 없음.
+   이전 정책(2026-04-24): PRO 멘토 + 복잡 질문일 때만 Opus, 단순 질문은 Sonnet
+   변경 이유: 멘토 자유화(c2cf3f9) 후 사용자 A/B 검증 결과, PMF 같은 표준 질문에서
+   Sonnet은 두 PRO 멘토(Thiel·Naval)의 답변 본문을 70% 동일하게 생성하고 시그니처
+   어휘를 거의 사용하지 않음. 멘토 정체성이 모델 한계에 묻힘. Opus는 같은
+   프롬프트로도 멘토별 차별화가 또렷이 나옴(외부 A/B에서 검증).
+   PRO 멘토의 가치 약속 = "더 깊이 있고 차별화된 답변"이므로, 복잡도 체크 없이
+   항상 Opus로 가야 그 약속이 실제로 작동함.
 
-   유료화 붙일 때: PROTOTYPE_MODE 플래그처럼 ROUTING_MODE 전환 지점으로 확장 가능.
-   롤백: 이 블록 + callOnce 직전 pickModel 호출부 되돌리면 끝. */
+   유료화 붙일 때: 게이트는 isPaid 체크. PRO 멘토 라우팅 자체는 유지.
+   롤백: 이 블록을 pre-identity-enforcement 태그 시점으로 되돌리면 끝. */
 const COMPLEX_QUERY_PATTERNS = [
   /분석/, /전략/, /시나리오/, /비교/, /계획/, /설계/, /구조/, /리서치/,
   /로드맵/, /경쟁/, /포지셔닝/, /피보팅/, /IR/, /투자\s*유치/, /사업\s*계획/,
@@ -2941,34 +2963,32 @@ async function pickModel(ctx){
   const question = String((ctx && ctx.question) || '');
   const hasFiles = !!(ctx && ctx.hasFiles);
 
-  /* 1축: 멘토 티어 — FREE는 무조건 Sonnet (비용·속도 우선) */
+  /* 멘토 티어 — FREE는 Sonnet, PRO는 Opus (복잡도 체크 없음) */
   const meta = (typeof MENTOR_META !== 'undefined') ? MENTOR_META[mentor] : null;
   const isFreeMentor = !!(meta && meta.free === true);
 
-  /* 2축: 복잡도 — 파일 첨부·키워드 매치·긴 질문 중 하나라도 해당 시 복잡 */
+  /* 복잡도는 더 이상 라우팅 분기 기준이 아님. 관측 로그 용도로만 계산 유지 */
   const isComplex =
     hasFiles ||
     question.length > 200 ||
     COMPLEX_QUERY_PATTERNS.some(rx => rx.test(question));
 
-  const useOpus = !isFreeMentor && isComplex;
+  const useOpus = !isFreeMentor;
   const family = useOpus ? 'opus' : 'sonnet';
 
   const resolved = await resolveModelId(family);
   const fallback = useOpus
-    ? 'claude-opus-4-7'           /* opus 최신으로 resolve 실패 시 폴백 — resolveModelId가 실제 최신을 반환하므로 비상용. 4.7 출시(2026-04-16 기준). */
+    ? 'claude-opus-4-7'           /* opus 최신으로 resolve 실패 시 폴백 — resolveModelId가 실제 최신을 반환하므로 비상용 */
     : 'claude-sonnet-4-5-20250929';
   const model = resolved || fallback;
 
-  /* 관측 로그 — 실제 라우팅이 의도대로 되는지 확인용 (초기 안정화 후 제거 가능) */
+  /* 관측 로그 — 실제 라우팅이 의도대로 되는지 확인용 */
   try{
     console.log('[route]', {
       model: model,
       tier: isFreeMentor ? 'free' : 'pro',
       complex: isComplex,
-      reason: isFreeMentor ? 'free_mentor_always_sonnet'
-            : isComplex ? (hasFiles ? 'has_files' : (question.length > 200 ? 'long_question' : 'complex_keyword'))
-            : 'pro_mentor_simple',
+      reason: isFreeMentor ? 'free_mentor_always_sonnet' : 'pro_mentor_always_opus',
       mentor,
       qlen: question.length,
       files: hasFiles
