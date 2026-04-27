@@ -1138,3 +1138,59 @@ D. 캐시 버스터 v5: `?v=20260427-language-policy-v5`
 - monopoly/leverage 같은 핵심 어휘는 짧은 단어로만 등장하는가 (영어 문장으로 길어지지 않음)
 - H2·H3 섹션 제목이 한국어 명사구인가
 
+
+---
+
+## 38. 2026-04-27 내보내기 Pro 게이트 (정책 누락 보완)
+
+### 발견
+
+사용자 점검 — DOCX/PDF 내보내기는 R01_PLANS·CONTEXT 정책상 Pro 전용인데, 코드는 무료 사용자도 그대로 사용 가능. §35 PROTOTYPE_MODE 정리 시 다른 게이트(파일 업로드, 지원사업, 멘토 모달)는 정리됐으나 exportAnswer는 처음부터 PROTOTYPE_MODE 분기조차 없이 열려있어 정리 대상에서 누락.
+
+### 사용자 결정
+
+- 복사 버튼: 무료 OK (이미 그렇게 작동 중)
+- 내보내기 버튼: 보이되 PRO 아이콘 표기, 클릭 시 결제 모달
+
+### 적용 변경
+
+**롤백 태그**: `pre-export-gate`
+
+A. **renderAnswerActions — PRO 배지 표시 분기**
+   - getCurrentPlan() 결과에 따라 무료 사용자에게는 내보내기 버튼에 `<span class="a-act-pro-badge">PRO</span>` 추가
+   - 잠긴 톤 표시: `a-act--locked` 클래스 (opacity 0.78)
+   - Pro 사용자에게는 배지·잠금 표시 없음 (정상)
+
+B. **exportAnswer 진입부 Pro 게이트**
+   - `getCurrentPlan() !== 'pro'` 면 결제 안내 모달 → 요금제 모달 유도
+   - 모달 메시지: "DOCX·PDF 내보내기는 Pro 플랜에서 이용할 수 있어요. 무료 플랜에서는 복사 버튼으로 답변을 옮길 수 있습니다."
+   - 다른 Pro 게이트(파일 업로드, 지원사업)와 같은 UX 패턴
+
+C. **refreshAnswerActionsForPlan 헬퍼 추가**
+   - plan 변경 시 기존 답변 카드의 액션 영역을 다시 렌더링 (PRO 배지가 즉시 반영)
+   - selectPlan에서 free → pro / pro → free 전환 시 호출
+
+D. **CSS — `.a-act-pro-badge` + `.a-act--locked`**
+   - 배지: 9.5px / 700 / 흰색 반투명 배경 / 둥근 알약 / 골드 버튼 안 자연스럽게 박힘
+   - 잠금: opacity 0.78 → hover 0.92 (살짝 눌린 톤)
+
+E. 캐시 버스터 v6: `?v=20260427-export-gate-v6`
+
+### 검증
+
+1. 무료 상태 답변 받기 → 답변 카드 우하단 "내보내기 (DOCX) PRO" / "내보내기 (PDF) PRO" 배지 보임
+2. 무료 상태에서 내보내기 클릭 → "📄 Pro 전용 기능" 모달 → "요금제 보기" 버튼
+3. Pro 전환 → 답변 카드 PRO 배지 즉시 사라짐 → 내보내기 정상 작동
+4. Pro → Free 복귀 → 답변 카드 PRO 배지 다시 표시
+
+### 정책 일관성 확인
+
+이제 모든 Pro 전용 기능에 일관된 게이트:
+- 멘토 선택 모달 (Pro 멘토 3명) ✓
+- 온보딩 멘토 선택 (pickMentorOrUpgrade) ✓
+- 지원사업 도우미 (checkGrantAccess) ✓
+- PDF 업로드 (checkUploadAccess) ✓
+- DOCX/PDF 내보내기 (exportAnswer) ✓ ← 이번에 추가
+
+남은 미구현: doSend 일일 5건 카운터 (백엔드 작업 시 구현 — §31 방향 A)
+

@@ -1803,6 +1803,17 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .a-act.gold:hover{opacity:.92;border-color:var(--brand-main-press);background:var(--brand-main-press)}
 .a-act:disabled{opacity:.45;cursor:not-allowed}
 
+/* Pro 잠금 상태 — 무료 사용자가 보는 내보내기 버튼.
+   클릭은 가능(=결제 모달로 안내), 시각적으로 약간 눌린 톤으로 잠금 인지 유도. */
+.a-act--locked{opacity:.78;}
+.a-act--locked:hover{opacity:.92;}
+.a-act-pro-badge{
+  display:inline-block;margin-left:4px;padding:1px 6px;border-radius:980px;
+  font-size:9.5px;font-weight:700;letter-spacing:0.4px;
+  background:rgba(255,255,255,0.22);color:#fff;
+  vertical-align:1px;
+}
+
 /* FILE UPLOAD */
 .upload-zone{
   border:1px dashed var(--border);border-radius:var(--r-lg);padding:18px;text-align:center;cursor:pointer;

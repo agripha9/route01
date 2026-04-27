@@ -3023,11 +3023,32 @@ async function doSend(text){
 /* (streaming disabled) */
 
 function renderAnswerActions(id){
+  /* 정책 (2026-04-27 v3): 복사는 무료 OK. DOCX/PDF 내보내기는 Pro 전용.
+     무료 사용자에게도 버튼은 노출 — Pro 가치 인지 유도. 버튼에 PRO 배지를 붙이고
+     클릭 시 exportAnswer 진입부에서 plan 검사 → 무료면 결제 모달. */
+  const plan = (typeof getCurrentPlan === 'function') ? getCurrentPlan() : 'free';
+  const isPro = plan === 'pro';
+  const proBadge = isPro ? '' : '<span class="a-act-pro-badge" aria-label="Pro 전용">PRO</span>';
   return `<div class="answer-actions" data-actions-for="${id}">
     <button class="a-act" onclick="copyAnswer('${id}',this)">복사</button>
-    <button class="a-act gold" onclick="void exportAnswer('docx','${id}',this)">내보내기 (DOCX)</button>
-    <button class="a-act gold" onclick="void exportAnswer('pdf','${id}',this)">내보내기 (PDF)</button>
+    <button class="a-act gold${isPro?'':' a-act--locked'}" onclick="void exportAnswer('docx','${id}',this)">내보내기 (DOCX)${proBadge}</button>
+    <button class="a-act gold${isPro?'':' a-act--locked'}" onclick="void exportAnswer('pdf','${id}',this)">내보내기 (PDF)${proBadge}</button>
   </div>`;
+}
+
+/* plan 변경 시 기존 답변 카드의 액션 영역을 다시 렌더링 — PRO 배지가 즉시 반영되도록.
+   selectPlan(요금제 변경) 또는 syncHeaderPlanPill 직후 호출. */
+function refreshAnswerActionsForPlan(){
+  try{
+    document.querySelectorAll('.answer-actions[data-actions-for]').forEach(el => {
+      const id = el.getAttribute('data-actions-for');
+      if(!id) return;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = renderAnswerActions(id);
+      const fresh = wrap.firstElementChild;
+      if(fresh) el.replaceWith(fresh);
+    });
+  }catch(e){}
 }
 
 const ANSWER_RAW = new Map();
@@ -4307,6 +4328,27 @@ document.addEventListener('DOMContentLoaded', function(){
 
 /* ─── exportAnswer (OOXML altChunk, standard) ─── */
 async function exportAnswer(type, id /*, btn */){
+  /* Pro 게이트 (2026-04-27 v3): DOCX/PDF 내보내기는 Pro 전용.
+     무료 사용자 클릭 시 결제 안내 모달 → 요금제 모달로 유도. */
+  const _plan = (typeof getCurrentPlan === 'function') ? getCurrentPlan() : 'free';
+  if(_plan !== 'pro'){
+    const m = document.createElement('div');
+    m.className = 'modal-bg open';
+    m.style.zIndex = '9999';
+    m.innerHTML = `<div class="modal" style="max-width:400px;text-align:center">
+      <button class="modal-close" onclick="this.closest('.modal-bg').remove()">×</button>
+      <div style="font-size:32px;margin-bottom:10px">📄</div>
+      <div class="modal-title">Pro 전용 기능</div>
+      <div class="modal-sub">DOCX·PDF 내보내기는 Pro 플랜에서 이용할 수 있어요.<br>무료 플랜에서는 <strong>복사</strong> 버튼으로 답변을 옮길 수 있습니다.</div>
+      <div style="display:flex;gap:8px;margin-top:1.25rem">
+        <button class="modal-btn" onclick="this.closest('.modal-bg').remove()" style="flex:1">닫기</button>
+        <button class="modal-btn pri" onclick="this.closest('.modal-bg').remove();openPricingModal();" style="flex:1">요금제 보기 →</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+    return;
+  }
   const Zip=typeof JSZip!=='undefined'?JSZip:(typeof window!=='undefined'?window.JSZip:undefined);
   const isDocx=type==='docx'||type==='word';
   const isPdf=type==='pdf';
@@ -6097,6 +6139,7 @@ function selectPlan(planId){
   if(plan.price === 0){
     localStorage.setItem('r01_plan','free');
     try{ syncHeaderPlanPill(); }catch(_){}
+    try{ refreshAnswerActionsForPlan(); }catch(_){}
     closePricingModal();
     alert('Free 플랜으로 변경됐습니다.');
     return;
@@ -6115,6 +6158,7 @@ function selectPlan(planId){
     if(!ok) return;
     localStorage.setItem('r01_plan','pro');
     try{ syncHeaderPlanPill(); }catch(_){}
+    try{ refreshAnswerActionsForPlan(); }catch(_){}
     closePricingModal();
     alert(`✓ Pro 플랜으로 전환됐습니다 (시뮬레이션)\n\n이제 5명 멘토 모두 Opus 모델로 답변합니다.\n해제: 헤더 PRO 배지 → "Free로 변경"`);
     return;
