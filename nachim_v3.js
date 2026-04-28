@@ -97,6 +97,59 @@ async function ensureAuth0Sdk(){
   return auth0SdkLoadPromise;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Supabase 클라이언트 (2026-04-28 도입, §44)
+   ────────────────────────────────────────────────────────────────────
+   이메일/비밀번호 인증, profiles·subscriptions·daily_usage 테이블 접근.
+   Auth0 Google 로그인은 그대로 유지 (세션 4에서 Supabase Google로 이관 예정).
+
+   publishable key는 공개 키 — RLS 정책으로 본인 데이터만 read/write 가능.
+   service_role(secret) 키는 절대 클라이언트에 노출 금지.
+   ══════════════════════════════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://fbfvaqcahppwzhtmlhtn.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_p4DC2MinPlyZwk4YIjATWg_Zl8OkS7I';
+
+/* CDN 로딩 실패 대비 — supabase 전역이 없으면 null로 두고 기존 흐름 유지 */
+let sb = null;
+try {
+  if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,        /* 세션을 localStorage에 자동 저장 */
+        autoRefreshToken: true,      /* 토큰 만료 전 자동 갱신 */
+        detectSessionInUrl: true     /* 이메일 인증 링크 콜백 자동 처리 */
+      }
+    });
+    console.log('[supabase] client initialized');
+  } else {
+    console.warn('[supabase] CDN not loaded — falling back to legacy auth');
+  }
+} catch (e) {
+  console.error('[supabase] init error', e);
+}
+
+/* 현재 Supabase 세션 사용자 가져오기 (헬퍼) */
+async function sbGetUser(){
+  if(!sb) return null;
+  try {
+    const { data, error } = await sb.auth.getUser();
+    if(error || !data?.user) return null;
+    return data.user;
+  } catch(e){ return null; }
+}
+
+/* Supabase 사용자 → 우리 코드의 setAuthed 포맷으로 변환 */
+function sbUserToAuthShape(u){
+  if(!u) return null;
+  return {
+    sub: u.id,
+    email: u.email,
+    name: u.user_metadata?.nickname || (u.email ? u.email.split('@')[0] : '사용자'),
+    method: 'email',     /* 이메일/PW 로그인은 'email', 향후 OAuth는 'google-oauth2' 등 */
+    supabase: true       /* Supabase 경로로 들어왔음을 구분 */
+  };
+}
+
 function isAuthed(){
   return !!localStorage.getItem('nachim_auth');
 }
