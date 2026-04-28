@@ -120,6 +120,8 @@ try {
         detectSessionInUrl: true     /* 이메일 인증 링크 콜백 자동 처리 */
       }
     });
+    /* 디버깅·콘솔 검증용 — 운영 안전성에 영향 없음 */
+    try { window.sb = sb; } catch(_){}
     console.log('[supabase] client initialized');
   } else {
     console.warn('[supabase] CDN not loaded — falling back to legacy auth');
@@ -237,6 +239,29 @@ async function initAuth0(){
 
 async function handleAuthCallback(){
   const qs=new URLSearchParams(window.location.search);
+  const hash = window.location.hash || '';
+
+  /* 1) Supabase 세션 처리 (2026-04-28 §44 Step 2)
+     - 이메일 인증 링크 클릭 후 돌아온 직후: URL에 토큰이 박혀 있고 detectSessionInUrl=true가 자동 처리
+     - 이미 로그인된 사용자가 재방문: persistSession이 localStorage에서 자동 복원
+     - 두 경우 모두 sb.auth.getSession()으로 현재 세션을 확인 가능. */
+  if(sb){
+    try {
+      /* 약간의 지연 — detectSessionInUrl이 비동기 처리를 끝낼 시간을 줌 */
+      const { data: { session }, error } = await sb.auth.getSession();
+      if(!error && session?.user){
+        /* Supabase 세션이 살아있으면 우리 setAuthed에 동기화 */
+        setAuthed(sbUserToAuthShape(session.user));
+
+        /* URL에 인증 토큰이 박혀 있으면 정리 (이메일 링크에서 돌아온 경우) */
+        if(hash.includes('access_token=') || hash.includes('type=signup') || hash.includes('type=recovery')){
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } catch(e){ console.warn('[supabase] session restore error', e); }
+  }
+
+  /* 2) Auth0 콜백 처리 (기존 로직 그대로 유지) */
   if(qs.has('code') && qs.has('state')){
     const c=await initAuth0();
     if(c){
@@ -5038,8 +5063,10 @@ function _isSocialEmail(email) {
   } catch(e){ return false; }
 }
 
-/* ── 이메일 로그인 ── */
-function emailLogin() {
+/* ── 이메일 로그인 (Supabase Auth — 2026-04-28 §44 Step 2) ──
+   기존: localStorage r01_accs에서 비밀번호 비교 (가짜)
+   현재: Supabase signInWithPassword — DB에서 검증 + 세션 토큰 발급 */
+async function emailLogin() {
   const email = (document.getElementById('alogin-email')?.value||'').trim();
   const pw    = (document.getElementById('alogin-pw')?.value||'');
   const err   = document.getElementById('aerr-login');
@@ -5047,67 +5074,133 @@ function emailLogin() {
   if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
   if(!pw) { err.textContent='비밀번호를 입력해주세요.'; return; }
 
-  const accounts = _r01Accounts();
-  const found = accounts.find(a=>a.email===email);
-  if(!found) {
-    err.textContent='가입되지 않은 이메일입니다. 회원가입을 해주세요.';
+  if(!sb){
+    err.textContent='인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.';
     return;
   }
-  if(found.pw !== btoa(pw)) { err.textContent='비밀번호가 맞지 않습니다.'; return; }
 
-  // 로그인 성공 — 기존 프로필 유지 (이메일 가입자의 프로필은 유지)
-  setAuthed({email, name:found.nickname||email.split('@')[0], method:'email'});
-  startAfterLogin();
+  /* 로그인 버튼 비활성화 + 로딩 표시 */
+  const btn = document.querySelector('#aform-login .auth-submit-btn');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '로그인 중...'; }
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if(error){
+      /* Supabase 에러 메시지를 한국어로 변환 */
+      const msg = String(error.message||'');
+      if(/Invalid login credentials/i.test(msg)){
+        err.textContent='이메일 또는 비밀번호가 맞지 않습니다.';
+      } else if(/Email not confirmed/i.test(msg)){
+        err.innerHTML='이메일 인증이 완료되지 않았습니다.<br>받으신 인증 메일의 링크를 클릭해주세요.';
+      } else if(/network|fetch/i.test(msg)){
+        err.textContent='네트워크 오류입니다. 잠시 후 다시 시도해주세요.';
+      } else {
+        err.textContent = '로그인 실패: ' + msg;
+      }
+      return;
+    }
+
+    /* 로그인 성공 — Supabase user를 우리 setAuthed 포맷으로 저장 */
+    const user = data?.user;
+    if(!user){ err.textContent='로그인은 됐지만 사용자 정보를 가져오지 못했습니다.'; return; }
+    setAuthed(sbUserToAuthShape(user));
+    startAfterLogin();
+  } catch(e){
+    err.textContent = '예기치 못한 오류: ' + (e?.message||String(e));
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = oldText || '로그인'; }
+  }
 }
 
-/* ── 이메일 회원가입 ── */
-function emailSignup() {
+/* ── 이메일 회원가입 (Supabase Auth — 2026-04-28 §44 Step 2) ──
+   기존: localStorage 가짜 저장 + 클라이언트에서 6자리 코드 생성·표시
+   현재: Supabase signUp → DB 사용자 생성 + 인증 메일 자동 발송 */
+async function emailSignup() {
   const email = (document.getElementById('asignup-email')?.value||'').trim();
   const pw    = (document.getElementById('asignup-pw')?.value||'');
   const pw2   = (document.getElementById('asignup-pw2')?.value||'');
   const err   = document.getElementById('aerr-signup');
   err.textContent = '';
-  // 이메일 바로 아래 중복 안내도 초기화
   const dupEl = document.getElementById('aerr-email-dup');
   if(dupEl) dupEl.textContent = '';
 
+  /* 클라이언트 측 사전 검증 — 네트워크 호출 전에 빨리 실패 */
   if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
   if(pw.length<8) { err.textContent='비밀번호는 8자 이상이어야 합니다.'; return; }
   if(pw!==pw2) { err.textContent='비밀번호가 일치하지 않습니다.'; return; }
   if(!document.getElementById('agree-terms')?.checked) { err.textContent='이용약관에 동의해주세요.'; return; }
   if(!document.getElementById('agree-privacy')?.checked) { err.textContent='개인정보처리방침에 동의해주세요.'; return; }
 
-  const accounts = _r01Accounts();
-
-  // ① 이메일 가입 중복 체크
-  if(accounts.find(a=>a.email===email)) {
-    err.innerHTML='이미 이메일로 가입된 계정입니다.<br><button type="button" onclick="switchAuthTab(\'login\')" style="color:var(--link-blue);background:none;border:none;cursor:pointer;font-size:13px;text-decoration:underline;padding:0">로그인하기 →</button>';
+  if(!sb){
+    err.textContent='인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.';
     return;
   }
 
-  // ② 소셜 계정 중복 체크 (같은 이메일로 구글/애플 등 로그인 이력 있는 경우)
-  // localStorage에서 Auth0 소셜 사용자 이메일 목록 확인
-  const socialUsed = _checkSocialUsedEmail(email);
-  if(socialUsed) {
-    err.innerHTML=`이 이메일은 이미 <strong>${socialUsed}</strong> 로그인으로 가입되어 있습니다.<br>해당 방법으로 로그인해 주세요.`;
-    return;
-  }
+  /* 가입 버튼 로딩 */
+  const btn = document.querySelector('#aform-signup .auth-submit-btn');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '가입 중...'; }
 
-  // ③ 인증 코드 생성 및 인증 화면 전환
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  window._r01PendingSignup = { email, pw: btoa(pw), code, ts: Date.now() };
+  try {
+    /* Supabase signUp — Confirm email이 켜져있으면 인증 메일 자동 발송.
+       emailRedirectTo는 인증 링크 클릭 후 돌아올 URL. Site URL의 redirect 화이트리스트에 등록되어 있어야 함. */
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pw,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+        data: {
+          /* user_metadata — handle_new_user 트리거가 nickname으로 사용 */
+          nickname: email.split('@')[0]
+        }
+      }
+    });
 
-  // 인증 화면 표시
-  const addrEl = document.getElementById('averify-addr'); if(addrEl) addrEl.textContent=email;
-  const codeEl = document.getElementById('averify-demo-code');
-  if(codeEl) {
-    codeEl.textContent = code;
-    codeEl.closest('.averify-demo-box').style.display='block';
+    if(error){
+      const msg = String(error.message||'');
+      if(/already registered|already exists|User already/i.test(msg)){
+        err.innerHTML='이미 이메일로 가입된 계정입니다.<br><button type="button" onclick="switchAuthTab(\'login\')" style="color:var(--link-blue);background:none;border:none;cursor:pointer;font-size:13px;text-decoration:underline;padding:0">로그인하기 →</button>';
+      } else if(/password/i.test(msg)){
+        err.textContent = '비밀번호 형식이 올바르지 않습니다: ' + msg;
+      } else if(/email/i.test(msg) && /invalid/i.test(msg)){
+        err.textContent = '올바른 이메일 형식이 아닙니다.';
+      } else {
+        err.textContent = '가입 실패: ' + msg;
+      }
+      return;
+    }
+
+    /* 가입 성공 — 인증 메일 발송됨. "메일 확인" 안내 화면으로 전환.
+       Confirm email이 켜진 상태에선 data.session은 null이고, 사용자가 메일 링크 클릭해야 활성화. */
+    const addrEl = document.getElementById('averify-addr');
+    if(addrEl) addrEl.textContent = email;
+
+    /* 데모 코드 박스 숨김 — 더 이상 6자리 코드를 사용하지 않음 */
+    const demoBox = document.querySelector('.averify-demo-box');
+    if(demoBox) demoBox.style.display = 'none';
+
+    /* 코드 입력란·인증 완료 버튼·재발송 버튼 숨김 — 메일 링크 클릭으로 대체 */
+    const codeField = document.getElementById('averify-code-input')?.closest('.afield');
+    if(codeField) codeField.style.display = 'none';
+    const verifyErr = document.getElementById('averr-verify');
+    if(verifyErr) verifyErr.style.display = 'none';
+    const verifyBtn = document.querySelector('#aform-verify .auth-submit-btn');
+    if(verifyBtn) verifyBtn.style.display = 'none';
+    const resendBtn = document.querySelector('#aform-verify button[onclick="resendVerify()"]');
+    if(resendBtn){
+      resendBtn.textContent = '인증 메일 재발송';
+      resendBtn.style.display = 'inline-block';
+    }
+
+    /* 화면 전환 */
+    const fs = document.getElementById('aform-signup'); if(fs) fs.style.display='none';
+    const fv = document.getElementById('aform-verify'); if(fv) fv.style.display='flex';
+  } catch(e){
+    err.textContent = '예기치 못한 오류: ' + (e?.message||String(e));
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = oldText || '회원가입'; }
   }
-  const fs = document.getElementById('aform-signup'); if(fs) fs.style.display='none';
-  const fv = document.getElementById('aform-verify'); if(fv) fv.style.display='flex';
-  const ci = document.getElementById('averify-code-input'); if(ci) { ci.value=''; ci.focus(); }
-  document.getElementById('averr-verify') && (document.getElementById('averr-verify').textContent='');
 }
 
 /* 소셜 이메일 사용 여부 확인 */
@@ -5170,65 +5263,66 @@ function _checkSocialUsedEmail(email) {
   return null;
 }
 
-/* ── 인증 코드 확인 ── */
+/* ── 인증 (Supabase 흐름 — 2026-04-28 §44 Step 2) ──
+   기존 6자리 코드 입력 방식은 폐기. 사용자는 메일 안 링크를 클릭해 인증.
+   verifySignupCode 함수는 onclick 호환을 위해 남겨두고 안내만 표시. */
 function verifySignupCode() {
-  const pending = window._r01PendingSignup;
-  const codeInput = (document.getElementById('averify-code-input')?.value||'').trim();
-  const errEl = document.getElementById('averr-verify');
-  errEl && (errEl.textContent='');
-
-  if(!pending) { errEl && (errEl.textContent='세션이 만료되었습니다. 다시 시도해주세요.'); return; }
-  if(Date.now() - pending.ts > 10*60*1000) {
-    errEl && (errEl.textContent='인증 시간이 초과되었습니다. 다시 가입해주세요.');
-    window._r01PendingSignup = null;
-    return;
-  }
-  if(codeInput !== pending.code) {
-    errEl && (errEl.textContent='인증 코드가 올바르지 않습니다.');
-    return;
-  }
-
-  // 인증 성공 — 계정 저장
-  const accounts = _r01Accounts();
-  accounts.push({email:pending.email, pw:pending.pw, ts:Date.now()});
-  _saveR01Accounts(accounts);
-  window._r01PendingSignup = null;
-
-  // 신규 가입: 기존 프로필 초기화 후 온보딩으로
-  localStorage.removeItem('vd_profile');
-  setAuthed({email:pending.email, name:pending.email.split('@')[0], method:'email'});
-
-  // 열려있는 모든 모달 닫기 (약관 팝업 등)
-  document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
-  closeTermsModal();
-
-  // 인증 화면 닫고 온보딩으로
-  document.getElementById('auth').classList.add('hidden');
-  document.getElementById('onboarding').classList.remove('hidden');
-  document.getElementById('app').style.display='none';
+  alert(
+    '인증 코드 입력은 더 이상 사용하지 않습니다.\n\n' +
+    '받으신 인증 메일에서 "이메일 확인" 링크를 클릭해주세요.\n' +
+    '클릭하면 자동으로 로그인됩니다.'
+  );
 }
 
-function resendVerify() {
-  const pending = window._r01PendingSignup;
-  if(!pending) { alert('세션이 만료되었습니다. 다시 가입해주세요.'); return; }
-  // 새 코드 발급
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  pending.code = code; pending.ts = Date.now();
-  const codeEl = document.getElementById('averify-demo-code');
-  if(codeEl) codeEl.textContent = code;
-  alert('새 인증 코드를 발송했습니다. (데모 화면에서 확인하세요)');
+/* ── 인증 메일 재발송 (Supabase) ── */
+async function resendVerify() {
+  if(!sb){ alert('인증 서비스 연결 실패. 새로고침 후 다시 시도해주세요.'); return; }
+  const email = (document.getElementById('averify-addr')?.textContent||'').trim();
+  if(!email){ alert('이메일 주소를 찾을 수 없습니다. 다시 가입해주세요.'); return; }
+
+  try {
+    const { error } = await sb.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    });
+    if(error){
+      alert('재발송 실패: ' + (error.message||'알 수 없는 오류'));
+      return;
+    }
+    alert(email + '으로 인증 메일을 다시 보냈습니다.\n\n메일함을 확인하고 "이메일 확인" 링크를 클릭해주세요.\n(스팸함도 함께 확인해주세요.)');
+  } catch(e){
+    alert('재발송 중 오류: ' + (e?.message||String(e)));
+  }
 }
 
-/* ── 비밀번호 찾기 ── */
-function sendResetPw() {
+/* ── 비밀번호 찾기 (Supabase resetPasswordForEmail) ── */
+async function sendResetPw() {
   const email = (document.getElementById('aforgot-email')?.value||'').trim();
   const err   = document.getElementById('aerr-forgot');
   err.textContent = '';
   if(!email||!email.includes('@')) { err.textContent='올바른 이메일을 입력해주세요.'; return; }
-  const accounts = _r01Accounts();
-  if(!accounts.find(a=>a.email===email)) { err.textContent='가입되지 않은 이메일입니다.'; return; }
-  alert(email+'으로 비밀번호 재설정 링크를 발송했습니다.');
-  switchAuthTab('login');
+
+  if(!sb){ err.textContent='인증 서비스 연결 실패. 새로고침 후 다시 시도해주세요.'; return; }
+
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if(error){
+      /* 가입 여부 노출 회피 — 개인정보 보호상 같은 메시지 표시 */
+      const msg = String(error.message||'');
+      if(/rate limit/i.test(msg)){
+        err.textContent='요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.';
+        return;
+      }
+    }
+    /* 성공/실패 메시지 통일 — 가입자/미가입자 식별 어렵게 */
+    alert(email+'이 가입된 이메일이라면, 비밀번호 재설정 링크가 발송됐습니다.\n\n메일함을 확인해주세요. (몇 분 안에 도착)');
+    switchAuthTab('login');
+  } catch(e){
+    err.textContent = '오류: ' + (e?.message||String(e));
+  }
 }
 
 /* ── 약관 체크박스 ── */
