@@ -152,10 +152,206 @@ function sbUserToAuthShape(u){
   };
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Supabase 데이터 동기화 헬퍼 (2026-04-28 §44 Step 3)
+   ────────────────────────────────────────────────────────────────────
+   profiles 테이블 ↔ vd_profile localStorage 캐시
+   subscriptions 테이블 ↔ getCurrentPlan() 결과
+   사용자 본인 데이터만 RLS로 접근 가능 (본인 row 외엔 SELECT 자체가 빈 결과).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Supabase profiles 테이블 행 → 화면용 profile 객체로 변환.
+   화면 코드가 기대하는 필드명: industry/stage/teamSize/concern/mentor 등 */
+function sbProfileRowToLocal(row){
+  if(!row) return null;
+  return {
+    name:       row.startup_name || '',
+    industry:   row.industry || '',
+    stage:      row.stage || '',
+    teamSize:   row.team_size || '',
+    concern:    row.worry || '',
+    mentor:     row.mentor || '',
+    nickname:   row.nickname || ''
+  };
+}
+
+/* 화면용 profile 객체 → Supabase profiles 테이블 행 형식 */
+function localProfileToSbRow(p){
+  if(!p) return {};
+  return {
+    startup_name: p.name || null,
+    industry:     p.industry || null,
+    stage:        p.stage || null,
+    team_size:    p.teamSize || null,
+    worry:        p.concern || null,
+    mentor:       p.mentor || null,
+    nickname:     p.nickname || null
+  };
+}
+
+/* 로그인된 사용자의 profile을 Supabase에서 fetch.
+   handle_new_user 트리거가 가입 시 자동으로 row를 만들어두기 때문에
+   row가 없는 경우는 거의 없지만, 안전 차원에서 null fallback. */
+async function loadProfileFromSupabase(){
+  if(!sb) return null;
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if(!user) return null;
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+    if(error){
+      console.warn('[supabase] profile fetch error', error);
+      return null;
+    }
+    return sbProfileRowToLocal(data);
+  } catch(e){
+    console.warn('[supabase] profile fetch exception', e);
+    return null;
+  }
+}
+
+/* 화면 profile을 Supabase profiles 테이블에 UPSERT (저장).
+   온보딩 완료·프로필 수정 시 호출. RLS 정책이 본인 row만 허용.
+   id는 auth.uid()로 자동 매칭 (insert·update 모두). */
+async function saveProfileToSupabase(localProfile){
+  if(!sb || !localProfile) return { ok: false, reason: 'not-ready' };
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if(!user) return { ok: false, reason: 'not-authed' };
+    const row = localProfileToSbRow(localProfile);
+    row.id = user.id;
+    /* upsert: 없으면 INSERT, 있으면 UPDATE.
+       handle_new_user 트리거로 row가 이미 있을 가능성이 높아 보통 UPDATE 경로. */
+    const { error } = await sb
+      .from('profiles')
+      .upsert(row, { onConflict: 'id' });
+    if(error){
+      console.warn('[supabase] profile save error', error);
+      return { ok: false, reason: error.message };
+    }
+    return { ok: true };
+  } catch(e){
+    console.warn('[supabase] profile save exception', e);
+    return { ok: false, reason: String(e) };
+  }
+}
+
+/* 로그인된 사용자의 plan(free/pro) 조회.
+   결제 검증을 거친 서버(Edge Function)에서만 plan을 변경할 수 있으므로
+   (RLS상 클라이언트는 SELECT만 가능), 이 값은 신뢰 가능.
+   세션 1·2에선 모두 'free'. 세션 3(결제) 이후 'pro' 가능. */
+async function loadPlanFromSupabase(){
+  if(!sb) return 'free';
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if(!user) return 'free';
+    const { data, error } = await sb
+      .from('subscriptions')
+      .select('plan, expires_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if(error || !data) return 'free';
+    /* Pro 만료 처리 — expires_at이 과거면 free 취급 */
+    if(data.plan === 'pro' && data.expires_at){
+      const exp = new Date(data.expires_at).getTime();
+      if(isFinite(exp) && exp < Date.now()) return 'free';
+    }
+    return data.plan === 'pro' ? 'pro' : 'free';
+  } catch(e){
+    console.warn('[supabase] plan fetch exception', e);
+    return 'free';
+  }
+}
+
+/* 부팅 후 또는 로그인 직후 호출 — Supabase에서 profile + plan을 가져와
+   localStorage 캐시를 정리한 상태로 동기화.
+   이 함수가 끝나면 화면 코드(launch 등)가 기대하는 vd_profile / r01_plan이 채워짐.
+
+   설계 원칙:
+   - Supabase가 진실의 원천. localStorage는 빠른 화면 표시용 캐시.
+   - profile이 비어있으면 → 신규 사용자 → 온보딩으로 보내기
+   - profile이 있으면 → 캐시에 저장 → launch()로 바로 앱 진입 */
+async function hydrateUserStateFromSupabase(){
+  if(!sb) return { hasProfile: false, plan: 'free' };
+
+  /* plan 먼저 — 헤더 pill·게이트 결정에 즉시 필요 */
+  const plan = await loadPlanFromSupabase();
+  try { localStorage.setItem('r01_plan', plan); } catch(_){}
+
+  /* profile — 입력된 프로필이 하나라도 있으면 hasProfile=true */
+  const localProfile = await loadProfileFromSupabase();
+  let hasProfile = false;
+  if(localProfile){
+    /* 비어있는 row와 실제 입력된 프로필 구분 — 핵심 필드 중 하나라도 있어야 인정 */
+    const hasContent = !!(localProfile.industry || localProfile.stage || localProfile.teamSize || localProfile.concern);
+    if(hasContent){
+      hasProfile = true;
+      try { localStorage.setItem('vd_profile', JSON.stringify(localProfile)); } catch(_){}
+      try { if(typeof profile !== 'undefined') profile = localProfile; } catch(_){}
+    }
+  }
+  return { hasProfile, plan };
+}
+
 function isAuthed(){
   return !!localStorage.getItem('nachim_auth');
 }
+
+/* 사용자별로 분리되어야 하는 localStorage 키 목록.
+   사용자가 바뀌면 이 키들을 모두 비워서 옛 사용자 데이터 누출 방지.
+   진실의 원천은 Supabase이고, localStorage는 단지 캐시일 뿐.
+   2026-04-28 §44 Step 3 도입. */
+const USER_SCOPED_LS_KEYS = [
+  'vd_profile',          /* 비즈니스 프로필 (업종/단계/팀규모) */
+  'vd_history',          /* 옛 질문 기록 (구버전) */
+  'r01_hist_v1',         /* 현행 질문 기록 (히스토리) */
+  'r01_chat_history',    /* 채팅 답변 기록 */
+  'r01_plan',            /* 가짜 plan (Step 3에서 Supabase로 대체되지만 캐시는 남아있을 수 있음) */
+  'r01_banner_x',        /* 배너 닫음 상태 */
+  'r01_pending_q',       /* 미전송 질문 */
+  'r01_last_mentor',     /* 마지막 선택 멘토 */
+  'r01_recent_questions',/* 최근 질문 */
+  'r01_accs',            /* 소셜 계정 method 캐시 */
+  '_r01PendingSignup'    /* 가입 대기 (이미 만료되어도 정리) */
+];
+
+/* 현재 인증된 사용자의 식별자(sub) 가져오기 — 못 찾으면 null */
+function getCurrentAuthSub(){
+  try {
+    const raw = localStorage.getItem('nachim_auth');
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.user?.sub || parsed?.user?.email || null;
+  } catch(e){ return null; }
+}
+
+/* 사용자별 캐시 클리어 — 다른 계정의 데이터가 화면에 새지 않도록 */
+function clearUserScopedCache(){
+  USER_SCOPED_LS_KEYS.forEach(k => {
+    try { localStorage.removeItem(k); } catch(_){}
+  });
+  /* 메모리 상의 profile 객체도 초기화 (전역 var) */
+  try { if(typeof profile !== 'undefined') profile = {}; } catch(_){}
+}
+
 function setAuthed(user){
+  /* 사용자 변경 감지 — 다른 사용자가 들어오면 캐시 비우기.
+     같은 사용자 재로그인이면 캐시 유지(불필요한 reload 방지). */
+  const prevSub = getCurrentAuthSub();
+  const newSub = user?.sub || user?.email || null;
+  if(prevSub && newSub && prevSub !== newSub){
+    clearUserScopedCache();
+    console.log('[auth] user changed — cleared user-scoped cache:', prevSub, '->', newSub);
+  } else if(!prevSub && newSub){
+    /* 신규 로그인(이전 사용자 없음) — 안전 차원에서 한 번 클리어.
+       옛날 옛적 만들어진 vd_profile 같은 stale 캐시가 남아있을 수 있음. */
+    clearUserScopedCache();
+    console.log('[auth] new login — cleared stale cache for clean start');
+  }
+
   localStorage.setItem('nachim_auth', JSON.stringify({user, ts:Date.now()}));
 
   // 소셜 로그인 계정 → r01_accs에 method 포함 저장 (중복 가입 감지용)
@@ -338,7 +534,13 @@ function saveAuth0Settings(){
   alert('저장되었습니다. 이제 소셜 로그인을 다시 시도하세요.\n\n주의: file://로 열면 동작하지 않을 수 있어요. http://localhost로 실행하세요.');
 }
 async function logout(){
+  /* Supabase 세션 종료 (이메일/PW 사용자) — 토큰 무효화·localStorage 토큰 제거 */
+  if(sb){
+    try { await sb.auth.signOut(); } catch(e){ console.warn('[supabase] signOut error', e); }
+  }
   clearAuthed();
+  /* 사용자별 캐시도 모두 비움 — 다음 로그인 시 깨끗한 상태 보장 */
+  clearUserScopedCache();
   const c=await initAuth0();
   if(c){
     c.logout({logoutParams:{returnTo: AUTH0_REDIRECT_URI}});
@@ -348,7 +550,7 @@ async function logout(){
   }
 }
 
-function startAfterLogin(){
+async function startAfterLogin(){
   document.getElementById('auth').classList.add('hidden');
 
   // 소셜 로그인 이력 저장 (method 기록으로 중복 가입 감지에 활용)
@@ -375,7 +577,23 @@ function startAfterLogin(){
     }
   }catch(e){}
 
-  /* if profile exists, go straight to app; otherwise onboarding */
+  /* Supabase에서 plan + profile 동기화 (2026-04-28 §44 Step 3).
+     Supabase 사용자가 아닐 경우(Auth0 Google 사용자) 함수 내부에서 빠르게 빠져나감. */
+  let hadProfile = false;
+  try {
+    const r = await hydrateUserStateFromSupabase();
+    hadProfile = r.hasProfile;
+    /* 헤더 plan pill 즉시 갱신 */
+    if(typeof syncHeaderPlanPill === 'function') syncHeaderPlanPill();
+  } catch(e){ console.warn('[supabase] hydrate error', e); }
+
+  /* Supabase에 프로필이 있었으면 바로 앱으로.
+     없으면 — 신규 가입자거나 아직 온보딩 안 한 사용자 — 온보딩 화면 노출. */
+  if(hadProfile){
+    try { launch(); return; } catch(e){ console.warn('[boot] launch error', e); }
+  }
+
+  /* fallback: localStorage 캐시에 프로필이 있으면 (Auth0 Google 사용자 등) 그걸로 진입 */
   try{
     const saved = localStorage.getItem('vd_profile');
     if(saved){
@@ -1397,6 +1615,9 @@ function finishOnboarding() {
   profile.sector = selTags;
   profile.sectorOther = otherVal;
   localStorage.setItem('vd_profile',JSON.stringify(profile));
+  /* Supabase profiles 테이블에 동기화 (2026-04-28 §44 Step 3).
+     실패해도 launch는 진행 — 다음 로그인에 다시 동기화 시도. */
+  saveProfileToSupabase(profile).catch(()=>{});
   launch();
 }
 function editProfile(targetStep){
@@ -4330,7 +4551,10 @@ function closeStyleModal(cancel){
 function applyMentorChange(s){
   if(!MENTOR_STYLES[s]) return;
   profile.style = s;
+  profile.mentor = s; /* Supabase profiles.mentor 컬럼과 통일 */
   try{localStorage.setItem('vd_profile',JSON.stringify(profile));}catch(e){}
+  /* Supabase에 멘토 변경 반영 (실패해도 화면은 계속) */
+  try{ saveProfileToSupabase(profile).catch(()=>{}); }catch(_){}
   applyProfile();
 
   /* 토스트: 헤더 멘토 pill 바로 아래에 표시.
@@ -6018,6 +6242,10 @@ const R01_PLANS = [
 ];
 
 function getCurrentPlan(){
+  /* localStorage 'r01_plan'은 hydrateUserStateFromSupabase에서
+     Supabase subscriptions 테이블을 조회해 채워둔 캐시.
+     따라서 이 함수는 동기지만 결과는 Supabase 진실값과 일치.
+     로그인 안 된 상태에선 'free' 반환. (PROTOTYPE_MODE 우회 로직 폐기) */
   return localStorage.getItem('r01_plan') || 'free';
 }
 
@@ -6058,7 +6286,10 @@ function ensureMentorPlanSync(opts){
     const fallback = 'Paul Graham (YC)';
     const oldMentor = cur;
     profile.style = fallback;
+    profile.mentor = fallback;
     try{ localStorage.setItem('vd_profile', JSON.stringify(profile)); }catch(_){}
+    /* Supabase 동기화 — Free 강등으로 자동 멘토 리셋된 사실을 DB에 반영 */
+    try{ saveProfileToSupabase(profile).catch(()=>{}); }catch(_){}
     try{ if(typeof applyProfile === 'function') applyProfile(); }catch(_){}
     /* 토스트 안내 — 조용히 하기보다 사용자가 알게 함 */
     if(opts && opts.silent !== true){
