@@ -161,30 +161,32 @@ function sbUserToAuthShape(u){
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Supabase profiles 테이블 행 → 화면용 profile 객체로 변환.
-   화면 코드가 기대하는 필드명: industry/stage/teamSize/concern/mentor 등 */
+   화면 코드가 기대하는 필드명: industry/stage/team/concern/style 등 */
 function sbProfileRowToLocal(row){
   if(!row) return null;
   return {
     name:       row.startup_name || '',
     industry:   row.industry || '',
     stage:      row.stage || '',
-    teamSize:   row.team_size || '',
+    team:       row.team_size || '',          /* 화면 코드 변수명: profile.team */
     concern:    row.worry || '',
-    mentor:     row.mentor || '',
+    style:      row.mentor || '',             /* 화면 코드 변수명: profile.style */
+    mentor:     row.mentor || '',             /* 호환을 위해 둘 다 채움 */
     nickname:   row.nickname || ''
   };
 }
 
-/* 화면용 profile 객체 → Supabase profiles 테이블 행 형식 */
+/* 화면용 profile 객체 → Supabase profiles 테이블 행 형식.
+   profile.team / profile.style 등 실제 화면 코드 변수명을 정확히 가져온다. */
 function localProfileToSbRow(p){
   if(!p) return {};
   return {
     startup_name: p.name || null,
     industry:     p.industry || null,
     stage:        p.stage || null,
-    team_size:    p.teamSize || null,
+    team_size:    p.team || p.teamSize || null,    /* team이 정본, teamSize는 fallback */
     worry:        p.concern || null,
-    mentor:       p.mentor || null,
+    mentor:       p.style || p.mentor || null,     /* style이 정본, mentor는 fallback */
     nickname:     p.nickname || null
   };
 }
@@ -223,6 +225,12 @@ async function saveProfileToSupabase(localProfile){
     if(!user) return { ok: false, reason: 'not-authed' };
     const row = localProfileToSbRow(localProfile);
     row.id = user.id;
+    /* 디버그 로그 — 어떤 필드가 어떻게 매핑되어 DB로 가는지 추적 */
+    console.log('[supabase] saveProfile — local:', {
+      name: localProfile.name, industry: localProfile.industry, stage: localProfile.stage,
+      team: localProfile.team, teamSize: localProfile.teamSize,
+      concern: localProfile.concern, style: localProfile.style, mentor: localProfile.mentor
+    }, '— sending to DB:', row);
     /* upsert: 없으면 INSERT, 있으면 UPDATE.
        handle_new_user 트리거로 row가 이미 있을 가능성이 높아 보통 UPDATE 경로. */
     const { error } = await sb
@@ -232,6 +240,7 @@ async function saveProfileToSupabase(localProfile){
       console.warn('[supabase] profile save error', error);
       return { ok: false, reason: error.message };
     }
+    console.log('[supabase] saveProfile ok');
     return { ok: true };
   } catch(e){
     console.warn('[supabase] profile save exception', e);
@@ -285,8 +294,8 @@ async function hydrateUserStateFromSupabase(){
   const localProfile = await loadProfileFromSupabase();
   let hasProfile = false;
   if(localProfile){
-    /* 비어있는 row와 실제 입력된 프로필 구분 — 핵심 필드 중 하나라도 있어야 인정 */
-    const hasContent = !!(localProfile.industry || localProfile.stage || localProfile.teamSize || localProfile.concern);
+    /* 화면 코드 기준 필드명: industry/stage/team/concern. 핵심 필드 중 하나라도 있어야 인정 */
+    const hasContent = !!(localProfile.industry || localProfile.stage || localProfile.team || localProfile.concern);
     if(hasContent){
       hasProfile = true;
       try { localStorage.setItem('vd_profile', JSON.stringify(localProfile)); } catch(_){}
