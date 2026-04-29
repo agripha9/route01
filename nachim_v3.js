@@ -171,8 +171,7 @@ function sbProfileRowToLocal(row){
     team:       row.team_size || '',          /* 화면 코드 변수명: profile.team */
     concern:    row.worry || '',
     style:      row.mentor || '',             /* 화면 코드 변수명: profile.style */
-    mentor:     row.mentor || '',             /* 호환을 위해 둘 다 채움 */
-    nickname:   row.nickname || ''
+    mentor:     row.mentor || ''              /* 호환을 위해 둘 다 채움 */
   };
 }
 
@@ -186,8 +185,7 @@ function localProfileToSbRow(p){
     stage:        p.stage || null,
     team_size:    p.team || p.teamSize || null,    /* team이 정본, teamSize는 fallback */
     worry:        p.concern || null,
-    mentor:       p.style || p.mentor || null,     /* style이 정본, mentor는 fallback */
-    nickname:     p.nickname || null
+    mentor:       p.style || p.mentor || null      /* style이 정본, mentor는 fallback */
   };
 }
 
@@ -5375,11 +5373,7 @@ async function emailSignup() {
       email,
       password: pw,
       options: {
-        emailRedirectTo: window.location.origin + window.location.pathname,
-        data: {
-          /* user_metadata — handle_new_user 트리거가 nickname으로 사용 */
-          nickname: email.split('@')[0]
-        }
+        emailRedirectTo: window.location.origin + window.location.pathname
       }
     });
 

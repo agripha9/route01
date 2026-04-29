@@ -12,6 +12,10 @@
 -- Supabase auth.users 테이블이 마스터이고,
 -- profiles는 1:1 관계로 사용자별 도메인 정보를 보관한다.
 -- id 컬럼은 auth.users.id를 그대로 참조 (PK 겸 FK).
+--
+-- 주의: 초기 스키마에 mentor_style·nickname 컬럼이 있었으나
+--       YAGNI 원칙에 따라 002 마이그레이션에서 제거됨.
+--       이 파일은 정본 — 신규 환경에서는 처음부터 두 컬럼 없이 생성.
 create table if not exists public.profiles (
   id              uuid primary key references auth.users(id) on delete cascade,
   -- 비즈니스 도메인 정보
@@ -20,11 +24,8 @@ create table if not exists public.profiles (
   stage           text,                 -- 단계 (idea, mvp, pmf, growth, scale)
   team_size       text,                 -- 팀 규모 (solo, 2-5, 6-10, 10+)
   worry           text,                 -- 핵심 고민
-  -- 멘토 선택
+  -- 멘토 선택 (1차원만 — 멘토 이름이 곧 스타일을 결정)
   mentor          text,                 -- 'Paul Graham (YC)' 등
-  mentor_style    text,                 -- 멘토 스타일 (현재 미사용, 확장 대비)
-  -- 부가 정보
-  nickname        text,                 -- 표시명
   -- 메타
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
@@ -88,15 +89,14 @@ create index if not exists idx_daily_usage_user_date
 -- 4. 신규 사용자 자동 초기화 트리거
 -- ============================================================================
 -- auth.users에 신규 사용자가 생기면 자동으로:
---   - profiles 빈 row 생성
+--   - profiles 빈 row 생성 (id만 — 다른 필드는 온보딩에서 채움)
 --   - subscriptions 'free' row 생성
 -- 이렇게 해두면 클라이언트 코드가 매번 "있는지 확인 후 없으면 생성" 안 해도 됨.
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer as $$
 begin
-  insert into public.profiles (id, nickname)
-  values (new.id, coalesce(new.raw_user_meta_data->>'nickname',
-                          split_part(new.email, '@', 1)))
+  insert into public.profiles (id)
+  values (new.id)
   on conflict (id) do nothing;
 
   insert into public.subscriptions (user_id, plan)
