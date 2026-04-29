@@ -161,31 +161,41 @@ function sbUserToAuthShape(u){
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Supabase profiles 테이블 행 → 화면용 profile 객체로 변환.
-   화면 코드가 기대하는 필드명: industry/stage/team/concern/style 등 */
+   화면 코드가 기대하는 필드명: industry/stage/team/concern/style/target/sector/mrr/funding.
+   모든 필드는 답변 프롬프트(buildSys)에 흘러들어가 답변 맞춤화의 재료가 된다. */
 function sbProfileRowToLocal(row){
   if(!row) return null;
   return {
     name:       row.startup_name || '',
     industry:   row.industry || '',
+    sector:     Array.isArray(row.sector) ? row.sector : [],
     stage:      row.stage || '',
-    team:       row.team_size || '',          /* 화면 코드 변수명: profile.team */
+    target:     row.target || '',
+    team:       row.team_size || '',
     concern:    row.worry || '',
-    style:      row.mentor || '',             /* 화면 코드 변수명: profile.style */
-    mentor:     row.mentor || ''              /* 호환을 위해 둘 다 채움 */
+    mrr:        row.mrr || '',
+    funding:    row.funding || '',
+    style:      row.mentor || '',
+    mentor:     row.mentor || ''           /* 호환을 위해 둘 다 채움 */
   };
 }
 
 /* 화면용 profile 객체 → Supabase profiles 테이블 행 형식.
-   profile.team / profile.style 등 실제 화면 코드 변수명을 정확히 가져온다. */
+   온보딩의 모든 필수·선택 입력을 빠짐없이 DB로 보낸다.
+   "사용자가 입력한 모든 필드는 답변 품질에 기여한다"는 원칙. */
 function localProfileToSbRow(p){
   if(!p) return {};
   return {
     startup_name: p.name || null,
     industry:     p.industry || null,
+    sector:       Array.isArray(p.sector) && p.sector.length ? p.sector : null,
     stage:        p.stage || null,
-    team_size:    p.team || p.teamSize || null,    /* team이 정본, teamSize는 fallback */
+    target:       p.target || null,
+    team_size:    p.team || p.teamSize || null,
     worry:        p.concern || null,
-    mentor:       p.style || p.mentor || null      /* style이 정본, mentor는 fallback */
+    mrr:          p.mrr || null,
+    funding:      p.funding || null,
+    mentor:       p.style || p.mentor || null
   };
 }
 
@@ -880,7 +890,21 @@ function buildGrantSystem(){
 ${styleGuide}
 `;
   if(profile.industry){
-    sys+=`\n[참고 프로필]\n업종/서비스: ${profile.industry}\n단계: ${profile.stage||'-'}\n팀: ${profile.team||'-'}\n${profile.mrr?`월 매출: ${profile.mrr}\n`:''}${profile.name?`명칭: ${profile.name}\n`:''}${profile.concern?`핵심 맥락: ${profile.concern}\n`:''}`;
+    /* 모든 프로필 필드를 답변 컨텍스트에 반영 — Route01 차별화의 핵심.
+       선택 항목은 값이 있을 때만 줄을 추가해 깔끔한 컨텍스트 유지. */
+    const sectorTxt = Array.isArray(profile.sector) && profile.sector.length
+      ? profile.sector.join(', ') : '';
+    sys += `\n[참고 프로필]`;
+    sys += `\n업종/서비스: ${profile.industry}`;
+    if(sectorTxt) sys += `\n업종 세부: ${sectorTxt}`;
+    sys += `\n단계: ${profile.stage||'-'}`;
+    if(profile.target) sys += `\n타겟 고객: ${profile.target}`;
+    sys += `\n팀: ${profile.team||'-'}`;
+    if(profile.mrr) sys += `\n월 매출: ${profile.mrr}`;
+    if(profile.funding) sys += `\n투자 상황: ${profile.funding}`;
+    if(profile.name) sys += `\n명칭: ${profile.name}`;
+    if(profile.concern) sys += `\n핵심 맥락: ${profile.concern}`;
+    sys += `\n`;
   }
   return sys;
 }
@@ -4458,12 +4482,18 @@ function prepareMarkdownForExport(md){
 /* ─── 프로필 모달 ──────────────────── */
 function openModal(){
   const b=document.getElementById('modal-body');
+  const sectorTxt = Array.isArray(profile.sector) && profile.sector.length
+    ? profile.sector.join(', ') : '';
   b.innerHTML=profile.industry?`
-    <div class="modal-row"><span class="m-label">업종</span><div class="m-val">${profile.industry}</div></div>
-    <div class="modal-row"><span class="m-label">단계</span><div class="m-val">${profile.stage}</div></div>
-    <div class="modal-row"><span class="m-label">팀 규모</span><div class="m-val">${profile.team}</div></div>
-    ${profile.mrr?`<div class="modal-row"><span class="m-label">월 매출</span><div class="m-val">${profile.mrr}</div></div>`:''}
-    ${profile.concern?`<div class="modal-row"><span class="m-label">핵심 고민</span><div class="m-val" style="font-size:13px;line-height:1.5">${profile.concern}</div></div>`:''}
+    ${profile.name?`<div class="modal-row"><span class="m-label">스타트업 이름</span><div class="m-val">${esc(profile.name)}</div></div>`:''}
+    <div class="modal-row"><span class="m-label">업종</span><div class="m-val">${esc(profile.industry)}</div></div>
+    ${sectorTxt?`<div class="modal-row"><span class="m-label">업종 세부</span><div class="m-val">${esc(sectorTxt)}</div></div>`:''}
+    <div class="modal-row"><span class="m-label">단계</span><div class="m-val">${esc(profile.stage)}</div></div>
+    ${profile.target?`<div class="modal-row"><span class="m-label">타겟 고객</span><div class="m-val">${esc(profile.target)}</div></div>`:''}
+    <div class="modal-row"><span class="m-label">팀 규모</span><div class="m-val">${esc(profile.team)}</div></div>
+    ${profile.mrr?`<div class="modal-row"><span class="m-label">월 매출</span><div class="m-val">${esc(profile.mrr)}</div></div>`:''}
+    ${profile.funding?`<div class="modal-row"><span class="m-label">투자 상황</span><div class="m-val">${esc(profile.funding)}</div></div>`:''}
+    ${profile.concern?`<div class="modal-row"><span class="m-label">핵심 고민</span><div class="m-val" style="font-size:13px;line-height:1.5">${esc(profile.concern)}</div></div>`:''}
     ${profile.style?`<div class="modal-row"><span class="m-label">멘토링 스타일</span><div class="m-val">${esc(mentorDisplayName(profile.style))}</div></div>`:''}
   `:'<div style="font-size:14px;color:var(--ink3);margin-bottom:1rem">아직 프로필이 설정되지 않았어요.</div>';
   document.getElementById('modal').classList.add('open');

@@ -13,17 +13,20 @@
 -- profiles는 1:1 관계로 사용자별 도메인 정보를 보관한다.
 -- id 컬럼은 auth.users.id를 그대로 참조 (PK 겸 FK).
 --
--- 주의: 초기 스키마에 mentor_style·nickname 컬럼이 있었으나
---       YAGNI 원칙에 따라 002 마이그레이션에서 제거됨.
---       이 파일은 정본 — 신규 환경에서는 처음부터 두 컬럼 없이 생성.
+-- 설계 원칙: 모든 컬럼은 답변 프롬프트(buildSys)에 흘러들어가 답변
+--           맞춤화의 재료가 됨. "프로필 필드 = 답변 차별화 재료" 원칙.
 create table if not exists public.profiles (
   id              uuid primary key references auth.users(id) on delete cascade,
   -- 비즈니스 도메인 정보
   startup_name    text,
-  industry        text,                 -- 업종 (saas, ai, ecommerce, ...)
-  stage           text,                 -- 단계 (idea, mvp, pmf, growth, scale)
-  team_size       text,                 -- 팀 규모 (solo, 2-5, 6-10, 10+)
-  worry           text,                 -- 핵심 고민
+  industry        text,                 -- 업종 한 줄 소개 (자유 텍스트)
+  sector          text[],               -- 업종 세부 (다중선택, 배열)
+  stage           text,                 -- 단계 (아이디어/MVP/초기매출/시드준비/시드완료/시리즈A+)
+  target          text,                 -- 타겟 고객 (B2B/B2C/B2G/복합)
+  team_size       text,                 -- 팀 규모 (1명·솔로 / 2~3명 / 4~10명 / 11명 이상)
+  worry           text,                 -- 핵심 고민 또는 목표
+  mrr             text,                 -- 월 매출 (선택)
+  funding         text,                 -- 투자 상황 (선택)
   -- 멘토 선택 (1차원만 — 멘토 이름이 곧 스타일을 결정)
   mentor          text,                 -- 'Paul Graham (YC)' 등
   -- 메타
