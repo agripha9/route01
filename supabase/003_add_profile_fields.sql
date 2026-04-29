@@ -14,13 +14,15 @@
 --   1. profiles.target text — 타겟 고객 (B2B/B2C/B2G/복합)
 --   2. profiles.sector text[] — 업종 세부 (다중선택, 배열)
 --   3. profiles.mrr text — 월 매출
---   4. profiles.funding text — 투자 상황 (미투자/엔젤·시드/시리즈A 등)
+--   4. profiles.invest text — 투자 상황 (미투자/엔젤·시드/시리즈A 등)
+--      주의: 003 최초 작성 시 'funding'으로 만들었으나 004에서 'invest'로 rename됨.
+--      이 파일은 정본 — 신규 환경에서는 처음부터 invest로 생성됨.
 -- ============================================================================
 
-alter table public.profiles add column if not exists target  text;
-alter table public.profiles add column if not exists sector  text[];
-alter table public.profiles add column if not exists mrr     text;
-alter table public.profiles add column if not exists funding text;
+alter table public.profiles add column if not exists target text;
+alter table public.profiles add column if not exists sector text[];
+alter table public.profiles add column if not exists mrr    text;
+alter table public.profiles add column if not exists invest text;
 
 -- ============================================================================
 -- 끝.

@@ -161,7 +161,7 @@ function sbUserToAuthShape(u){
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Supabase profiles 테이블 행 → 화면용 profile 객체로 변환.
-   화면 코드가 기대하는 필드명: industry/stage/team/concern/style/target/sector/mrr/funding.
+   화면 코드가 기대하는 필드명: industry/stage/team/concern/style/target/sector/mrr/invest.
    모든 필드는 답변 프롬프트(buildSys)에 흘러들어가 답변 맞춤화의 재료가 된다. */
 function sbProfileRowToLocal(row){
   if(!row) return null;
@@ -174,7 +174,7 @@ function sbProfileRowToLocal(row){
     team:       row.team_size || '',
     concern:    row.worry || '',
     mrr:        row.mrr || '',
-    funding:    row.funding || '',
+    invest:     row.invest || '',          /* 화면 코드 변수명: ob.invest / profile.invest */
     style:      row.mentor || '',
     mentor:     row.mentor || ''           /* 호환을 위해 둘 다 채움 */
   };
@@ -194,7 +194,7 @@ function localProfileToSbRow(p){
     team_size:    p.team || p.teamSize || null,
     worry:        p.concern || null,
     mrr:          p.mrr || null,
-    funding:      p.funding || null,
+    invest:       p.invest || null,
     mentor:       p.style || p.mentor || null
   };
 }
@@ -901,7 +901,7 @@ ${styleGuide}
     if(profile.target) sys += `\n타겟 고객: ${profile.target}`;
     sys += `\n팀: ${profile.team||'-'}`;
     if(profile.mrr) sys += `\n월 매출: ${profile.mrr}`;
-    if(profile.funding) sys += `\n투자 상황: ${profile.funding}`;
+    if(profile.invest)  sys += `\n투자 상황: ${profile.invest}`;
     if(profile.name) sys += `\n명칭: ${profile.name}`;
     if(profile.concern) sys += `\n핵심 맥락: ${profile.concern}`;
     sys += `\n`;
@@ -4492,7 +4492,7 @@ function openModal(){
     ${profile.target?`<div class="modal-row"><span class="m-label">타겟 고객</span><div class="m-val">${esc(profile.target)}</div></div>`:''}
     <div class="modal-row"><span class="m-label">팀 규모</span><div class="m-val">${esc(profile.team)}</div></div>
     ${profile.mrr?`<div class="modal-row"><span class="m-label">월 매출</span><div class="m-val">${esc(profile.mrr)}</div></div>`:''}
-    ${profile.funding?`<div class="modal-row"><span class="m-label">투자 상황</span><div class="m-val">${esc(profile.funding)}</div></div>`:''}
+    ${profile.invest?`<div class="modal-row"><span class="m-label">투자 상황</span><div class="m-val">${esc(profile.invest)}</div></div>`:''}
     ${profile.concern?`<div class="modal-row"><span class="m-label">핵심 고민</span><div class="m-val" style="font-size:13px;line-height:1.5">${esc(profile.concern)}</div></div>`:''}
     ${profile.style?`<div class="modal-row"><span class="m-label">멘토링 스타일</span><div class="m-val">${esc(mentorDisplayName(profile.style))}</div></div>`:''}
   `:'<div style="font-size:14px;color:var(--ink3);margin-bottom:1rem">아직 프로필이 설정되지 않았어요.</div>';

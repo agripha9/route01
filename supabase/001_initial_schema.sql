@@ -17,19 +17,20 @@
 --           맞춤화의 재료가 됨. "프로필 필드 = 답변 차별화 재료" 원칙.
 create table if not exists public.profiles (
   id              uuid primary key references auth.users(id) on delete cascade,
-  -- 비즈니스 도메인 정보
+  -- 비즈니스 도메인 정보 (Step 1)
   startup_name    text,
   industry        text,                 -- 업종 한 줄 소개 (자유 텍스트)
   sector          text[],               -- 업종 세부 (다중선택, 배열)
   stage           text,                 -- 단계 (아이디어/MVP/초기매출/시드준비/시드완료/시리즈A+)
   target          text,                 -- 타겟 고객 (B2B/B2C/B2G/복합)
+  -- 운영 정보 (Step 2)
   team_size       text,                 -- 팀 규모 (1명·솔로 / 2~3명 / 4~10명 / 11명 이상)
   worry           text,                 -- 핵심 고민 또는 목표
   mrr             text,                 -- 월 매출 (선택)
-  funding         text,                 -- 투자 상황 (선택)
-  -- 멘토 선택 (1차원만 — 멘토 이름이 곧 스타일을 결정)
-  mentor          text,                 -- 'Paul Graham (YC)' 등
-  -- 메타
+  invest          text,                 -- 투자 상황 (선택, 화면 코드의 ob.invest와 정렬)
+  -- 멘토 (Step 3)
+  mentor          text,                 -- 'Paul Graham (YC)' 등 (멘토 이름이 곧 스타일)
+  -- 메타 (시스템 자동)
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
