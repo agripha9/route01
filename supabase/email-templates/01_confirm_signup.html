@@ -1,0 +1,111 @@
+<!--
+  Route01 — 가입 인증 메일 (Confirm sign up)
+  Supabase Dashboard 적용 위치:
+    Authentication → Emails → Templates → Confirm sign up
+  변수: {{ .ConfirmationURL }}
+  Subject 추천: Route01 가입을 위해 이메일을 인증해주세요
+  최종 업데이트: 2026-04-29
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route01 가입 인증</title>
+</head>
+<body style="margin:0;padding:0;background-color:#dfdfe4;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Pretendard','Apple SD Gothic Neo','Segoe UI',sans-serif;">
+
+<!-- Preheader: 받은편지함 미리보기에 표시되는 텍스트 (본문엔 보이지 않음) -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#dfdfe4;opacity:0;">
+  Route01에 가입해주셔서 감사합니다. 인증 링크는 1시간 동안 유효합니다.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#dfdfe4;padding:40px 16px;">
+  <tr>
+    <td align="center">
+
+      <!-- 메인 카드 -->
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e5ea;">
+
+        <!-- 헤더 (네이비) -->
+        <tr>
+          <td align="center" style="background-color:#1a3a6e;padding:32px 24px;">
+            <div style="font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">
+              Route01
+            </div>
+            <div style="font-size:13px;color:#b8c5d9;margin-top:6px;letter-spacing:0.3px;">
+              Finding your Route from Zero to One
+            </div>
+          </td>
+        </tr>
+
+        <!-- 본문 -->
+        <tr>
+          <td style="padding:40px 40px 32px 40px;">
+
+            <h1 style="margin:0 0 20px 0;font-size:22px;font-weight:600;color:#1d1d1f;letter-spacing:-0.3px;line-height:1.4;">
+              이메일을 인증해주세요
+            </h1>
+
+            <p style="margin:0 0 16px 0;font-size:15px;line-height:1.62;color:#1d1d1f;">
+              Route01에 가입해주셔서 감사합니다.
+            </p>
+
+            <p style="margin:0 0 28px 0;font-size:15px;line-height:1.62;color:#1d1d1f;">
+              아래 버튼을 클릭하시면 가입이 완료됩니다.<br>
+              인증을 마치시면 곧바로 멘토에게 첫 질문을 보내실 수 있습니다.
+            </p>
+
+            <!-- CTA 버튼 -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+              <tr>
+                <td align="center" style="background-color:#1a3a6e;border-radius:8px;">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:-0.2px;">
+                    이메일 인증하기
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- 폴백 링크 -->
+            <p style="margin:32px 0 0 0;font-size:13px;line-height:1.6;color:#6e6e73;">
+              버튼이 동작하지 않으면 아래 링크를 복사하여 브라우저에 붙여넣어 주세요.
+            </p>
+            <p style="margin:8px 0 0 0;font-size:12px;line-height:1.5;color:#1a3a6e;word-break:break-all;">
+              <a href="{{ .ConfirmationURL }}" style="color:#1a3a6e;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+            </p>
+
+            <!-- 보안 안내 -->
+            <div style="margin-top:32px;padding:16px 18px;background-color:#f7f8fb;border-left:3px solid #d2d2d7;border-radius:0 6px 6px 0;">
+              <p style="margin:0;font-size:13px;line-height:1.6;color:#6e6e73;">
+                이 링크는 발송 시점부터 <strong style="color:#1d1d1f;">1시간</strong> 동안만 유효합니다.<br>
+                본인이 가입하지 않으셨다면 이 메일을 무시하셔도 됩니다.
+              </p>
+            </div>
+
+          </td>
+        </tr>
+
+        <!-- 푸터 -->
+        <tr>
+          <td style="padding:24px 40px 32px 40px;border-top:1px solid #e5e5ea;background-color:#fafafa;">
+            <p style="margin:0 0 6px 0;font-size:12px;line-height:1.6;color:#86868b;">
+              Route01 — AI 스타트업 자문 서비스
+            </p>
+            <p style="margin:0;font-size:11px;line-height:1.6;color:#86868b;">
+              본 메일은 발신 전용입니다. 문의는
+              <a href="mailto:hello@route01.kr" style="color:#1a3a6e;text-decoration:none;">hello@route01.kr</a>
+              로 보내주세요.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
