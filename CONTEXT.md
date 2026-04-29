@@ -1518,3 +1518,130 @@ D. 캐시 버스터 v10: `?v=20260427-pdf-pro-badge-v10`
 - 토큰: fine-grained, 기한 내 유지 정책 (사용자 결정). 메모리·코드·CONTEXT에 저장 안 함 ✓
 - API 키: 사용자 직접 입력 방식. 클라이언트 localStorage. 백엔드 도입 시 서버 측 키 관리로 전환 예정
 
+## 44. 2026-04-29 Supabase 백엔드 통합 (방향 A 시작 — 세션 1)
+
+### 오늘 세션 한 줄 요약
+PROTOTYPE_MODE 가짜 인증·로컬 데이터에서 진짜 Supabase 백엔드로 전환. 인증·DB·데이터 격리·프로필 동기화 모두 작동. 사용자 입력 모든 프로필 필드가 답변 프롬프트로 흘러들어가는 차별화 핵심 회로 점검·복구.
+
+### 오늘 커밋 9개 (시간순)
+1. `6a9ca3d` feat(supabase): add JS client + DB schema migration (§44 Step 1)
+2. `6798af6` feat(supabase): real auth — emailLogin/Signup via Supabase + session restore (§44 Step 2)
+3. `04ff756` fix(cache): bump JS cache buster to v12 — Step 1·2 changes weren't taking effect
+4. `85fa932` feat(supabase): data isolation + profile/plan sync (§44 Step 3)
+5. `01e8e66` fix(supabase): correct profile field name mapping (§44 Step 3 fix)
+6. `e7c9547` fix(modal): bump modal z-index above onboarding (3000 > 2500)
+7. `03c6b49` refactor(supabase): drop unused profiles columns — YAGNI cleanup
+8. `5e73bf0` feat(supabase+answer): wire all profile fields → DB → answer prompt
+9. `84892df` fix(supabase): rename funding column to invest — match screen code
+
+### Supabase 인프라 (운영)
+- **Project URL**: `https://fbfvaqcahppwzhtmlhtn.supabase.co`
+- **Region**: Northeast Asia (Seoul, ap-northeast-2)
+- **Plan**: Free
+- **Publishable key (브라우저)**: `sb_publishable_p4DC2MinPlyZwk4YIjATWg_Zl8OkS7I` — 공개 안전, RLS로 보호
+- **Secret key**: 절대 클라이언트에 노출 금지. Edge Function 도입 시 환경변수로만 사용
+- **Site URL**: `https://route01.kr`
+- **Redirect URLs 화이트리스트**: `https://route01.kr/**` (운영). localhost 두 개도 등록되어 있는데 사용 안 하니 정리 가능
+
+### DB 스키마 (정본은 supabase/001_initial_schema.sql)
+3개 테이블 — auth.users(Supabase 관리)와 1:N 관계.
+- **profiles**: 사용자 프로필 — startup_name, industry, sector(text[]), stage, target, team_size, worry, mrr, invest, mentor + created_at/updated_at
+- **subscriptions**: 결제 상태 — plan('free'/'pro'), expires_at, provider, provider_sub_id
+- **daily_usage**: 일일 사용량 카운터 — (user_id, usage_date) PK + question_count
+
+신규 사용자 가입 시 `handle_new_user` 트리거가 자동으로 profiles·subscriptions row 생성 (id만, 나머지는 온보딩에서 채움).
+
+### RLS 정책 (5개)
+- profiles_select_own / profiles_insert_own / profiles_update_own — `auth.uid() = id`
+- subscriptions_select_own — `auth.uid() = user_id` (INSERT/UPDATE는 의도적 차단, Edge Function에서 service_role로만)
+- daily_usage_select_own — 같은 패턴
+
+### 적용된 마이그레이션 4개
+- `001_initial_schema.sql` — 정본 (3 tables + 5 RLS + handle_new_user trigger)
+- `002_drop_unused_columns.sql` — mentor_style·nickname 삭제 (YAGNI)
+- `003_add_profile_fields.sql` — target·sector(text[])·mrr·invest 추가
+- `004_rename_funding_to_invest.sql` — 003에서 funding으로 만든 컬럼을 invest로 rename (화면 코드 정합)
+
+001 정본은 002~004까지 모두 반영된 최종 스키마로 업데이트 완료.
+
+### JS 측 변경 핵심
+- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` 상수 + `sb` 클라이언트 (라인 105~)
+- `sbUserToAuthShape`, `sbProfileRowToLocal`, `localProfileToSbRow` — 컨버터
+- `loadProfileFromSupabase`, `saveProfileToSupabase`, `loadPlanFromSupabase`, `hydrateUserStateFromSupabase` — Supabase ↔ localStorage 캐시 동기화
+- `USER_SCOPED_LS_KEYS` + `clearUserScopedCache` — 사용자 변경 시 옛 사용자 데이터 누수 차단
+- `setAuthed` — 사용자 변경 감지 후 캐시 클리어
+- `startAfterLogin` — async로 변경, hydrate 후 hasProfile에 따라 launch/onboarding 분기
+- `logout` — `sb.auth.signOut()` + 캐시 클리어
+- `emailLogin`, `emailSignup`, `verifySignupCode`, `resendVerify`, `sendResetPw` — 모두 Supabase API 호출로 교체
+- `handleAuthCallback` — 부팅 시 Supabase 세션 자동 복원 + URL 토큰 정리
+- `buildSys` (line 882~) — 답변 프롬프트에 9개 프로필 필드 모두 반영 (industry/sector/stage/target/team/mrr/invest/name/concern)
+- `openModal` — 프로필 모달에 sector/target/invest 표시 추가
+
+### 검증 결과 (수동)
+- ✅ 신규 가입 → 인증 메일 발송 → 링크 클릭 → 자동 로그인 (또는 토큰 만료 시 로그인 화면 폴백)
+- ✅ 옛 사용자 데이터 누수 0 (사이드바 깨끗, 프로필 빈 상태로 시작)
+- ✅ 온보딩 완료 시 profiles 테이블에 모든 필드 정확히 매핑되어 저장
+- ✅ subscriptions에 plan='free' 자동 생성
+- ✅ 재로그인 시 모든 필드 복원 — 데이터 손실 0
+- ✅ 가격 모달 z-index 정상 (3000 > onboarding 2500)
+- ✅ Auth0 Google 로그인 그대로 작동 (영향 없음)
+
+### 캐시 버스터 진화 (오늘)
+- v11 → v12 (Step 1·2 — JS 캐시 버스터 빠뜨려서 변경 반영 안 됨, 큰 시간 손실. **JS·CSS 둘 다 매번 올리는 운영 규칙 메모리 추가**)
+- v12 → v13 (Step 3 데이터 격리)
+- v13 → v14 (필드명 매핑 fix)
+- v14 → v15 (모달 z-index)
+- v15 → v16 (YAGNI cleanup)
+- v16 → v17 (4개 필드 추가)
+- v17 → v18 (funding → invest rename)
+
+### 진단·결정 요약
+- 백엔드 스택: Supabase 채택 — 한국어 자료, 네이버/카카오 OAuth 호환, 비용 구조 모두 우위
+- 인증 방식: 이메일/PW 먼저 (오늘) → SNS는 세션 4 (네이버/카카오 비즈 등록 필요)
+- Pro 한도: 분당 5건 + 일 100건 hard cap 하이브리드 (결제 도입 시 적용)
+- 데이터 격리 전략: 사용자별 키 분리(옵션 A) 대신 사용자 변경 시 캐시 클리어(옵션 B). Supabase가 진실의 원천이므로 캐시는 다음 로그인에 자동 복원
+- YAGNI 적용 한계: "모든 입력 필드는 답변 품질에 기여해야 한다"는 Route01 차별화 원칙이 우선. 안 쓰는 필드는 빼는 게 아니라 빠진 와이어링을 복구해야 함
+
+### 발견된 보안 구멍 — 다음 세션 결정 필요
+- **PROTOTYPE_MODE** (line 6604): 헤더 PRO/FREE pill → 가격 모달 → confirm 한 번이면 localStorage `r01_plan`이 'pro'로 바뀜. 결제 없이 Pro 흉내 가능. 세션 3 토스페이먼츠 연동 시 정리 또는 dev 모드 제한 결정 필요
+
+### 메일 상태 (다음 세션 우선순위)
+- ❌ 인증 메일 스팸함 직행 (도착률·전환율 큰 영향)
+- ❌ 영문 그대로 ("Confirm your signup")
+- ❌ 발신자가 `noreply@mail.app.supabase.io` (Supabase 공유 도메인)
+- ❌ 브랜드 0 (로고·색·서명 없음)
+- 해결 방법: 자체 도메인 SMTP (SendGrid/Resend) + DNS 설정 + Email Templates HTML 작성
+
+### 자동화 유보 결정
+컨버터 round-trip 단위 테스트 (옵션 A)는 다음 세션 시작에 5분 작업으로 추가 예정. 이메일 인증 포함 E2E는 OAuth·결제 안정화 이후 검토.
+
+### 다음 세션 우선순위
+1. **메일 디자인** (스팸 차단 + 한국어화 + 브랜딩) — 도착률 직결, 가입 전환율의 첫 관문
+2. **컨버터 round-trip 단위 테스트** (회귀 방지)
+3. **PROTOTYPE_MODE 보안 결정** — 그대로 유지 vs dev 모드 제한 vs 완전 차단
+4. **세션 2 본 작업**: 일일 카운터 작동 + 마이페이지 백엔드 연결 + Anthropic API Edge Function (서버 측 호출, 사용자 자기 키 입력 폐지)
+5. **세션 3**: 토스페이먼츠 실 연동 + 약관·개인정보처리방침 결제 조항
+6. **세션 4**: Auth0 → Supabase Google 마이그레이션 + 네이버·카카오 OAuth
+
+### 다음 세션 시작 시 결정할 것
+- 메일 트랙 어디까지 (자체 SMTP까지 vs Supabase 템플릿만 한국어화)
+- 컨버터 단위 테스트 위치 (vendor/test.html vs 별도 npm 스크립트)
+- PROTOTYPE_MODE 처리 방향
+
+### 다음 세션 시작 프로토콜
+1. 레포 클론 → CONTEXT.md 먼저 읽기 → `git log --oneline -10`
+2. Supabase 대시보드 확인 (Authentication → Users / Table Editor → profiles 상태)
+3. 캐시 버스터 v18부터 시작, 변경 시 v19로 (JS·CSS 둘 다)
+
+### 알려진 이슈 (이번 세션 발생)
+1. 인증 메일 스팸함 직행 — 다음 세션 1순위
+2. 토큰 만료 시 (1시간 이상 지난 메일) 로그인 화면 폴백 — 정상 동작이지만 UX 매끄럽지 않음
+3. 컬럼 순서가 production DB에서는 created_at·updated_at이 중간에 끼어있음 (cosmetic only, 신규 환경에선 정본 001대로 깔끔하게 생성됨)
+
+### 보안 확인
+- Publishable key: 공개 안전 (RLS 정책으로 본인 데이터만 read/write 가능, 검증 완료)
+- Secret key: 알려주지 않음, 코드·CONTEXT·메모리 어디에도 저장 안 함 ✓
+- DB password: 사용자가 1Password 등 안전한 곳에 보관 (Claude 모름) ✓
+- GitHub 토큰: 메모리 정책상 저장 안 함, 매 세션 한 번만 받아 그 세션 안에서만 재사용 ✓
+- localStorage 토큰: Supabase JWT는 자동 만료·갱신, autoRefreshToken=true 설정 ✓
+
