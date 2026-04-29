@@ -225,12 +225,6 @@ async function saveProfileToSupabase(localProfile){
     if(!user) return { ok: false, reason: 'not-authed' };
     const row = localProfileToSbRow(localProfile);
     row.id = user.id;
-    /* 디버그 로그 — 어떤 필드가 어떻게 매핑되어 DB로 가는지 추적 */
-    console.log('[supabase] saveProfile — local:', {
-      name: localProfile.name, industry: localProfile.industry, stage: localProfile.stage,
-      team: localProfile.team, teamSize: localProfile.teamSize,
-      concern: localProfile.concern, style: localProfile.style, mentor: localProfile.mentor
-    }, '— sending to DB:', row);
     /* upsert: 없으면 INSERT, 있으면 UPDATE.
        handle_new_user 트리거로 row가 이미 있을 가능성이 높아 보통 UPDATE 경로. */
     const { error } = await sb
@@ -240,7 +234,6 @@ async function saveProfileToSupabase(localProfile){
       console.warn('[supabase] profile save error', error);
       return { ok: false, reason: error.message };
     }
-    console.log('[supabase] saveProfile ok');
     return { ok: true };
   } catch(e){
     console.warn('[supabase] profile save exception', e);
