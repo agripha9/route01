@@ -5524,7 +5524,7 @@ function _checkSocialUsedEmail(email) {
 function verifySignupCode() {
   alert(
     '인증 코드 입력은 더 이상 사용하지 않습니다.\n\n' +
-    '받으신 인증 메일에서 "이메일 확인" 링크를 클릭해주세요.\n' +
+    '받으신 인증 메일에서 "이메일 인증하기" 링크를 클릭해주세요.\n' +
     '클릭하면 자동으로 로그인됩니다.'
   );
 }
@@ -5545,7 +5545,7 @@ async function resendVerify() {
       alert('재발송 실패: ' + (error.message||'알 수 없는 오류'));
       return;
     }
-    alert(email + '으로 인증 메일을 다시 보냈습니다.\n\n메일함을 확인하고 "이메일 확인" 링크를 클릭해주세요.\n(스팸함도 함께 확인해주세요.)');
+    alert(email + '으로 인증 메일을 다시 보냈습니다.\n\n메일함을 확인하고 "이메일 인증하기" 링크를 클릭해주세요.\n(스팸함도 함께 확인해주세요.)');
   } catch(e){
     alert('재발송 중 오류: ' + (e?.message||String(e)));
   }
