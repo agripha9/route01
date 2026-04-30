@@ -310,6 +310,33 @@ function isAuthed(){
   return !!localStorage.getItem('nachim_auth');
 }
 
+/* ─── 관리자 화이트리스트 (2026-04-30) ─────────────────────────
+   결제 백엔드(토스페이먼츠) 연동 전까지 Pro 시뮬레이션·내부 도구를
+   리팡 본인만 사용할 수 있도록 제한. 일반 사용자가 paywall에서
+   '프로토타입 모드 진행' 다이얼로그로 무료 Pro 전환되는 보안 구멍을 막음.
+
+   이메일은 소문자로만 비교 (Supabase Auth가 이메일을 소문자로 저장).
+   향후 Supabase의 user_metadata.role='admin'으로 옮길 수 있음 — 지금은
+   간단한 화이트리스트가 충분. */
+const R01_ADMIN_EMAILS = [
+  'agripha@gmail.com'
+];
+
+function getCurrentUserEmail(){
+  try{
+    const raw = localStorage.getItem('nachim_auth');
+    if(!raw) return null;
+    const u = JSON.parse(raw)?.user;
+    return (u?.email || '').toLowerCase().trim() || null;
+  }catch(_){ return null; }
+}
+
+function isAdminUser(){
+  const email = getCurrentUserEmail();
+  if(!email) return false;
+  return R01_ADMIN_EMAILS.includes(email);
+}
+
 /* 사용자별로 분리되어야 하는 localStorage 키 목록.
    사용자가 바뀌면 이 키들을 모두 비워서 옛 사용자 데이터 누출 방지.
    진실의 원천은 Supabase이고, localStorage는 단지 캐시일 뿐.
@@ -3246,9 +3273,11 @@ async function doSend(text){
     }
   }catch(_){}
 
-  /* 요금제 한도 체크 — 프로토타입 단계에서는 비활성화.
-     사용자가 직접 자기 Claude API 키를 입력해서 쓰므로 우리가 횟수를 제한할 근거가 없고,
-     실서비스 전환 시(서버/DB 도입 시점) 다시 켜면 됨. */
+  /* 월 사용량 한도 체크 — 현재 비활성화 (PROTOTYPE_MODE).
+     활성화 조건: daily_usage 테이블 + 서버 측 카운터 트랙 완료 후
+     (§45 우선순위 4번 — 일일 카운터·마이페이지 백엔드 작업).
+     클라이언트만으로 한도를 거는 건 위변조 가능하므로 의미 없음 →
+     서버 카운터가 진짜 진실의 원천이 되어야 함. */
   const PROTOTYPE_MODE = true;
   if(!PROTOTYPE_MODE){
     const curPlan = getCurrentPlan ? getCurrentPlan() : 'free';
@@ -6664,15 +6693,21 @@ function selectPlan(planId){
     }
     return;
   }
-  /* PROTOTYPE_MODE: 결제 백엔드가 아직 없는 단계에서 Pro 라우팅(Opus)을
-     검증할 수 있도록, 결제 시뮬레이션으로 즉시 plan을 'pro'로 전환.
-     실제 결제·백엔드 붙으면 이 분기를 토스페이먼츠 SDK 호출로 교체. */
-  const PROTOTYPE_MODE = true;
-  if(PROTOTYPE_MODE){
+  /* Pro 시뮬레이션 — 관리자 전용 (2026-04-30 보안 작업).
+     결제 백엔드(토스페이먼츠)가 붙기 전까지는 일반 사용자가 결제 없이
+     Pro로 넘어가는 경로를 모두 차단. 관리자(R01_ADMIN_EMAILS)만 라우팅·UI
+     검증 목적으로 시뮬레이션 사용 가능.
+
+     주의: localStorage.r01_plan = 'pro'는 클라이언트 캐시일 뿐이고,
+     hydrateUserStateFromSupabase가 부팅 시점에 subscriptions 테이블에서
+     실제 plan을 가져와 덮어씀 → 다음 로그인 때는 Free로 복귀. 이건 의도된
+     동작 (서버가 진실의 원천). 영속 Pro는 결제 백엔드 도입 후. */
+  if(isAdminUser()){
     const ok = confirm(
-      `[프로토타입 모드] ${plan.name} 플랜 결제 시뮬레이션\n\n` +
-      `실제 결제 없이 Pro 플랜으로 즉시 전환됩니다.\n` +
-      `(라우팅 검증용 — Opus 모델로 답변 가능)\n\n` +
+      `[관리자 시뮬레이션] ${plan.name} 플랜 즉시 전환\n\n` +
+      `결제 없이 클라이언트 캐시만 Pro로 변경합니다.\n` +
+      `(라우팅·UI 검증용 — Opus 모델로 답변 가능)\n\n` +
+      `다음 로그인 시 서버 plan으로 복귀됩니다.\n\n` +
       `진행하시겠어요?`
     );
     if(!ok) return;
@@ -6681,11 +6716,11 @@ function selectPlan(planId){
     try{ refreshAnswerActionsForPlan(); }catch(_){}
     try{ refreshPdfAttachButtonsForPlan(); }catch(_){}
     closePricingModal();
-    alert(`✓ Pro 플랜으로 전환됐습니다 (시뮬레이션)\n\n이제 5명 멘토 모두 Opus 모델로 답변합니다.\n해제: 헤더 PRO 배지 → "Free로 변경"`);
+    alert(`✓ Pro 플랜으로 전환됐습니다 (관리자 시뮬레이션)\n\n5명 멘토 모두 Opus 모델로 답변.\n해제: 헤더 PRO 배지 → "Free로 변경"`);
     return;
   }
-  /* 실 결제 (백엔드 도입 후 활성화) */
-  alert(`[준비 중] ${plan.name} 플랜 결제 기능은 곧 오픈됩니다.\n\n문의: contact@route01.kr`);
+  /* 일반 사용자 — 결제 기능 준비 중 안내 (시뮬레이션 진입 차단) */
+  alert(`[준비 중] ${plan.name} 플랜 결제 기능은 곧 오픈됩니다.\n\n문의: hello@route01.kr`);
 }
 
 /* 비밀번호 변경 */
