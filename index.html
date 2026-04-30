@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260430-admin-sim-persist-v29">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260430-form-tag-v30">
 </head>
 <body>
 
@@ -98,7 +98,7 @@
         <div class="auth-or-divider"><span>또는 이메일로</span></div>
 
         <!-- 로그인 폼 -->
-        <div id="aform-login" class="aform">
+        <form id="aform-login" class="aform" onsubmit="emailLogin();return false">
           <div class="afield">
             <label class="afield-label" for="alogin-email">이메일</label>
             <input class="afield-input" id="alogin-email" type="email" placeholder="hello@example.com" autocomplete="email"/>
@@ -113,12 +113,12 @@
               <button type="button" class="apw-eye" onclick="togglePwEye('alogin-pw',this)">👁</button>
             </div>
           </div>
-          <button type="button" class="auth-btn auth-submit-btn" onclick="emailLogin()">로그인</button>
+          <button type="submit" class="auth-btn auth-submit-btn">로그인</button>
           <div class="aerr" id="aerr-login"></div>
-        </div>
+        </form>
 
         <!-- 회원가입 폼 -->
-        <div id="aform-signup" class="aform" style="display:none">
+        <form id="aform-signup" class="aform" style="display:none" onsubmit="emailSignup();return false">
           <div class="afield">
             <label class="afield-label" for="asignup-email">이메일</label>
             <input class="afield-input" id="asignup-email" type="email" placeholder="hello@example.com" autocomplete="email"/>
@@ -166,9 +166,9 @@
             </div>
           </div>
 
-          <button type="button" class="auth-btn auth-submit-btn" onclick="emailSignup()">회원가입</button>
+          <button type="submit" class="auth-btn auth-submit-btn">회원가입</button>
           <div class="aerr" id="aerr-signup"></div>
-        </div>
+        </form>
 
         <!-- 이메일 인증 안내 -->
         <div id="aform-verify" class="aform averify-wrap" style="display:none">
@@ -896,6 +896,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260430-admin-sim-persist-v29"></script>
+<script src="./nachim_v3.js?v=20260430-form-tag-v30"></script>
 </body>
 </html>
