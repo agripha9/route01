@@ -512,8 +512,9 @@ async function loginProvider(connection){
   }
 }
 function demoLogin(){
-  setAuthed({demo:true,name:'Demo User'});
-  startAfterLogin();
+  /* 데모 모드는 2026-04-30에 제거됨. Supabase 인증 정상 작동 후 불필요.
+     테스트가 필요하면 Supabase에서 테스트 계정을 직접 생성해 사용. */
+  console.warn('[demoLogin] removed — use a real Supabase test account instead');
 }
 function openAuth0Settings(){
   const cfg=getAuth0Config();

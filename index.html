@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260429-invest-rename-v18">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260430-auth-cleanup-v19">
 </head>
 <body>
 
@@ -211,10 +211,6 @@
           <div class="aerr" id="aerr-forgot"></div>
         </div>
 
-        <div class="auth-bottom-row">
-          <button type="button" class="auth-demo-btn" onclick="demoLogin()">🔓 데모 체험 (로그인 없이)</button>
-          <button type="button" class="auth-settings-btn" onclick="openAuth0Settings()">Auth0 설정</button>
-        </div>
         <p class="auth-copy">© 2026 <span class="brand">Route01</span> &nbsp;·&nbsp;
           <a href="#" onclick="openTermsModal('terms');return false">이용약관</a> &nbsp;·&nbsp;
           <a href="#" onclick="openTermsModal('privacy');return false">개인정보처리방침</a>
@@ -892,6 +888,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260429-invest-rename-v18"></script>
+<script src="./nachim_v3.js?v=20260430-auth-cleanup-v19"></script>
 </body>
 </html>

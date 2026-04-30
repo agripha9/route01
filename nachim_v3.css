@@ -1992,11 +1992,6 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .aview-btn:hover{text-decoration:underline;}
 
 /* 하단 */
-.auth-bottom-row{display:flex;flex-direction:column;gap:6px;margin-top:.75rem;}
-.auth-demo-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:9px;font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;font-family:var(--font-text);}
-.auth-demo-btn:hover{background:var(--bg);}
-.auth-settings-btn{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:2px 0;text-align:center;}
-.auth-settings-btn:hover{text-decoration:underline;color:var(--ink);}
 .auth-copy{margin-top:1.25rem;font-size:11px;color:var(--ink3);text-align:center;}
 .auth-copy a{color:var(--link-blue);text-decoration:none;}
 .auth-copy a:hover{text-decoration:underline;}
