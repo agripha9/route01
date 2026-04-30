@@ -318,7 +318,7 @@ async function hydrateUserStateFromSupabase(){
       try { if(typeof profile !== 'undefined') profile = localProfile; } catch(_){}
     }
   }
-  return { hasProfile, plan };
+  return { hasProfile, plan: isAdminSim ? (localStorage.getItem('r01_plan') || plan) : plan };
 }
 
 function isAuthed(){

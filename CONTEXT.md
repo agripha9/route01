@@ -1965,3 +1965,35 @@ c573786 fix(admin): persist Pro simulation across reloads via sessionStorage fla
 ```
 
 §46과 §47을 합치면 11커밋, 캐시 버스터 v18 → v30 (12번 bump). 회원가입·로그인 동선 전체 한 바퀴.
+
+### §47 세션 마감 점검 (코드 레벨 review)
+
+세션 마무리 시 표준 점검 절차를 도입 (사용자 요청). 이번 세션 작업 14커밋 검사 결과:
+
+**자동 검사**
+- ✓ JS syntax (`new Function(js)` 통과)
+- ✓ HTML form 짝 매칭 (`<form>` 2 / `</form>` 2)
+- ✓ 캐시 버스터 CSS/JS 일치
+- ✓ TEMP 마커 정확히 4곳 (설계와 일치)
+
+**의미 검사 발견 — 작은 일관성 버그**
+`hydrateUserStateFromSupabase` 반환값 `plan`이 isAdminSim일 때 서버값('free')을 반환했음. 실제 동작에는 영향 없음 (호출자가 `r.hasProfile`만 사용, plan은 `getCurrentPlan()`을 직접 read해서 정확). 하지만 미래에 누군가 `r.plan`을 쓰면 헷갈릴 수 있어 일관성 차원에서 수정:
+```
+return { hasProfile, plan: isAdminSim ? (localStorage.getItem('r01_plan') || plan) : plan };
+```
+
+**점검에서 통과한 항목**
+- form 안 모든 보조 버튼이 `type="button"` (의도치 않은 submit 방지) ✓
+- 약관 검증은 emailSignup 진입부에서 처리 — form 변환 후에도 정상 ✓
+- isAdminUser/R01_ADMIN_EMAILS 함수 hoisting 안전 ✓
+- TEMP 4곳 위치 모두 §47 설계와 일치 ✓
+
+**캐시 버스터**: v30 → v31 (점검 수정 반영). 다음 세션 시작값 **v32**.
+
+**점검 절차 (다음 세션부터 표준)**
+1. `git log --oneline <last-session-commit>..HEAD` — 작업 범위
+2. JS syntax check
+3. HTML 구조 sanity (form/div pairs, 캐시 버스터 일치)
+4. 새로 추가/수정된 함수의 의미 검사 (반환값 일관성, 스코프, hoisting)
+5. 호환성 검사 (기존 코드와의 영향 — 변환된 요소가 다른 함수에서 어떻게 다뤄지는지)
+6. 발견된 이슈 즉시 수정 + 캐시 버스터 bump
