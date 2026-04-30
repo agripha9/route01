@@ -447,6 +447,28 @@ async function handleAuthCallback(){
   const qs=new URLSearchParams(window.location.search);
   const hash = window.location.hash || '';
 
+  /* 0) Supabase 인증 에러 처리 (otp_expired, access_denied 등)
+     이메일 링크 만료·재사용·잘못된 링크 등으로 인증 실패 시 hash에 에러가 실려 옴.
+     예: #error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired
+     처리 안 하면 사용자가 빈 화면을 보게 됨 → alert로 안내 후 URL 정리. */
+  if(hash.includes('error=') && hash.includes('error_code=')){
+    const hashParams = new URLSearchParams(hash.replace(/^#/, ''));
+    const errCode = hashParams.get('error_code') || '';
+    const errDesc = decodeURIComponent(hashParams.get('error_description') || '').replace(/\+/g, ' ');
+    let userMsg = '인증 링크 처리 중 오류가 발생했습니다.';
+    if(errCode === 'otp_expired'){
+      userMsg = '인증 메일 링크가 만료되었거나 이미 사용된 링크입니다.\n\n' +
+                '다시 회원가입을 진행하거나, 기존에 가입한 계정이라면 로그인을 시도해 주세요.\n' +
+                '필요시 회원가입 화면에서 "인증 메일 재발송" 또는 "비밀번호 찾기"를 이용하실 수 있습니다.';
+    } else if(errDesc){
+      userMsg = '인증 링크 오류: ' + errDesc + '\n\n다시 회원가입을 진행하거나 로그인해 주세요.';
+    }
+    /* URL hash 정리 후 안내 — 정리 먼저 해야 새로고침 시 같은 에러 반복 안 됨 */
+    window.history.replaceState({}, document.title, window.location.pathname);
+    try{ alert(userMsg); }catch(_){}
+    return; /* 후속 세션·Auth0 콜백 처리 스킵 — 인증 실패 상태 유지 → #auth 화면 노출 */
+  }
+
   /* 1) Supabase 세션 처리 (2026-04-28 §44 Step 2)
      - 이메일 인증 링크 클릭 후 돌아온 직후: URL에 토큰이 박혀 있고 detectSessionInUrl=true가 자동 처리
      - 이미 로그인된 사용자가 재방문: persistSession이 localStorage에서 자동 복원
