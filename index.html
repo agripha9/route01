@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260430-hydrate-return-fix-v31">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260430-pw-change-form-v32">
 </head>
 <body>
 
@@ -835,32 +835,34 @@
   <div class="modal" style="width:400px">
     <button class="modal-close" onclick="closePwChange()">×</button>
     <div class="modal-title">비밀번호 변경</div>
-    <div class="afield" style="margin-bottom:12px">
-      <label class="afield-label" for="pw-cur">현재 비밀번호</label>
-      <div class="apw-wrap">
-        <input class="afield-input" id="pw-cur" type="password" placeholder="현재 비밀번호"/>
-        <button type="button" class="apw-eye" onclick="togglePwEye('pw-cur',this)">👁</button>
+    <form id="pw-change-form" onsubmit="submitPwChange();return false">
+      <div class="afield" style="margin-bottom:12px">
+        <label class="afield-label" for="pw-cur">현재 비밀번호</label>
+        <div class="apw-wrap">
+          <input class="afield-input" id="pw-cur" type="password" placeholder="현재 비밀번호" autocomplete="current-password"/>
+          <button type="button" class="apw-eye" onclick="togglePwEye('pw-cur',this)">👁</button>
+        </div>
       </div>
-    </div>
-    <div class="afield" style="margin-bottom:12px">
-      <label class="afield-label" for="pw-new">새 비밀번호 <span style="font-weight:400;color:var(--ink3)">(8자 이상)</span></label>
-      <div class="apw-wrap">
-        <input class="afield-input" id="pw-new" type="password" placeholder="새 비밀번호"/>
-        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new',this)">👁</button>
+      <div class="afield" style="margin-bottom:12px">
+        <label class="afield-label" for="pw-new">새 비밀번호 <span style="font-weight:400;color:var(--ink3)">(8자 이상)</span></label>
+        <div class="apw-wrap">
+          <input class="afield-input" id="pw-new" type="password" placeholder="새 비밀번호" autocomplete="new-password"/>
+          <button type="button" class="apw-eye" onclick="togglePwEye('pw-new',this)">👁</button>
+        </div>
       </div>
-    </div>
-    <div class="afield" style="margin-bottom:16px">
-      <label class="afield-label" for="pw-new2">새 비밀번호 확인</label>
-      <div class="apw-wrap">
-        <input class="afield-input" id="pw-new2" type="password" placeholder="새 비밀번호 재입력"/>
-        <button type="button" class="apw-eye" onclick="togglePwEye('pw-new2',this)">👁</button>
+      <div class="afield" style="margin-bottom:16px">
+        <label class="afield-label" for="pw-new2">새 비밀번호 확인</label>
+        <div class="apw-wrap">
+          <input class="afield-input" id="pw-new2" type="password" placeholder="새 비밀번호 재입력" autocomplete="new-password"/>
+          <button type="button" class="apw-eye" onclick="togglePwEye('pw-new2',this)">👁</button>
+        </div>
       </div>
-    </div>
-    <div class="aerr" id="aerr-pw-change" style="margin-bottom:10px"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closePwChange()">취소</button>
-      <button class="modal-btn pri" onclick="submitPwChange()">변경하기</button>
-    </div>
+      <div class="aerr" id="aerr-pw-change" style="margin-bottom:10px"></div>
+      <div class="modal-btn-row">
+        <button type="button" class="modal-btn" onclick="closePwChange()">취소</button>
+        <button type="submit" class="modal-btn pri">변경하기</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -896,6 +898,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260430-hydrate-return-fix-v31"></script>
+<script src="./nachim_v3.js?v=20260430-pw-change-form-v32"></script>
 </body>
 </html>
