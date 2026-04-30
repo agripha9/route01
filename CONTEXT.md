@@ -1877,3 +1877,66 @@ ef07ceb fix(paywall): portal pricing-modal to body so it works during onboarding
 - Paywall 빈 화면 버그에서 backdrop-filter stacking 가설(틀림) → DOM 구조 확인 후 부모 가시성 가설(맞음). 추측 한 사이클 낭비.
 - Pro→Free 회귀 버그에서 plan 캐시 의심 → `localStorage.r01_plan`이 hydrate에서 덮어쓰일 가능성 → 결국 Auth0 user가 Supabase 미인증이라는 구조적 한계 발견. 추측 단계가 길었지만 결과적으로 §47 우선순위 결정에 결정적 단서가 됨.
 - 교훈: 증상 보고 즉시 코드 패치하지 말고, **무엇이 진실의 원천인지** 확인부터. Supabase가 백엔드인 시스템에서 "Auth0 사용자"는 거짓 인증된 상태였음.
+
+---
+
+## 47. 2026-04-30 §46 후속 — Pro 시뮬레이션 영속화 + §46 진단 정정
+
+### 진단 정정
+§46에서 "Auth0 사용자 = Supabase 미인증이라서 Pro가 Free로 회귀한다"고 결론지었으나, **임시 우회(이메일/PW 가입) 후 검증해보니 동일하게 Free로 회귀**. 가설이 틀렸음을 확인.
+
+### 진짜 원인
+- `selectPlan('pro')` 시뮬레이션은 `localStorage.setItem('r01_plan','pro')`만 함 — **subscriptions 테이블에 아무것도 안 씀**
+- 새로고침 시 `startAfterLogin` → `hydrateUserStateFromSupabase` → `loadPlanFromSupabase`
+- `subscriptions`에 row 없음 → `'free'` 반환 (line 266 `if(error || !data) return 'free'`)
+- `r01_plan` 캐시가 'free'로 덮어써짐 → PRO 사라짐
+- **Auth0와 무관**. 이메일/PW 사용자도 동일 (subscriptions에 row 없으면 모두 'free').
+
+§46이 부분적으로 틀린 이유는 검증 없이 추측에 추측을 쌓았기 때문. 이메일/PW 우회가 작동했다면 진단이 맞았을 텐데, 작동 안 하니 가설 자체가 무효.
+
+### 적용한 수정 (커밋 [TBD])
+
+**TEMP 우회 장치 — 결제 백엔드 도입 시 통째로 제거**
+
+1. **`selectPlan` Pro 시뮬레이션**: `localStorage.r01_plan='pro'`와 함께 `sessionStorage.r01_admin_sim='1'` 박음
+2. **`hydrateUserStateFromSupabase`**: plan 덮어쓰기 직전 우회 체크
+   ```
+   const isAdminSim = sessionStorage.r01_admin_sim==='1' && isAdminUser();
+   if(!isAdminSim){ localStorage.setItem('r01_plan', plan); }
+   ```
+3. **`selectPlan` Free 변경**: `sessionStorage.removeItem('r01_admin_sim')` — 시뮬레이션 해제
+4. **`clearUserScopedCache` (로그아웃)**: `sessionStorage` 정리 — 다음 사용자 누수 방지
+
+**보안 특성**
+- `sessionStorage`라 탭 닫으면 자연 소멸 (영속 위변조 위험 없음)
+- `isAdminUser()` 화이트리스트 체크 동반 → 일반 사용자가 sessionStorage 직접 만져도 우회 안 됨
+- 두 조건(플래그 AND 관리자) 모두 만족해야 우회 발동
+
+### 죽음의 조건 (결제 백엔드 트랙에서 제거할 코드)
+
+코드에 `TEMP(결제 백엔드 도입 시 제거)` 주석 4곳:
+- `selectPlan` Pro 시뮬레이션 분기 안 sessionStorage.setItem (line ~6720)
+- `selectPlan` Free 변경 분기 안 sessionStorage.removeItem (line ~6700)
+- `hydrateUserStateFromSupabase` 안 isAdminSim 체크 (line ~290)
+- `clearUserScopedCache` 안 sessionStorage.removeItem (line ~373)
+
+결제 백엔드 도입 시점에:
+- selectPlan Pro 분기 자체가 토스페이먼츠 SDK 호출로 교체됨 → sessionStorage 코드 자연 제거
+- 진짜 결제로 subscriptions에 row 들어감 → hydrate가 정상 'pro' 반환 → 우회 불필요
+- 4곳 모두 한 번에 정리 가능
+
+### 다음 세션 우선순위 (재정렬)
+
+§46이 잡아둔 우선순위 그대로 유효. 단 §47에서 발견했듯 "Auth0 통일"이 모든 백엔드 문제의 원인은 아니었음 — 그래도 사용자 데이터 분산·코드 단순화 측면에서 여전히 1순위.
+
+1. **Auth0 → Supabase 통일** (콘솔 작업 동반, 반나절~하루)
+2. 마이페이지 / 일일 카운터 백엔드
+3. 토스페이먼츠 실 연동 ← 이때 §47 TEMP 코드 4곳 한 번에 정리
+4. 컨버터 round-trip 단위 테스트
+
+### 캐시 버스터
+- §46 후속: v28 → v29
+- 다음 세션 시작값: **v30**
+
+### §47 회고
+§46에서 추측을 검증으로 닫지 못한 게 §47에서 드러났음. 임시 우회(이메일/PW)를 적용 후 검증을 직접 했어야 했는데, 적용을 권하기만 하고 닫았던 게 약점. 다음에 비슷한 "구조적 한계 가설" 나오면 **검증 후 닫기**가 원칙이 되어야 함.

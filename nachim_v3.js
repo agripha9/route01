@@ -289,7 +289,22 @@ async function hydrateUserStateFromSupabase(){
 
   /* plan 먼저 — 헤더 pill·게이트 결정에 즉시 필요 */
   const plan = await loadPlanFromSupabase();
-  try { localStorage.setItem('r01_plan', plan); } catch(_){}
+  /* TEMP(결제 백엔드 도입 시 제거): 관리자 시뮬레이션 영속화.
+     selectPlan에서 'r01_admin_sim'=1을 박으면 hydrate가 plan 덮어쓰기를 스킵.
+     subscriptions 테이블에 직접 쓰는 권한이 없어서(서버 측 결제 검증 필요)
+     클라이언트 캐시만으로는 새로고침 시 이 함수가 'free'로 덮어써왔음.
+     이 우회 장치는 결제 백엔드 도입 시 selectPlan의 PROTOTYPE_MODE 블록과
+     함께 통째로 제거. */
+  const isAdminSim = (function(){
+    try {
+      return sessionStorage.getItem('r01_admin_sim') === '1' && isAdminUser();
+    } catch(_){ return false; }
+  })();
+  if(!isAdminSim){
+    try { localStorage.setItem('r01_plan', plan); } catch(_){}
+  } else {
+    console.log('[admin-sim] skipping plan overwrite — keeping cached r01_plan');
+  }
 
   /* profile — 입력된 프로필이 하나라도 있으면 hasProfile=true */
   const localProfile = await loadProfileFromSupabase();
@@ -370,6 +385,9 @@ function clearUserScopedCache(){
   USER_SCOPED_LS_KEYS.forEach(k => {
     try { localStorage.removeItem(k); } catch(_){}
   });
+  /* TEMP(결제 백엔드 도입 시 제거): 관리자 시뮬레이션 플래그도 함께 정리.
+     로그아웃 후 다른 사용자가 같은 브라우저로 들어왔을 때 누수 방지. */
+  try { sessionStorage.removeItem('r01_admin_sim'); } catch(_){}
   /* 메모리 상의 profile 객체도 초기화 (전역 var) */
   try { if(typeof profile !== 'undefined') profile = {}; } catch(_){}
 }
@@ -6681,6 +6699,9 @@ function selectPlan(planId){
   if(!plan) return;
   if(plan.price === 0){
     localStorage.setItem('r01_plan','free');
+    /* TEMP(결제 백엔드 도입 시 제거): 시뮬레이션 해제.
+       관리자가 Pro 시뮬레이션 → Free 다운그레이드 시 우회 플래그도 함께 제거. */
+    try{ sessionStorage.removeItem('r01_admin_sim'); }catch(_){}
     try{ syncHeaderPlanPill(); }catch(_){}
     const mentorSync = (function(){ try{ return ensureMentorPlanSync({silent:true}); }catch(_){ return {changed:false}; } })();
     try{ refreshAnswerActionsForPlan(); }catch(_){}
@@ -6712,6 +6733,12 @@ function selectPlan(planId){
     );
     if(!ok) return;
     localStorage.setItem('r01_plan','pro');
+    /* TEMP(결제 백엔드 도입 시 제거): 시뮬레이션 영속화 플래그.
+       이게 없으면 새로고침 시 hydrateUserStateFromSupabase가 subscriptions
+       테이블에서 'free'를 가져와 r01_plan을 덮어씀. 관리자가 라우팅을 검증하는
+       동안 Pro 상태 유지를 위해 sessionStorage 플래그로 우회.
+       sessionStorage라 탭 닫으면 자연 소멸 → 영속 위변조 위험 없음. */
+    try{ sessionStorage.setItem('r01_admin_sim','1'); }catch(_){}
     try{ syncHeaderPlanPill(); }catch(_){}
     try{ refreshAnswerActionsForPlan(); }catch(_){}
     try{ refreshPdfAttachButtonsForPlan(); }catch(_){}
