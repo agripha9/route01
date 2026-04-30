@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260430-remove-apple-v20">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260430-verify-redesign-v21">
 </head>
 <body>
 
@@ -171,14 +171,21 @@
         </div>
 
         <!-- 이메일 인증 안내 -->
-        <div id="aform-verify" class="aform" style="display:none;text-align:center;padding:8px 0">
-          <div style="font-size:40px;margin-bottom:16px">📧</div>
-          <div style="font-size:17px;font-weight:600;color:var(--ink);margin-bottom:8px">이메일을 확인해 주세요</div>
-          <div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:20px">
-            <span id="averify-addr" style="font-weight:600;color:var(--ink)"></span>으로<br>인증 메일을 발송했습니다.<br><br>
-            메일 안의 <strong style="color:var(--ink)">"이메일 확인"</strong> 링크를 클릭하면<br>자동으로 로그인됩니다.<br>
-            <span style="font-size:12px;color:var(--ink3);margin-top:8px;display:inline-block">메일이 안 보이면 스팸함도 확인해주세요.</span>
+        <div id="aform-verify" class="aform averify-wrap" style="display:none">
+          <div class="averify-icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2"/>
+              <path d="M3 7l9 6 9-6"/>
+            </svg>
           </div>
+          <h3 class="averify-title">이메일을 확인해 주세요</h3>
+          <p class="averify-sub">
+            <span id="averify-addr" class="averify-addr"></span>으로<br>인증 메일을 발송했습니다.
+          </p>
+          <div class="averify-action-card">
+            메일 안의 <strong>"이메일 확인"</strong> 링크를 클릭하면<br>자동으로 로그인됩니다.
+          </div>
+          <p class="averify-spam">메일이 안 보이면 스팸함도 확인해주세요.</p>
           <!-- 데모용 코드 표시 박스 (Supabase 도입으로 폐기, 호환을 위해 DOM은 유지) -->
           <div class="averify-demo-box" style="display:none;background:var(--bg);border:1px dashed var(--border);border-radius:var(--r);padding:12px;margin-bottom:16px;font-size:13px;color:var(--ink3);">
             <div style="margin-bottom:4px">📌 데모 모드 — 인증 코드:</div>
@@ -191,8 +198,8 @@
           </div>
           <div class="aerr" id="averr-verify" style="margin-bottom:8px;display:none"></div>
           <button type="button" class="auth-btn auth-submit-btn" style="display:none" onclick="verifySignupCode()">인증 완료</button>
-          <button type="button" class="alink-btn" style="margin-top:10px" onclick="resendVerify()">인증 메일 재발송</button>
-          <button type="button" class="alink-btn" onclick="switchAuthTab('signup')" style="margin-top:4px">← 회원가입으로 돌아가기</button>
+          <button type="button" class="averify-resend-btn" onclick="resendVerify()">인증 메일 재발송</button>
+          <button type="button" class="alink-btn averify-back-btn" onclick="switchAuthTab('signup')">← 회원가입으로 돌아가기</button>
         </div>
 
         <!-- 비밀번호 찾기 -->
@@ -884,6 +891,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260430-remove-apple-v20"></script>
+<script src="./nachim_v3.js?v=20260430-verify-redesign-v21"></script>
 </body>
 </html>

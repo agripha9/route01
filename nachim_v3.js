@@ -5281,6 +5281,8 @@ function switchAuthTab(tab) {
   ['aerr-login','aerr-signup','aerr-forgot','aerr-email-dup'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.textContent='';
   });
+  /* verify 모드 해제 — 상단 탭/소셜/구분선 다시 표시 */
+  document.querySelector('.auth-right-inner')?.classList.remove('verify-mode');
 }
 
 function togglePwEye(id, btn) {
@@ -5447,6 +5449,8 @@ async function emailSignup() {
     /* 화면 전환 */
     const fs = document.getElementById('aform-signup'); if(fs) fs.style.display='none';
     const fv = document.getElementById('aform-verify'); if(fv) fv.style.display='flex';
+    /* verify 모드 진입 — 상단 탭/소셜/구분선 숨김 (CSS .verify-mode) */
+    document.querySelector('.auth-right-inner')?.classList.add('verify-mode');
   } catch(e){
     err.textContent = '예기치 못한 오류: ' + (e?.message||String(e));
   } finally {
