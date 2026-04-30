@@ -1997,3 +1997,43 @@ return { hasProfile, plan: isAdminSim ? (localStorage.getItem('r01_plan') || pla
 4. 새로 추가/수정된 함수의 의미 검사 (반환값 일관성, 스코프, hoisting)
 5. 호환성 검사 (기존 코드와의 영향 — 변환된 요소가 다른 함수에서 어떻게 다뤄지는지)
 6. 발견된 이슈 즉시 수정 + 캐시 버스터 bump
+
+### §47 추가 — 점검 절차로 발견된 콘솔 경고 처리 (커밋 f9933c7)
+
+세션 마감 직전 사용자가 DevTools 콘솔/이슈 패널 확인 요청. 점검 절차의 일부로 처리.
+
+**콘솔 경고 4건 분류**
+- `key-input` (API 키 모달): 진짜 비밀번호 아님 — autocomplete='off'로 충분, 무시
+- `pw-cur`, `pw-new`, `pw-new2` (비밀번호 변경 모달): div 구조라 form 미인식 — **수정 대상**
+
+**수정**: 비밀번호 변경 모달을 `<form id="pw-change-form">`으로 감쌈
+- onsubmit으로 submitPwChange 호출
+- 변경하기: type='submit', 취소: type='button' 명시 (form 안 기본 submit 위험)
+- autocomplete: current-password / new-password 정확히 박음
+
+**효과**: 콘솔 경고 3건 제거 + Chrome이 비밀번호 변경 후 저장된 값 자동 업데이트 제안 + Enter 키 제출.
+
+**이슈 패널 12건 (별도 트랙)**
+'No label associated with a form field' — 접근성 경고. 분석 결과:
+- 4건: 약관 체크박스 (시각적 텍스트는 옆에 있음 — `<label for>` 또는 aria-label 필요)
+- 5건: 숨김 file input (display:none, 다른 버튼이 트리거 — aria-label 권장)
+- 4건: 온보딩 입력 (industry-in, sector-other-in, mrr-in, name-in — placeholder만 있고 label 없음)
+- 1건: averify-code-input (데모 잔재, 숨겨짐 — 무시 OK)
+
+**다음 세션 후보 항목 (접근성 트랙)**
+- aria-label / `<label for>` 매칭 정리 (15곳)
+- Lighthouse 접근성 점수 확인
+- 한국 정부지원사업 IR 평가의 접근성 점수 대비
+
+**캐시 버스터**: v31 → v32. 다음 세션 시작값 **v33**.
+
+### §47 진짜 최종 커밋 이력
+```
+c573786 fix(admin): persist Pro simulation across reloads via sessionStorage flag
+62ab77b fix(auth): wrap login/signup in <form> tags so Chrome offers password save
+d850f5c docs: close 2026-04-30 §47 (1차)
+e2bc6c0 fix(hydrate): make return value consistent when admin sim is active
+f9933c7 fix(pw-change): wrap modal in <form> + add autocomplete attrs
+```
+
+§46 + §47 합쳐 **15커밋, 캐시 버스터 v18 → v32 (15번 bump)**.
