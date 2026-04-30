@@ -6621,7 +6621,16 @@ function openPricingModal(){
   /* onboarding이 떠있는 상태에서 paywall이 호출되면 onboarding이 paywall을 가리는
      렌더링 이슈가 있어 (브라우저의 backdrop-filter stacking 동작 차이 추정),
      paywall이 떠있는 동안 onboarding을 임시로 숨겨 paywall에 집중하도록 함.
-     입력값은 DOM에 그대로 남으므로 paywall 닫으면 자연 복귀. */
+     입력값은 DOM에 그대로 남으므로 paywall 닫으면 자연 복귀.
+
+     추가: pricing-modal은 원래 <div id="app"> 안에 있어 #app이 display:none인
+     온보딩 진행 단계(신규 가입자)에서는 paywall도 함께 안 보였음.
+     init 시점에 한 번만 body로 이동시켜 #app 가시 상태와 무관하게 동작하도록 함.
+     이미 body 직속이면 idempotent — 부모 체크로 한 번만 이동. */
+  const pricingModal = document.getElementById('pricing-modal');
+  if(pricingModal && pricingModal.parentElement !== document.body){
+    document.body.appendChild(pricingModal);
+  }
   const ob = document.getElementById('onboarding');
   if(ob && !ob.classList.contains('hidden')){
     ob.dataset.hiddenForPaywall = '1';
