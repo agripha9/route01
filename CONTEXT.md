@@ -2037,3 +2037,50 @@ f9933c7 fix(pw-change): wrap modal in <form> + add autocomplete attrs
 ```
 
 §46 + §47 합쳐 **15커밋, 캐시 버스터 v18 → v32 (15번 bump)**.
+
+### §47 마지막 발견 — §44 백엔드 통합 미완 영역 (다음 세션 필수)
+
+비밀번호 변경 모달 form화 직후 사용자가 실제 사용 시도 → "소셜 로그인 계정은 비밀번호를 변경할 수 없습니다" 에러 (이메일/PW 가입자인데도). 깊은 구조적 문제 발견.
+
+**진짜 원인 (`submitPwChange` line 6764~6787)**
+- 함수가 **§44 이전의 옛 시스템(localStorage `r01_accs` + base64 비밀번호)** 으로 검증
+- §44 이후 이메일/PW 가입자의 비밀번호는 Supabase 서버에 해싱 저장 — `r01_accs`에는 row 없음
+- 못 찾으니 "소셜 로그인" 오판 → 에러 표시
+- 설사 row가 있다 해도 base64 비교 후 Supabase 서버의 진짜 비밀번호는 안 바뀜 → UI 가짜 성공
+
+**Chrome 추가 경고**: "Password forms should have (optionally hidden) username fields for accessibility" — 비밀번호 변경 폼에 username(email) hidden field 누락. Chrome 비밀번호 매니저가 어떤 계정의 비밀번호인지 못 알아봄.
+
+**확장 의심 — §44 백엔드 통합에서 빠진 다른 영역들**
+- `forgotPw` / `showForgotPw` — Supabase `resetPasswordForEmail` 사용 중인지 옛 r01_accs 기반인지 미확인
+- `submitWithdraw` — Supabase 회원 탈퇴 API 호출 안 하는 듯 (localStorage만 비움). DB에 사용자 row + profile + subscription 그대로 남을 가능성
+
+**다음 세션 작업 (필수, 누락 금지)**
+**제목: §44 백엔드 통합 미완 영역 정리 — 인증 후속 동선 (변경/찾기/탈퇴)**
+
+1. `submitPwChange` Supabase 기반으로 재작성
+   - 현재 비밀번호로 reauthenticate (`sb.auth.signInWithPassword`)
+   - 성공 시 `sb.auth.updateUser({password: 신규})`
+   - hidden username field (`autocomplete="username"`) 추가 — Chrome 매니저용
+2. `forgotPw` 흐름 검증 + 필요시 Supabase로 통일
+3. `submitWithdraw` 검증 + Supabase 회원 탈퇴 API 호출 추가
+   - `sb.auth.admin.deleteUser`는 service role 필요 → Edge Function 경유 검토
+   - 또는 사용자 본인 호출 가능한 RPC 함수 정의
+4. 이 트랙은 **Auth0 → Supabase 통일 (다음 세션 1순위)** 작업과 직접 연관됨 — 함께 진행하는 게 자연스러움
+
+**예상 작업량**: 30분~1시간 (단독), Auth0 통일과 묶으면 +30분 정도
+
+**임시 상태**: 비밀번호 변경 모달은 열리긴 하나 작동 안 함. UI가 "에러 표시"로 인지 가능하므로 사용자가 "왜 안 되지?" 정도. 다음 세션까지 이 상태로 두는 게 가장 깨끗 (가짜 메시지 박지 않음).
+
+**다음 세션 우선순위 재정렬 (확정)**
+1. **인증 트랙 전체 정리** (이 두 항목을 묶어 한 번에)
+   - Auth0 → Supabase 통일
+   - 비밀번호 변경/찾기/탈퇴 Supabase 백엔드 연결
+   - 콘솔 작업 동반 (Google Cloud, Kakao, Naver, Supabase Dashboard)
+   - 반나절~하루
+2. 마이페이지 / 일일 카운터 백엔드
+3. 토스페이먼츠 + TEMP 4곳 정리
+4. 접근성 트랙 (aria-label 15곳)
+5. 컨버터 round-trip 테스트
+
+### §47 진짜 진짜 최종 — 18 커밋, 캐시 버스터 v18 → v32
+점검 절차로 발견된 문제까지 정직하게 기록하고 마감. 비밀번호 변경 흐름의 가짜 작동은 다음 세션 첫 작업으로 잡힘.
