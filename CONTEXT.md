@@ -1940,3 +1940,28 @@ ef07ceb fix(paywall): portal pricing-modal to body so it works during onboarding
 
 ### §47 회고
 §46에서 추측을 검증으로 닫지 못한 게 §47에서 드러났음. 임시 우회(이메일/PW)를 적용 후 검증을 직접 했어야 했는데, 적용을 권하기만 하고 닫았던 게 약점. 다음에 비슷한 "구조적 한계 가설" 나오면 **검증 후 닫기**가 원칙이 되어야 함.
+
+### §47 추가 작업 — Chrome 비밀번호 저장 활성화 (커밋 62ab77b)
+
+**증상**: Chrome이 로그인 후 비밀번호 저장 제안을 안 띄움.
+
+**원인**: 로그인/회원가입이 `<div>` 구조 + `<input>`만 있어 Chrome 휴리스틱이 form으로 인식 못 함. autocomplete 속성은 잘 박혀있어 자동완성 자체는 작동하나, 저장 제안은 `<form>` submit 이벤트가 트리거되어야 발동.
+
+**수정**:
+- `#aform-login`: `<div>` → `<form onsubmit="emailLogin();return false">`
+- `#aform-signup`: `<div>` → `<form onsubmit="emailSignup();return false">`
+- 두 submit 버튼: `type="button" onclick="..."` → `type="submit"`
+
+**부수 효과**: Enter 키로도 제출 가능, 가입 시점에도 비밀번호 저장 제안.
+
+**검증 결과**: 알림 토스트는 안 떴지만 주소창 열쇠 아이콘에 정보 저장됨 — 정상 작동.
+
+**캐시 버스터**: v29 → v30. 다음 세션 시작값 **v31**.
+
+### §47 최종 커밋 이력
+```
+c573786 fix(admin): persist Pro simulation across reloads via sessionStorage flag
+62ab77b fix(auth): wrap login/signup in <form> tags so Chrome offers password save
+```
+
+§46과 §47을 합치면 11커밋, 캐시 버스터 v18 → v30 (12번 bump). 회원가입·로그인 동선 전체 한 바퀴.
