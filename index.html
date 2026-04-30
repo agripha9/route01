@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260430-verify-polish-v22">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260430-apple-buttons-v23">
 </head>
 <body>
 
@@ -199,7 +199,12 @@
           <div class="aerr" id="averr-verify" style="margin-bottom:8px;display:none"></div>
           <button type="button" class="auth-btn auth-submit-btn" style="display:none" onclick="verifySignupCode()">인증 완료</button>
           <button type="button" class="averify-resend-btn" onclick="resendVerify()">인증 메일 재발송</button>
-          <button type="button" class="alink-btn averify-back-btn" onclick="switchAuthTab('signup')">← 회원가입으로 돌아가기</button>
+          <button type="button" class="averify-back-btn" onclick="switchAuthTab('signup')">
+            <svg class="averify-back-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>회원가입으로 돌아가기</span>
+          </button>
         </div>
 
         <!-- 비밀번호 찾기 -->
@@ -891,6 +896,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260430-verify-polish-v22"></script>
+<script src="./nachim_v3.js?v=20260430-apple-buttons-v23"></script>
 </body>
 </html>
