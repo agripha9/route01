@@ -6596,9 +6596,24 @@ function openPricingModal(){
     <p class="pricing-note">결제는 토스페이먼츠를 통해 안전하게 처리됩니다. 언제든 해지할 수 있어요.</p>
   `;
   document.getElementById('pricing-modal').classList.add('open');
+  /* onboarding이 떠있는 상태에서 paywall이 호출되면 onboarding이 paywall을 가리는
+     렌더링 이슈가 있어 (브라우저의 backdrop-filter stacking 동작 차이 추정),
+     paywall이 떠있는 동안 onboarding을 임시로 숨겨 paywall에 집중하도록 함.
+     입력값은 DOM에 그대로 남으므로 paywall 닫으면 자연 복귀. */
+  const ob = document.getElementById('onboarding');
+  if(ob && !ob.classList.contains('hidden')){
+    ob.dataset.hiddenForPaywall = '1';
+    ob.classList.add('hidden');
+  }
 }
 function closePricingModal(){
   document.getElementById('pricing-modal')?.classList.remove('open');
+  /* paywall 호출 직전 숨겼던 onboarding 복원 */
+  const ob = document.getElementById('onboarding');
+  if(ob && ob.dataset.hiddenForPaywall === '1'){
+    ob.classList.remove('hidden');
+    delete ob.dataset.hiddenForPaywall;
+  }
 }
 function selectPlan(planId){
   /* 토스페이먼츠 결제 (현재는 데모 — 실제 연동은 방향 A 백엔드 작업 시) */
