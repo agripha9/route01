@@ -285,22 +285,6 @@ body{
 @media (max-width:480px){.auth-actions{gap:8px}}
 @media (prefers-reduced-motion:reduce){.auth-btn{transition:none}#auth .auth-hero-anim,#auth .auth-hero-anim.auth-hero-visible{opacity:1;transform:none;transition:none}}
 
-/* Auth0 설정 모달 */
-#auth0-modal .auth0-field-label{font-size:12px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0;margin-bottom:6px;display:block}
-#auth0-modal .auth0-flat-input{
-  width:100%;border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;
-  font-size:17px;font-family:var(--font-text);background:#fff;color:var(--ink);
-  outline:none;transition:border-color .15s,box-shadow .15s;margin-bottom:0;
-  letter-spacing:-0.374px
-}
-#auth0-modal .auth0-flat-input:focus{border-color:var(--apple-blue);box-shadow:var(--ring-blue)}
-#auth0-modal .auth0-flat-input::placeholder{color:#aeaeb2}
-#auth0-modal .auth0-hint{font-size:12px;color:var(--gray-48);line-height:1.43;margin:10px 0 18px;word-break:break-all;letter-spacing:-0.12px}
-#auth0-modal .modal-btn.pri{background:var(--cta);color:#fff;border-color:var(--cta)}
-#auth0-modal .modal-btn.pri:hover{opacity:.92;background:var(--cta-press);border-color:var(--cta-press)}
-#auth0-modal .modal-btn:not(.pri){background:#fff;border:1px solid var(--border);color:var(--ink)}
-#auth0-modal .modal-btn:not(.pri):hover{border-color:var(--border2);background:var(--filter-bg)}
-
 /* ONBOARDING */
 #onboarding{position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;animation:fadeIn .4s ease}
 #onboarding .modal-close{color:var(--ink3)}

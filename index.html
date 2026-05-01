@@ -10,10 +10,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="./vendor/auth0-spa-js.production.js"></script>
-<!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
+<!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 §44 도입, 2026-05-01 §48에서 단일 인증으로 승격) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260501-supabase-oauth-v35">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260501-auth0-cleanup-v36">
 </head>
 <body>
 
@@ -716,32 +715,6 @@
   </div>
 </div>
 
-<!-- Auth0 설정 모달 -->
-<div class="modal-bg" id="auth0-modal">
-  <div class="modal" style="width:520px">
-    <button class="modal-close" onclick="closeAuth0Settings()">×</button>
-    <div class="modal-title">Auth0 연동</div>
-    <div class="modal-sub">소셜 로그인을 쓰려면 테넌트 도메인과 애플리케이션의 클라이언트 ID가 필요합니다.</div>
-    <div style="margin-bottom:16px">
-      <label class="auth0-field-label" for="auth0-domain">도메인</label>
-      <input id="auth0-domain" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: 내테넌트.us.auth0.com" />
-    </div>
-    <div style="margin-bottom:16px">
-      <label class="auth0-field-label" for="auth0-clientid">클라이언트 ID</label>
-      <input id="auth0-clientid" class="auth0-flat-input" type="text" autocomplete="off" placeholder="Auth0 대시보드에서 복사한 클라이언트 ID" />
-    </div>
-    <div style="margin-bottom:4px">
-      <label class="auth0-field-label" for="auth0-audience">API 대상 · audience (선택)</label>
-      <input id="auth0-audience" class="auth0-flat-input" type="text" autocomplete="off" placeholder="예: https://api.example.com (API 식별자가 있을 때만)" />
-    </div>
-    <p class="auth0-hint">Auth0 앱 설정의 「허용된 콜백 URL」에 아래 주소를 그대로 추가하세요.<br><strong id="auth0-redirect-url"></strong></p>
-    <div class="modal-btn-row">
-      <button type="button" class="modal-btn" onclick="closeAuth0Settings()">취소</button>
-      <button type="button" class="modal-btn pri" onclick="saveAuth0Settings()">저장</button>
-    </div>
-  </div>
-</div>
-
 <!-- 지원 사업 도우미 -->
 <div class="modal-bg" id="grant-modal">
   <div class="modal modal-wide" style="max-width:560px">
@@ -904,6 +877,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260501-supabase-oauth-v35"></script>
+<script src="./nachim_v3.js?v=20260501-auth0-cleanup-v36"></script>
 </body>
 </html>

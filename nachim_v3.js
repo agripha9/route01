@@ -16,95 +16,20 @@ function normalizeApiKey(raw){
 let API_KEY = normalizeApiKey(localStorage.getItem('nachim_api_key') || '');
 function apiKey(){ return normalizeApiKey(API_KEY); }
 
-/* ─── AUTH (LOGIN) ───────────────────────── */
-function getAuth0Config(){
-  try{
-    const raw=localStorage.getItem('nachim_auth0');
-    return raw?JSON.parse(raw):{};
-  }catch(e){return {};}
-}
-function setAuth0Config(cfg){
-  localStorage.setItem('nachim_auth0', JSON.stringify(cfg||{}));
-}
-function auth0Domain(){return (getAuth0Config().domain||'').trim();}
-function auth0ClientId(){return (getAuth0Config().clientId||'').trim();}
-function auth0Audience(){return (getAuth0Config().audience||'').trim();}
-
-/* default Auth0 config (can be overridden in settings modal) */
-(function ensureDefaultAuth0(){
-  const cfg=getAuth0Config();
-  if(cfg && cfg.domain && cfg.clientId) return;
-  setAuth0Config({
-    domain:'dev-unrwq5rzawkqep5s.us.auth0.com',
-    clientId:'c6KcE7zuXTUiRCcWgh53ycSyBCqOcLWz',
-    audience: cfg?.audience || ''
-  });
-})();
-
-const AUTH0_REDIRECT_URI = window.location.origin + window.location.pathname;
-let auth0Client = null;
-
-/* ─── Auth0 SPA SDK loader (fallback CDNs) ─── */
-const AUTH0_SDK_URLS = [
-  'https://unpkg.com/@auth0/auth0-spa-js@2.0.4/dist/auth0-spa-js.production.js',
-  'https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@2.0.4/dist/auth0-spa-js.production.js'
-];
-let auth0SdkLoadPromise = null;
-function getCreateAuth0Client(){
-  return window.createAuth0Client || (window.auth0 && window.auth0.createAuth0Client) || null;
-}
-function bridgeAuth0Global(){
-  if(!window.createAuth0Client && window.auth0 && window.auth0.createAuth0Client){
-    window.createAuth0Client = window.auth0.createAuth0Client;
-  }
-}
-function loadScriptOnce(src){
-  return new Promise((resolve, reject)=>{
-    const existing=[...document.scripts].find(s=>s.src===src);
-    if(existing){
-      bridgeAuth0Global();
-      if(getCreateAuth0Client()) return resolve();
-      /* if it exists but didn't execute yet, wait a tick */
-      setTimeout(()=>{
-        bridgeAuth0Global();
-        getCreateAuth0Client()?resolve():reject(new Error('script_present_but_sdk_missing'));
-      }, 0);
-      return;
-    }
-    const s=document.createElement('script');
-    s.src=src;
-    s.async=true;
-    s.crossOrigin='anonymous';
-    s.onload=()=>{ bridgeAuth0Global(); resolve(); };
-    s.onerror=()=>reject(new Error('script_load_failed'));
-    document.head.appendChild(s);
-  });
-}
-async function ensureAuth0Sdk(){
-  bridgeAuth0Global();
-  if(getCreateAuth0Client()) return true;
-  if(auth0SdkLoadPromise) return auth0SdkLoadPromise;
-  auth0SdkLoadPromise = (async ()=>{
-    for(const url of AUTH0_SDK_URLS){
-      try{
-        await loadScriptOnce(url);
-        bridgeAuth0Global();
-        if(getCreateAuth0Client()) return true;
-      }catch(e){}
-    }
-    return false;
-  })();
-  return auth0SdkLoadPromise;
-}
+/* ─── AUTH ─────────────────────────────
+   인증은 Supabase로 단일화됨 (2026-05-01 §48 Step 4 — Auth0 잔재 일괄 정리).
+   - 이메일/PW: sb.auth.signUp / signInWithPassword
+   - 소셜 로그인 (Google/Kakao/Apple): sb.auth.signInWithOAuth
+   - 비밀번호 변경/탈퇴: sb.auth.updateUser / Edge Function delete-user
+   Naver는 Supabase 미지원으로 별도 트랙(Edge Function bridge)에서 처리 예정. */
 
 /* ══════════════════════════════════════════════════════════════════════════
-   Supabase 클라이언트 (2026-04-28 도입, §44)
+   Supabase 클라이언트 (2026-04-28 §44 도입, 2026-05-01 §48에서 단일 인증으로 승격)
    ────────────────────────────────────────────────────────────────────
-   이메일/비밀번호 인증, profiles·subscriptions·daily_usage 테이블 접근.
-   Auth0 Google 로그인은 그대로 유지 (세션 4에서 Supabase Google로 이관 예정).
+   이메일/비밀번호·소셜 인증, profiles·subscriptions·daily_usage 접근.
 
    publishable key는 공개 키 — RLS 정책으로 본인 데이터만 read/write 가능.
-   service_role(secret) 키는 절대 클라이언트에 노출 금지.
+   service_role(secret) 키는 절대 클라이언트에 노출 금지 (Edge Function에서만 사용).
    ══════════════════════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://fbfvaqcahppwzhtmlhtn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_p4DC2MinPlyZwk4YIjATWg_Zl8OkS7I';
@@ -396,7 +321,8 @@ const USER_SCOPED_LS_KEYS = [
   'r01_pending_q',       /* 미전송 질문 */
   'r01_last_mentor',     /* 마지막 선택 멘토 */
   'r01_recent_questions',/* 최근 질문 */
-  'r01_accs',            /* 소셜 계정 method 캐시 */
+  'r01_accs',            /* legacy: 옛 r01_accs 시스템 정리용 (정의 자체는 §48 Step 4에서 제거됨) */
+  'nachim_auth0',        /* legacy: 옛 Auth0 설정 (§48 Step 4 통일 후 잔재 정리용) */
   '_r01PendingSignup'    /* 가입 대기 (이미 만료되어도 정리) */
 ];
 
@@ -438,28 +364,10 @@ function setAuthed(user){
   }
 
   localStorage.setItem('nachim_auth', JSON.stringify({user, ts:Date.now()}));
-
-  // 소셜 로그인 계정 → r01_accs에 method 포함 저장 (중복 가입 감지용)
-  try {
-    if(user && user.email && user.sub) {
-      const sub = user.sub || '';
-      let method = null;
-      if(sub.startsWith('google'))      method = 'google-oauth2';
-      else if(sub.startsWith('apple'))  method = 'apple';
-      else if(sub.startsWith('naver'))  method = 'naver';
-      else if(sub.startsWith('kakao'))  method = 'kakao';
-
-      if(method) {
-        const raw = localStorage.getItem('r01_accs');
-        const accs = raw ? JSON.parse(raw) : [];
-        // 같은 이메일이 없을 때만 추가
-        if(!accs.find(a => a.email === user.email)) {
-          accs.push({ email: user.email, method: method, ts: Date.now() });
-          localStorage.setItem('r01_accs', JSON.stringify(accs));
-        }
-      }
-    }
-  } catch(e) {}
+  /* 2026-05-01 §48 Step 4 — r01_accs 옛 시스템 제거.
+     소셜 로그인 사용자의 provider 식별은 sbUserToAuthShape가 user.app_metadata.provider /
+     user.identities[].provider에서 직접 추출해 user.method로 박는다.
+     중복 가입 감지는 Supabase auth.users 테이블 + RLS 단에서 처리됨. */
 }
 function clearAuthed(){
   localStorage.removeItem('nachim_auth');
@@ -491,31 +399,6 @@ function showAuthGate(){
 function hideAuthGate(){
   document.getElementById('auth').classList.add('hidden');
   document.getElementById('onboarding').classList.remove('hidden');
-}
-
-async function initAuth0(){
-  const domain=auth0Domain();
-  const clientId=auth0ClientId();
-  const audience=auth0Audience();
-  if(!domain || !clientId) return null;
-  if(!getCreateAuth0Client()){
-    const ok = await ensureAuth0Sdk();
-    if(!ok) return null;
-  }
-  if(auth0Client) return auth0Client;
-  const factory = getCreateAuth0Client();
-  if(!factory) return null;
-  auth0Client = await factory({
-    domain,
-    clientId,
-    authorizationParams:{
-      redirect_uri: AUTH0_REDIRECT_URI,
-      audience: audience || undefined
-    },
-    cacheLocation:'localstorage',
-    useRefreshTokens:true
-  });
-  return auth0Client;
 }
 
 async function handleAuthCallback(){
@@ -563,28 +446,16 @@ async function handleAuthCallback(){
       }
     } catch(e){ console.warn('[supabase] session restore error', e); }
   }
-
-  /* 2) Auth0 콜백 처리 — 2026-05-01 §48 Step 3에서 Supabase로 통일됨.
-     Auth0가 더 이상 사용되지 않으므로 이 분기는 무력화. SDK·모달·헬퍼는 Step 4에서 일괄 제거.
-     혹시 남아 있는 Auth0 콜백 URL이 들어왔을 경우(과거 가입자가 옛 메일 링크 클릭 등):
-     URL을 정리하고 사용자에게 다시 로그인 안내. */
-  if(qs.has('code') && qs.has('state') && !qs.has('error')){
-    /* Supabase OAuth 콜백은 hash 기반(#access_token=...)이므로 query string에 code+state는 Auth0 잔재. */
-    window.history.replaceState({}, document.title, window.location.pathname);
-    /* 사용자 안내는 생략 — 정상 Supabase OAuth 흐름이라면 setAuthed가 위 (1)에서 이미 처리됐고,
-       이 분기까지 도달하면 옛 Auth0 링크일 가능성. URL만 깨끗이 정리하고 화면은 유지. */
-  }
 }
 
-/* ── 소셜 로그인 (Supabase OAuth — 2026-05-01 §48 Step 3) ──
-   기존: Auth0 loginWithRedirect (제3자 SDK + Auth0 데모 자격증명).
-   현재: sb.auth.signInWithOAuth — Supabase가 직접 Google/Kakao/Apple OAuth 처리.
+/* ── 소셜 로그인 (Supabase OAuth) ──
+   sb.auth.signInWithOAuth — Supabase가 직접 Google/Kakao/Apple OAuth 처리.
 
    provider 매핑:
-   - HTML 버튼은 'google-oauth2'/'kakao'/'naver'/'apple'을 보냄 (구 호환성 유지)
-   - Supabase는 'google'/'kakao'/'apple' 표준 명칭만 받음
-   - 'naver'는 Supabase 미지원 → 별도 안내 후 차단 (Edge Function bridge 트랙으로 이연)
-   - 'apple'은 Supabase 지원하나 Apple Developer Program 가입 후에만 활성화 가능 (~1년 후 글로벌 런칭 시점) */
+   - HTML 버튼은 'google-oauth2'/'kakao'/'naver'/'apple'을 보냄
+   - Supabase는 'google'/'kakao'/'apple' 표준 명칭을 받음
+   - 'naver'는 Supabase 미지원 → 안내 모달 후 차단 (Edge Function bridge 트랙 이연)
+   - 'apple'은 Supabase 지원하지만 Apple Developer Program 가입 후에만 활성화 (글로벌 런칭 시점) */
 async function loginProvider(connection){
   if(!sb){
     alert('인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.');
@@ -640,85 +511,24 @@ async function loginProvider(connection){
     alert(`로그인 시작 오류: ${e?.message||e}`);
   }
 }
-function demoLogin(){
-  /* 데모 모드는 2026-04-30에 제거됨. Supabase 인증 정상 작동 후 불필요.
-     테스트가 필요하면 Supabase에서 테스트 계정을 직접 생성해 사용. */
-  console.warn('[demoLogin] removed — use a real Supabase test account instead');
-}
-function openAuth0Settings(){
-  const cfg=getAuth0Config();
-  const d=document.getElementById('auth0-domain');
-  const c=document.getElementById('auth0-clientid');
-  const a=document.getElementById('auth0-audience');
-  if(d) d.value=cfg.domain||'';
-  if(c) c.value=cfg.clientId||'';
-  if(a) a.value=cfg.audience||'';
-  const m=document.getElementById('auth0-modal');
-  if(m) m.classList.add('open');
-}
-function closeAuth0Settings(){
-  const m=document.getElementById('auth0-modal');
-  if(m) m.classList.remove('open');
-}
-function saveAuth0Settings(){
-  const domain=(document.getElementById('auth0-domain')?.value||'').trim();
-  const clientId=(document.getElementById('auth0-clientid')?.value||'').trim();
-  const audience=(document.getElementById('auth0-audience')?.value||'').trim();
-  if(!domain || !clientId){
-    alert('AUTH0 DOMAIN과 CLIENT ID는 필수입니다.');
-    return;
-  }
-  setAuth0Config({domain, clientId, audience});
-  auth0Client=null; /* reset */
-  closeAuth0Settings();
-  alert('저장되었습니다. 이제 소셜 로그인을 다시 시도하세요.\n\n주의: file://로 열면 동작하지 않을 수 있어요. http://localhost로 실행하세요.');
-}
 async function logout(){
-  /* Supabase 세션 종료 (이메일/PW 사용자) — 토큰 무효화·localStorage 토큰 제거 */
+  /* Supabase 세션 종료 — 토큰 무효화·localStorage 토큰 제거 */
   if(sb){
     try { await sb.auth.signOut(); } catch(e){ console.warn('[supabase] signOut error', e); }
   }
   clearAuthed();
   /* 사용자별 캐시도 모두 비움 — 다음 로그인 시 깨끗한 상태 보장 */
   clearUserScopedCache();
-  const c=await initAuth0();
-  if(c){
-    c.logout({logoutParams:{returnTo: AUTH0_REDIRECT_URI}});
-  } else {
-    showAuthGate();
-    initAuthHeroMessaging();
-  }
+  /* 인증 화면 복귀 */
+  showAuthGate();
+  initAuthHeroMessaging();
 }
 
 async function startAfterLogin(){
   document.getElementById('auth').classList.add('hidden');
 
-  // 소셜 로그인 이력 저장 (method 기록으로 중복 가입 감지에 활용)
-  try{
-    const authRaw = localStorage.getItem('nachim_auth');
-    if(authRaw){
-      const authData = JSON.parse(authRaw);
-      const u = authData?.user;
-      if(u && u.email && u.sub){
-        const sub = u.sub||'';
-        let method = null;
-        if(sub.startsWith('google')) method = 'google-oauth2';
-        else if(sub.startsWith('apple')) method = 'apple';
-        else if(sub.startsWith('naver')) method = 'naver';
-        else if(sub.startsWith('kakao')) method = 'kakao';
-        if(method){
-          const accs = _r01Accounts();
-          if(!accs.find(a => a.email === u.email)){
-            accs.push({email:u.email, method, ts:Date.now()});
-            localStorage.setItem('r01_accs', JSON.stringify(accs));
-          }
-        }
-      }
-    }
-  }catch(e){}
-
-  /* Supabase에서 plan + profile 동기화 (2026-04-28 §44 Step 3).
-     Supabase 사용자가 아닐 경우(Auth0 Google 사용자) 함수 내부에서 빠르게 빠져나감. */
+  /* Supabase에서 plan + profile 동기화 (2026-04-28 §44).
+     Supabase 사용자가 아니면 함수 내부에서 빠르게 빠져나감. */
   let hadProfile = false;
   try {
     const r = await hydrateUserStateFromSupabase();
@@ -4780,9 +4590,6 @@ function setMentorStyle(style){
 
 /* ─── 초기화 ────────────────────────── */
 document.addEventListener('DOMContentLoaded', function(){
-  const auth0Ru=document.getElementById('auth0-redirect-url');
-  if(auth0Ru) auth0Ru.textContent=window.location.origin+window.location.pathname;
-
   if(!isAuthed()) initAuthHeroMessaging();
 
   /* auth gate */
@@ -4817,7 +4624,6 @@ document.addEventListener('DOMContentLoaded', function(){
   safeClick('modal',          closeModal);
   safeClick('key-modal',      closeKeyModal);
   safeClick('style-modal',    ()=>closeStyleModal(true));
-  safeClick('auth0-modal',    closeAuth0Settings);
   safeClick('grant-modal',    closeGrantModal);
   safeClick('confirm-modal',  closeConfirm);
   safeClick('hist-modal',     closeHistModal);
@@ -5380,11 +5186,8 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 /* ─── Global exposure for inline HTML handlers ─── */
 window.handleAuthCallback = handleAuthCallback;
 window.loginProvider = loginProvider;
-window.demoLogin = demoLogin;
 window.logout = logout;
 window.startAfterLogin = startAfterLogin;
-window.openAuth0Settings = openAuth0Settings;
-window.closeAuth0Settings = closeAuth0Settings;
 window.openKeyModal = openKeyModal;
 window.closeKeyModal = closeKeyModal;
 window.saveKey = saveKey;
@@ -5427,33 +5230,8 @@ function showForgotPw() {
   const ff = document.getElementById('aform-forgot'); if(ff) ff.style.display='flex';
 }
 
-/* ── 계정 저장소 ── */
-function _r01Accounts() {
-  try{return JSON.parse(localStorage.getItem('r01_accs')||'[]');}catch(e){return[];}
-}
-function _saveR01Accounts(arr) { localStorage.setItem('r01_accs', JSON.stringify(arr)); }
-
-/* 소셜 로그인으로 가입된 이메일인지 확인 (Auth0 캐시) */
-function _isSocialEmail(email) {
-  try {
-    const raw = localStorage.getItem('nachim_auth');
-    if(!raw) return false;
-    const data = JSON.parse(raw);
-    const u = data?.user;
-    if(!u) return false;
-    // Auth0 소셜 유저는 email 필드가 있고 sub가 google-oauth2|, apple|, naver| 등으로 시작
-    const sub = u.sub||'';
-    const uEmail = (u.email||'').toLowerCase();
-    return uEmail === email.toLowerCase() && (
-      sub.startsWith('google') || sub.startsWith('apple') ||
-      sub.startsWith('naver') || sub.startsWith('kakao')
-    );
-  } catch(e){ return false; }
-}
-
-/* ── 이메일 로그인 (Supabase Auth — 2026-04-28 §44 Step 2) ──
-   기존: localStorage r01_accs에서 비밀번호 비교 (가짜)
-   현재: Supabase signInWithPassword — DB에서 검증 + 세션 토큰 발급 */
+/* ── 이메일 로그인 (Supabase Auth — 2026-04-28 §44) ──
+   Supabase signInWithPassword — DB에서 검증 + 세션 토큰 발급 */
 async function emailLogin() {
   const email = (document.getElementById('alogin-email')?.value||'').trim();
   const pw    = (document.getElementById('alogin-pw')?.value||'');
@@ -5589,67 +5367,7 @@ async function emailSignup() {
   }
 }
 
-/* 소셜 이메일 사용 여부 확인 */
-function _clearDupMsg() {
-  var el = document.getElementById('aerr-email-dup');
-  if(el) el.textContent = '';
-}
-
-function _showDupMsg(dupEl, msg, linkText) {
-  // 기존 내용 초기화
-  dupEl.innerHTML = '';
-
-  // 메시지 줄
-  var msgLine = document.createElement('div');
-  msgLine.style.cssText = 'display:flex;align-items:center;gap:5px;margin-bottom:4px';
-  msgLine.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' + msg;
-  dupEl.appendChild(msgLine);
-
-  // 로그인 버튼 줄
-  var btnLine = document.createElement('div');
-  var btn = document.createElement('button');
-  btn.type = 'button';
-  btn.textContent = linkText;
-  btn.style.cssText = 'color:var(--link-blue);background:none;border:none;cursor:pointer;font-size:12px;text-decoration:underline;padding:0;font-family:inherit';
-  btn.addEventListener('click', function() { switchAuthTab('login'); });
-  btnLine.appendChild(btn);
-  dupEl.appendChild(btnLine);
-}
-
-function _checkSocialUsedEmail(email) {
-  try {
-    // r01_accs에서 소셜 method 확인 (setAuthed에서 저장됨)
-    const accs = _r01Accounts();
-    const found = accs.find(a => a.email && a.email.toLowerCase() === email.toLowerCase());
-    if(found && found.method && found.method !== 'email') {
-      const names = {
-        'google-oauth2': 'Google',
-        'apple': 'Apple',
-        'naver': '네이버',
-        'kakao': '카카오'
-      };
-      return names[found.method] || found.method;
-    }
-    // 보조: Auth0 캐시 확인
-    const keys = Object.keys(localStorage).filter(k => k.includes('@@auth0spajs@@'));
-    for(const k of keys) {
-      try {
-        const val = JSON.parse(localStorage.getItem(k)||'{}');
-        const u = val?.body?.decodedPayload || val?.body?.user || {};
-        if((u.email||'').toLowerCase() === email.toLowerCase()) {
-          const sub = u.sub||'';
-          if(sub.startsWith('google')) return 'Google';
-          if(sub.startsWith('apple')) return 'Apple';
-          if(sub.startsWith('naver')) return '네이버';
-          if(sub.startsWith('kakao')) return '카카오';
-        }
-      } catch(e2){}
-    }
-  } catch(e){}
-  return null;
-}
-
-/* ── 인증 (Supabase 흐름 — 2026-04-28 §44 Step 2) ──
+/* ── 인증 (Supabase 흐름 — 2026-04-28 §44) ──
    기존 6자리 코드 입력 방식은 폐기. 사용자는 메일 안 링크를 클릭해 인증.
    verifySignupCode 함수는 onclick 호환을 위해 남겨두고 안내만 표시. */
 function verifySignupCode() {
@@ -6235,44 +5953,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     e.preventDefault(); e.stopPropagation(); openTermsModal('privacy');
   });
 
-  /* 이메일 입력 후 포커스 벗어날 때 즉시 중복 체크 */
-  const signupEmailEl = document.getElementById('asignup-email');
-  if(signupEmailEl) {
-    signupEmailEl.addEventListener('blur', function() {
-      const email = this.value.trim();
-      const dupEl = document.getElementById('aerr-email-dup');
-      if(!dupEl) return;
-      if(!email || !email.includes('@')) { _clearDupMsg(); return; }
-
-      // r01_accs에서 중복 체크 (소셜/이메일 구분)
-      const accounts = _r01Accounts();
-      const found = accounts.find(a => a.email && a.email.toLowerCase() === email.toLowerCase());
-
-      if(found) {
-        if(found.method && found.method !== 'email') {
-          // 소셜 가입
-          const providerNames = {
-            'google-oauth2':'Google', 'apple':'Apple',
-            'naver':'네이버', 'kakao':'카카오'
-          };
-          const pName = providerNames[found.method] || found.method;
-          _showDupMsg(dupEl, pName + ' 계정으로 가입된 이메일입니다.', pName + ' 로그인하기 →');
-        } else {
-          // 이메일 가입
-          _showDupMsg(dupEl, '이미 이메일로 가입된 계정입니다.', '로그인하기 →');
-        }
-        return;
-      }
-
-      _clearDupMsg();
-    });
-
-    // 이메일 입력 시작하면 중복 메시지 초기화
-    signupEmailEl.addEventListener('input', function() {
-      const dupEl = document.getElementById('aerr-email-dup');
-      if(dupEl) dupEl.textContent = '';
-    });
-  }
+  /* 이메일 입력 중복 체크는 §48 Step 4에서 제거.
+     기존: localStorage r01_accs 조회 (옛 시스템 잔재).
+     현재: 이메일 중복은 Supabase signUp 호출 시점에 서버에서 검증되어 에러로 반환.
+     RLS로 클라이언트는 다른 사용자 row를 볼 수 없어 즉시 체크 불가. */
 
   /* aterms-row: 체크박스 직접 클릭만 동작 (행 전체 클릭 방지) */
   document.querySelectorAll('.aterms-row').forEach(row => {
@@ -6614,7 +6298,9 @@ function openMyPage(){
   let user = null;
   try{ user = JSON.parse(authRaw)?.user; }catch(e){}
   const email = user?.email || '이메일 정보 없음';
-  const method = user?.method || (user?.sub?.startsWith('google')?'google-oauth2': user?.sub?.startsWith('apple')?'apple':'email');
+  /* user.method는 sbUserToAuthShape에서 'email' / 'google-oauth2' / 'kakao' / 'apple' / 'naver'로 정확히 박힘.
+     Auth0 시절 sub.startsWith fallback은 §48 Step 4에서 제거. */
+  const method = user?.method || 'email';
   const isEmail = method === 'email';
   const plan = getCurrentPlan();
   const planInfo = R01_PLANS.find(p=>p.id===plan) || R01_PLANS[0];
@@ -7040,11 +6726,7 @@ function checkUploadAccess(inputId){
     closeTermsModal: closeTermsModal,
     // App
     loginProvider: loginProvider,
-    demoLogin: demoLogin,
     logout: logout,
-    openAuth0Settings: openAuth0Settings,
-    closeAuth0Settings: closeAuth0Settings,
-    saveAuth0Settings: saveAuth0Settings,
     openKeyModal: openKeyModal,
     closeKeyModal: closeKeyModal,
     saveKey: saveKey,
