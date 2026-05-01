@@ -141,14 +141,44 @@ async function sbGetUser(){
 }
 
 /* Supabase 사용자 → 우리 코드의 setAuthed 포맷으로 변환 */
+/* Supabase user → 우리 앱 user shape (2026-05-01 §48 Step 3 보강).
+   - provider: app_metadata.provider 또는 identities[0].provider 우선
+   - method: 'email' / 'google-oauth2' / 'kakao' / 'apple' / 'naver' (HTML/마이페이지 코드와 호환되는 키)
+   - name: 우선순위 — user_metadata.full_name → name → nickname → preferred_username → email 앞부분 → 'Route01 사용자'
+   - email: 그대로 유지 (카카오 placeholder 이메일도 user.email에 들어옴) */
 function sbUserToAuthShape(u){
   if(!u) return null;
+
+  /* provider 추출 — Supabase는 OAuth 사용자에게 app_metadata.provider 또는 identities[0].provider 박음 */
+  const identities = Array.isArray(u.identities) ? u.identities : [];
+  const rawProvider = (u.app_metadata?.provider) || (identities[0]?.provider) || 'email';
+
+  /* HTML/구 코드와의 호환을 위해 기존 명칭으로 변환 */
+  const PROVIDER_TO_METHOD = {
+    'email':  'email',
+    'google': 'google-oauth2',  /* HTML 버튼·마이페이지 라벨이 이 키를 기대 */
+    'kakao':  'kakao',
+    'apple':  'apple',
+    'naver':  'naver'
+  };
+  const method = PROVIDER_TO_METHOD[rawProvider] || rawProvider;
+
+  /* 디스플레이 이름 — 카카오는 nickname, 구글은 full_name 또는 name, 애플은 name이 첫 로그인에만 옴 */
+  const meta = u.user_metadata || {};
+  const name =
+    meta.full_name ||
+    meta.name ||
+    meta.nickname ||
+    meta.preferred_username ||
+    (u.email ? u.email.split('@')[0] : '') ||
+    'Route01 사용자';
+
   return {
     sub: u.id,
-    email: u.email,
-    name: u.user_metadata?.nickname || (u.email ? u.email.split('@')[0] : '사용자'),
-    method: 'email',     /* 이메일/PW 로그인은 'email', 향후 OAuth는 'google-oauth2' 등 */
-    supabase: true       /* Supabase 경로로 들어왔음을 구분 */
+    email: u.email || null,
+    name,
+    method,
+    supabase: true
   };
 }
 
@@ -534,46 +564,78 @@ async function handleAuthCallback(){
     } catch(e){ console.warn('[supabase] session restore error', e); }
   }
 
-  /* 2) Auth0 콜백 처리 (기존 로직 그대로 유지) */
-  if(qs.has('code') && qs.has('state')){
-    const c=await initAuth0();
-    if(c){
-      await c.handleRedirectCallback();
-      const user=await c.getUser();
-      setAuthed(user||{});
-    }
-    /* cleanup url */
-    window.history.replaceState({}, document.title, AUTH0_REDIRECT_URI);
+  /* 2) Auth0 콜백 처리 — 2026-05-01 §48 Step 3에서 Supabase로 통일됨.
+     Auth0가 더 이상 사용되지 않으므로 이 분기는 무력화. SDK·모달·헬퍼는 Step 4에서 일괄 제거.
+     혹시 남아 있는 Auth0 콜백 URL이 들어왔을 경우(과거 가입자가 옛 메일 링크 클릭 등):
+     URL을 정리하고 사용자에게 다시 로그인 안내. */
+  if(qs.has('code') && qs.has('state') && !qs.has('error')){
+    /* Supabase OAuth 콜백은 hash 기반(#access_token=...)이므로 query string에 code+state는 Auth0 잔재. */
+    window.history.replaceState({}, document.title, window.location.pathname);
+    /* 사용자 안내는 생략 — 정상 Supabase OAuth 흐름이라면 setAuthed가 위 (1)에서 이미 처리됐고,
+       이 분기까지 도달하면 옛 Auth0 링크일 가능성. URL만 깨끗이 정리하고 화면은 유지. */
   }
 }
 
+/* ── 소셜 로그인 (Supabase OAuth — 2026-05-01 §48 Step 3) ──
+   기존: Auth0 loginWithRedirect (제3자 SDK + Auth0 데모 자격증명).
+   현재: sb.auth.signInWithOAuth — Supabase가 직접 Google/Kakao/Apple OAuth 처리.
+
+   provider 매핑:
+   - HTML 버튼은 'google-oauth2'/'kakao'/'naver'/'apple'을 보냄 (구 호환성 유지)
+   - Supabase는 'google'/'kakao'/'apple' 표준 명칭만 받음
+   - 'naver'는 Supabase 미지원 → 별도 안내 후 차단 (Edge Function bridge 트랙으로 이연)
+   - 'apple'은 Supabase 지원하나 Apple Developer Program 가입 후에만 활성화 가능 (~1년 후 글로벌 런칭 시점) */
 async function loginProvider(connection){
+  if(!sb){
+    alert('인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.');
+    return;
+  }
+
+  /* HTML 구 명칭 → Supabase provider 명칭 매핑 */
+  const PROVIDER_MAP = {
+    'google-oauth2': 'google',
+    'google': 'google',
+    'kakao': 'kakao',
+    'apple': 'apple',
+    'naver': null      /* 미지원, 별도 처리 */
+  };
+
+  const provider = PROVIDER_MAP[connection];
+
+  /* 네이버 — 정중한 안내 */
+  if(connection === 'naver'){
+    alert('네이버 로그인은 현재 준비 중입니다.\n\nGoogle 또는 카카오로 로그인해 주세요. 이메일/비밀번호로도 가입하실 수 있습니다.');
+    return;
+  }
+
+  /* 애플 — 글로벌 런칭 전까지 비활성 */
+  if(connection === 'apple'){
+    alert('Apple 로그인은 글로벌 서비스 오픈 시 활성화됩니다.\n\nGoogle 또는 카카오로 로그인해 주세요. 이메일/비밀번호로도 가입하실 수 있습니다.');
+    return;
+  }
+
+  if(!provider){
+    alert('지원하지 않는 로그인 방식입니다.');
+    return;
+  }
+
   try{
-    /* Auth0 SPA SDK requires a secure origin (http(s)). file:// won't work reliably. */
-    if(window.location.protocol==='file:'){
-      alert('소셜 로그인을 사용하려면 파일을 직접 열기(file://)가 아니라 로컬 서버(http://localhost)로 실행해야 합니다.');
-      return;
-    }
-    if(!getCreateAuth0Client()){
-      const ok = await ensureAuth0Sdk();
-      if(!ok){
-        alert(
-          'Auth0 라이브러리 로드에 실패했습니다. 네트워크/차단 여부를 확인하세요.\n\n' +
-          '- 보안 프로그램/확장 프로그램에서 unpkg, jsdelivr 차단 여부 확인\n' +
-          '- 회사/학교 네트워크에서 CDN 차단 여부 확인\n' +
-          '- 가능하면 http://localhost 로 실행'
-        );
-        return;
+    const { error } = await sb.auth.signInWithOAuth({
+      provider,
+      options: {
+        /* 인증 후 돌아올 URL — Supabase Dashboard의 Redirect URLs에 등록되어 있어야 함.
+           pathname까지 포함시켜 새 탭/같은 탭 어느 쪽이든 정확히 우리 앱으로 복귀. */
+        redirectTo: window.location.origin + window.location.pathname,
+        /* Kakao/Google/Apple 모두 표준 OAuth로 처리 — 추가 scope 명시 불필요
+           (Supabase Dashboard의 provider 설정이 scope 관리). */
       }
-    }
-    const c=await initAuth0();
-    if(!c){
-      openAuth0Settings();
+    });
+    if(error){
+      const msg = String(error.message || error);
+      alert('로그인 시작 오류: ' + msg);
       return;
     }
-    await c.loginWithRedirect({
-      authorizationParams:{ connection }
-    });
+    /* 성공 시 브라우저는 자동으로 OAuth provider 페이지로 이동 (signInWithOAuth가 redirect 처리) */
   }catch(e){
     alert(`로그인 시작 오류: ${e?.message||e}`);
   }
@@ -5667,7 +5729,7 @@ function syncAllCheck() {
 /* ── 약관 모달 ── */
 const R01_TERMS = {
   terms:{title:'이용약관',html:`<h3>제1조 (목적)</h3><p>본 약관은 <span class="brand">Route01</span>이 제공하는 AI 스타트업 자문 서비스의 이용 조건 및 회사와 이용자의 권리·의무를 규정합니다.</p><h3>제2조 (서비스 제공)</h3><p><span class="brand">Route01</span>은 AI 기반 스타트업 경영·투자·법률·재무·마케팅 자문 서비스를 제공합니다.</p><h3>제3조 (AI 서비스 한계 및 면책)</h3><ol><li><span class="brand">Route01</span> AI 자문은 참고용 정보 제공을 목적으로 하며, 전문적 자문을 대체하지 않습니다.</li><li>AI 답변은 부정확하거나 불완전할 수 있으며, 회사는 정확성을 보증하지 않습니다.</li><li>중요한 의사결정 전에는 전문가와 상담해야 합니다.</li></ol><h3>제4조 (이용자 의무)</h3><p>이용자는 관련 법령 및 본 약관을 준수해야 합니다.</p><h3>제5조 (요금제)</h3><ol><li>Free: 월 10회 무료</li><li>Pro: 19,900원/월 (무제한, 전체 멘토 + 지원사업 도우미 + PDF/내보내기)</li></ol><h3>제6조 (분쟁 해결)</h3><p>관할 법원은 서울중앙지방법원입니다.</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`},
-  privacy:{title:'개인정보처리방침',html:`<h3>1. 수집 항목</h3><ul><li><strong>필수:</strong> 이메일, 소셜 로그인 식별자</li><li><strong>선택:</strong> 스타트업명, 업종, 단계, 팀 규모</li></ul><h3>2. 수집 목적</h3><ul><li>서비스 제공 및 회원 관리</li><li>맞춤형 AI 자문 제공</li><li>마케팅 정보 발송 (동의 시)</li></ul><h3>3. 보유 기간</h3><p>회원 탈퇴 시 즉시 삭제</p><h3>4. 처리 위탁</h3><ul><li>Anthropic: AI 답변 생성</li><li>Auth0(Okta): 로그인 인증</li><li>토스페이먼츠: 결제 처리</li></ul><h3>5. 이용자 권리</h3><p>열람·수정·삭제 요청: privacy@route01.kr</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`}
+  privacy:{title:'개인정보처리방침',html:`<h3>1. 수집 항목</h3><ul><li><strong>필수:</strong> 이메일, 소셜 로그인 식별자</li><li><strong>선택:</strong> 스타트업명, 업종, 단계, 팀 규모</li></ul><h3>2. 수집 목적</h3><ul><li>서비스 제공 및 회원 관리</li><li>맞춤형 AI 자문 제공</li><li>마케팅 정보 발송 (동의 시)</li></ul><h3>3. 보유 기간</h3><p>회원 탈퇴 시 즉시 삭제</p><h3>4. 처리 위탁</h3><ul><li>Anthropic: AI 답변 생성</li><li>Supabase: 인증·데이터베이스</li><li>Google·Kakao: 소셜 로그인 (선택 이용 시)</li><li>토스페이먼츠: 결제 처리</li></ul><h3>5. 이용자 권리</h3><p>열람·수정·삭제 요청: privacy@route01.kr</p><p style="margin-top:1rem;color:var(--ink3);font-size:12px">시행일: 2026년 1월 1일</p>`}
 };
 function openTermsModal(type) {
   const d = R01_TERMS[type]; if(!d) return;

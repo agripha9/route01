@@ -1951,6 +1951,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .kakao-btn{background:#FEE500;border-color:#FEE500;color:#3A1D1D;}
 .kakao-btn:hover{opacity:.9;}
 
+/* 비활성 소셜 버튼 (Naver: 준비 중 / Apple: 글로벌 오픈 시 활성화) — 클릭은 가능하나 안내 모달만 띄움 */
+.auth-social-btn.auth-social-disabled{background:#e8e8ed;border-color:#e0e0e2;color:#8e8e93;opacity:.7;cursor:not-allowed;}
+.auth-social-btn.auth-social-disabled:hover{opacity:.7;background:#e8e8ed;border-color:#e0e0e2;}
+.auth-social-btn.auth-social-disabled svg path{fill:#8e8e93 !important;}
+.auth-social-btn.auth-social-disabled span{color:#8e8e93 !important;}
+
 /* 구분선 */
 .auth-or-divider{display:flex;align-items:center;gap:12px;margin:.9rem 0;color:var(--ink3);font-size:12px;}
 .auth-or-divider::before,.auth-or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
