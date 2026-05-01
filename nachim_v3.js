@@ -6756,34 +6756,104 @@ function openPwChange(){
     const el=document.getElementById(id); if(el) el.value='';
   });
   const e=document.getElementById('aerr-pw-change'); if(e) e.textContent='';
+
+  /* Chrome 비밀번호 매니저용 hidden username — 현재 로그인 이메일 주입 */
+  try{
+    const authRaw = localStorage.getItem('nachim_auth');
+    const email = JSON.parse(authRaw||'{}')?.user?.email || '';
+    const u = document.getElementById('pw-change-username');
+    if(u) u.value = email;
+  }catch(_){}
+
   document.getElementById('pw-change-modal')?.classList.add('open');
 }
 function closePwChange(){
   document.getElementById('pw-change-modal')?.classList.remove('open');
 }
-function submitPwChange(){
+
+/* ── 비밀번호 변경 (Supabase Auth — 2026-05-01 §48 인증 트랙 정리) ──
+   재인증(signInWithPassword) → 성공 시 updateUser({password})
+   소셜 로그인(OAuth) 사용자는 비밀번호 자체가 없으므로 변경 불가.
+   판별: 현 세션 user.identities에 'email' provider가 있는지 확인. */
+async function submitPwChange(){
   const cur = document.getElementById('pw-cur')?.value||'';
   const nw  = document.getElementById('pw-new')?.value||'';
   const nw2 = document.getElementById('pw-new2')?.value||'';
   const err = document.getElementById('aerr-pw-change');
   if(err) err.textContent='';
 
-  const authRaw = localStorage.getItem('nachim_auth');
-  let user = null;
-  try{ user = JSON.parse(authRaw)?.user; }catch(e){}
-  const email = user?.email;
-
-  const accounts = _r01Accounts();
-  const acc = accounts.find(a=>a.email===email);
-  if(!acc){ if(err) err.textContent='소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.'; return; }
-  if(acc.pw !== btoa(cur)){ if(err) err.textContent='현재 비밀번호가 맞지 않습니다.'; return; }
+  /* 1) 클라이언트 사이드 검증 — 서버 호출 전 명백한 오류 컷 */
+  if(!cur){ if(err) err.textContent='현재 비밀번호를 입력해주세요.'; return; }
   if(nw.length<8){ if(err) err.textContent='새 비밀번호는 8자 이상이어야 합니다.'; return; }
   if(nw!==nw2){ if(err) err.textContent='새 비밀번호가 일치하지 않습니다.'; return; }
+  if(nw===cur){ if(err) err.textContent='새 비밀번호가 현재 비밀번호와 같습니다.'; return; }
 
-  acc.pw = btoa(nw);
-  _saveR01Accounts(accounts);
-  closePwChange();
-  alert('비밀번호가 변경됐습니다.');
+  if(!sb){ if(err) err.textContent='인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.'; return; }
+
+  /* 2) 현재 세션 + 이메일 확보 */
+  let email = null;
+  let identities = [];
+  try{
+    const { data:{ user }, error } = await sb.auth.getUser();
+    if(error || !user){ if(err) err.textContent='로그인 세션이 만료됐습니다. 다시 로그인해주세요.'; return; }
+    email = user.email || null;
+    identities = Array.isArray(user.identities) ? user.identities : [];
+  }catch(e){ if(err) err.textContent='세션 확인 중 오류: '+(e?.message||String(e)); return; }
+
+  if(!email){ if(err) err.textContent='이메일 정보를 확인할 수 없습니다. 다시 로그인해주세요.'; return; }
+
+  /* 3) 소셜 로그인 사용자 차단 — identities에 email provider가 없으면 비밀번호 미존재 */
+  const hasEmailProvider = identities.some(i => (i?.provider||'').toLowerCase() === 'email');
+  if(!hasEmailProvider){
+    if(err) err.textContent='소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.';
+    return;
+  }
+
+  /* 4) 변경하기 버튼 잠금 — 중복 클릭 방지 */
+  const btn = document.querySelector('#pw-change-form .modal-btn.pri');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '변경 중...'; }
+
+  try{
+    /* 5) 현재 비밀번호 재인증 — 보안 차원에서 필수.
+       updateUser는 세션만 있으면 비밀번호를 바꿀 수 있어, 재인증 없이 두면
+       "잠시 자리 비운 사이 누가 비밀번호를 바꿀 수 있음" 시나리오에 노출됨. */
+    const { error: reauthErr } = await sb.auth.signInWithPassword({ email, password: cur });
+    if(reauthErr){
+      const msg = String(reauthErr.message||'');
+      if(/Invalid login credentials/i.test(msg)){
+        if(err) err.textContent='현재 비밀번호가 맞지 않습니다.';
+      } else if(/rate limit/i.test(msg)){
+        if(err) err.textContent='요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.';
+      } else {
+        if(err) err.textContent='재인증 실패: '+msg;
+      }
+      return;
+    }
+
+    /* 6) 비밀번호 업데이트 */
+    const { error: updErr } = await sb.auth.updateUser({ password: nw });
+    if(updErr){
+      const msg = String(updErr.message||'');
+      if(/should be different|same as the existing/i.test(msg)){
+        if(err) err.textContent='새 비밀번호가 현재 비밀번호와 같습니다.';
+      } else if(/at least|password.*characters|too short/i.test(msg)){
+        if(err) err.textContent='새 비밀번호가 정책에 맞지 않습니다 (8자 이상).';
+      } else {
+        if(err) err.textContent='변경 실패: '+msg;
+      }
+      return;
+    }
+
+    /* 7) 성공 — 모달 닫고 안내 */
+    closePwChange();
+    alert('비밀번호가 변경됐습니다.');
+
+  }catch(e){
+    if(err) err.textContent='오류: '+(e?.message||String(e));
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = oldText || '변경하기'; }
+  }
 }
 
 /* 회원탈퇴 */

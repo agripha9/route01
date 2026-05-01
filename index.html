@@ -13,7 +13,7 @@
 <script src="./vendor/auth0-spa-js.production.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 도입, §44) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260430-pw-change-form-v32">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260501-pw-change-supabase-v33">
 </head>
 <body>
 
@@ -836,6 +836,8 @@
     <button class="modal-close" onclick="closePwChange()">×</button>
     <div class="modal-title">비밀번호 변경</div>
     <form id="pw-change-form" onsubmit="submitPwChange();return false">
+      <!-- Chrome 비밀번호 매니저를 위한 hidden username field — 어떤 계정의 비밀번호인지 식별. JS에서 로그인 이메일로 동기화. -->
+      <input id="pw-change-username" type="text" autocomplete="username" style="display:none" tabindex="-1" aria-hidden="true" readonly />
       <div class="afield" style="margin-bottom:12px">
         <label class="afield-label" for="pw-cur">현재 비밀번호</label>
         <div class="apw-wrap">
@@ -898,6 +900,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260430-pw-change-form-v32"></script>
+<script src="./nachim_v3.js?v=20260501-pw-change-supabase-v33"></script>
 </body>
 </html>
