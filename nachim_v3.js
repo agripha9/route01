@@ -6863,26 +6863,74 @@ function openWithdraw(){
 function closeWithdraw(){
   document.getElementById('withdraw-modal')?.classList.remove('open');
 }
-function submitWithdraw(){
-  // 모든 데이터 삭제
-  const authRaw = localStorage.getItem('nachim_auth');
-  let email = null;
-  try{ email = JSON.parse(authRaw)?.user?.email; }catch(e){}
-
-  if(email){
-    const accounts = _r01Accounts().filter(a=>a.email!==email);
-    _saveR01Accounts(accounts);
+/* ── 회원 탈퇴 (Supabase Edge Function — 2026-05-01 §48 Step 2) ──
+   서버에서 auth.users 삭제 → cascade로 profiles/subscriptions/daily_usage 자동 삭제.
+   service_role 키는 Edge Function 안에만 존재 (클라이언트 노출 금지).
+   삭제 성공 후에만 클라이언트 측 세션·캐시 정리. */
+async function submitWithdraw(){
+  if(!sb){
+    alert('인증 서비스 연결에 실패했습니다. 새로고침 후 다시 시도해주세요.');
+    return;
   }
-  ['nachim_auth','vd_profile','vd_history','r01_hist_v1','r01_plan','r01_banner_x',
-   'nachim_api_key','r01_accs'].forEach(k=>localStorage.removeItem(k));
-  // 접두사 기반 키 삭제
-  Object.keys(localStorage).filter(k=>k.startsWith('r01_usage_')).forEach(k=>localStorage.removeItem(k));
 
-  closeWithdraw();
-  alert('탈퇴가 완료됐습니다. 이용해 주셔서 감사합니다.');
-  clearAuthed();
-  showAuthGate();
-  initAuthHeroMessaging();
+  /* 1) 탈퇴 버튼 잠금 — 중복 클릭 + 부분 실행 방지 */
+  const btn = document.querySelector('#withdraw-modal .modal-btn--danger');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '탈퇴 처리 중...'; }
+
+  try {
+    /* 2) 현 세션 토큰 추출 — Edge Function에 Authorization으로 전달 */
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if(sessErr || !session?.access_token){
+      alert('로그인 세션이 만료됐습니다. 다시 로그인 후 시도해주세요.');
+      return;
+    }
+
+    /* 3) Edge Function 호출 — supabase-js의 functions.invoke가 baseUrl·헤더 자동 처리 */
+    const { data, error } = await sb.functions.invoke('delete-user', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` }
+    });
+
+    if(error){
+      console.error('[withdraw] Edge Function error', error);
+      const msg = String(error.message || error || '알 수 없는 오류');
+      /* Edge Function 미배포(404) — 사용자에게 친절히 안내 */
+      if(/not found|404/i.test(msg)){
+        alert('탈퇴 처리 서비스 점검 중입니다. 잠시 후 다시 시도하시거나 hello@route01.kr로 문의해주세요.');
+      } else {
+        alert('탈퇴 처리 중 오류가 발생했습니다.\n\n' + msg + '\n\n문제가 계속되면 hello@route01.kr로 문의해주세요.');
+      }
+      return;
+    }
+
+    if(!data?.ok){
+      alert('탈퇴 처리 결과를 확인할 수 없습니다.\n\nhello@route01.kr로 문의해주세요.');
+      return;
+    }
+
+    /* 4) 서버 삭제 성공 → 클라이언트 세션 종료 + 모든 캐시 비우기 */
+    try { await sb.auth.signOut(); } catch(_){}
+
+    /* 사용자 데이터·캐시 전부 정리 (clearUserScopedCache가 다 못 잡는 옛날 키들 포함) */
+    ['nachim_auth','vd_profile','vd_history','r01_hist_v1','r01_plan','r01_banner_x',
+     'nachim_api_key','r01_accs','nachim_auth0'].forEach(k=>localStorage.removeItem(k));
+    Object.keys(localStorage).filter(k=>k.startsWith('r01_usage_')).forEach(k=>localStorage.removeItem(k));
+    try { sessionStorage.clear(); } catch(_){}
+
+    /* 5) UI 정리 + 안내 */
+    closeWithdraw();
+    alert('탈퇴가 완료됐습니다. 이용해 주셔서 감사합니다.');
+    clearAuthed();
+    showAuthGate();
+    initAuthHeroMessaging();
+
+  } catch(e){
+    console.error('[withdraw] unexpected error', e);
+    alert('탈퇴 처리 중 예기치 못한 오류가 발생했습니다.\n\n' + (e?.message || String(e)));
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = oldText || '탈퇴하기'; }
+  }
 }
 /* PRO 잠금 멘토 클릭 시 (온보딩용) */
 function pickMentorOrUpgrade(el, styleKey){
