@@ -2475,10 +2475,9 @@ terms.html / privacy.html SEO 보강:
 
 ### §49 외부 작업 — 남은 것 (간단)
 
-⏳ **privacy@ Cloudflare Email Routing** (5분):
-1. Cloudflare Dashboard → route01.kr → Email → Email Routing → Routing rules
-2. Create address → Custom address: `privacy` → Action: Send to → `agripha@gmail.com`
-3. 저장. 즉시 활성화.
+✅ **privacy@ Cloudflare Email Routing** (완료, 2026-05-04): 사용자 직접 설정 + 테스트까지 완료.
+   - Custom address: `privacy@route01.kr` → Send to: `agripha@gmail.com`
+   - 모든 §49 외부 작업 종결.
 
 ### §49 외부 작업 — 베타 후반/정식 런칭 시점
 
@@ -2557,7 +2556,7 @@ terms.html / privacy.html SEO 보강:
 | 외부 작업 | 상태 | 비고 |
 |---|---|---|
 | Cloudflare Pages 정적 페이지 배포 확인 | ✅ | route01.kr/terms · route01.kr/privacy 정상 |
-| Cloudflare Email Routing — privacy@ 추가 | ⏳ | 미완료, 5분 작업 (마감 후 진행 가능) |
+| Cloudflare Email Routing — privacy@ 추가 | ✅ | 사용자 직접 설정 + 테스트 완료 (2026-05-04) |
 | Google Cloud Console — Branding URL 등록 | ✅ | 홈/약관/개인정보 URL 모두 저장 |
 | Google Cloud Console — Audience 모드 | ✅ | Testing 유지 (베타 운영) |
 | Google Search Console — 도메인 검증 | ✅ | route01.kr DNS TXT |
