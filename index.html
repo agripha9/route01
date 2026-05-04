@@ -4,15 +4,104 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Route01 — AI Startup Advisory</title>
-<meta name="description" content="스타트업을 위한 AI 자문 서비스. Finding your Route from Zero to One.">
+
+<!-- ── SEO: 기본 메타 ─────────────────────── -->
+<title>Route01 — AI 스타트업 자문 서비스 | 루트제로원</title>
+<meta name="description" content="AI 기반 스타트업 자문 서비스. 투자 유치, 비즈니스 전략, 마케팅, 재무, 인사, 법률 등 모든 영역에 대해 세계 최고 수준 멘토 스타일로 맞춤 자문을 제공합니다. 무료 체험 가능, Pro 월 19,900원.">
+<meta name="keywords" content="AI 스타트업 자문, 스타트업 멘토링 AI, 창업 AI 자문, 스타트업 컨설팅, IR 덱 작성, 시드 투자 자문, Route01, 루트제로원, AI startup advisory">
+<meta name="author" content="Route01">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://route01.kr/">
+<link rel="icon" href="./logo.png">
+
+<!-- ── SEO: Open Graph (카카오톡·페이스북·LinkedIn 공유) ─────────────────────── -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Route01">
+<meta property="og:title" content="Route01 — AI 스타트업 자문 서비스">
+<meta property="og:description" content="AI 기반 스타트업 자문 서비스. 투자 유치, 비즈니스 전략, 마케팅, 재무, 인사, 법률까지. 세계 최고 수준 멘토 스타일로 맞춤 자문. Finding your Route from Zero to One.">
+<meta property="og:url" content="https://route01.kr/">
+<meta property="og:image" content="https://route01.kr/logo.png">
+<meta property="og:image:alt" content="Route01 logo">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- ── SEO: Twitter Card ─────────────────────── -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Route01 — AI 스타트업 자문 서비스">
+<meta name="twitter:description" content="AI 기반 스타트업 자문 서비스. 투자 유치, 전략, 마케팅, 재무, 인사, 법률까지 세계 최고 수준 멘토 스타일로 맞춤 자문.">
+<meta name="twitter:image" content="https://route01.kr/logo.png">
+
+<!-- ── SEO: 네이버 검색 최적화 보조 ─────────────────────── -->
+<meta name="naver-site-verification" content="">
+<!-- ↑ 네이버 서치어드바이저 등록 시 발급되는 코드 입력 -->
+
+<!-- ── SEO: JSON-LD 구조화 데이터 (검색 결과 풍부한 표시) ─────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://route01.kr/#organization",
+      "name": "Route01",
+      "alternateName": ["루트제로원", "Route Zero One"],
+      "url": "https://route01.kr/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://route01.kr/logo.png",
+        "width": 512,
+        "height": 512
+      },
+      "description": "AI 기반 스타트업 자문 서비스",
+      "email": "hello@route01.kr",
+      "sameAs": []
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://route01.kr/#website",
+      "url": "https://route01.kr/",
+      "name": "Route01",
+      "description": "AI 스타트업 자문 서비스",
+      "publisher": { "@id": "https://route01.kr/#organization" },
+      "inLanguage": "ko-KR"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://route01.kr/#app",
+      "name": "Route01",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any (Web)",
+      "url": "https://route01.kr/",
+      "description": "투자 유치, 비즈니스 전략, 마케팅, 재무, 인사, 법률 등 스타트업 경영 전 영역에 대한 AI 자문 서비스. 세계 최고 수준 멘토(Paul Graham, Peter Thiel, Brian Chesky, Jensen Huang, Naval Ravikant) 스타일로 맞춤 자문을 제공합니다.",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free",
+          "price": "0",
+          "priceCurrency": "KRW",
+          "description": "월 10회 무료 이용"
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro",
+          "price": "19900",
+          "priceCurrency": "KRW",
+          "description": "월 19,900원, 무제한 이용 + 전체 멘토 + 지원사업 도우미 + PDF/내보내기"
+        }
+      ],
+      "publisher": { "@id": "https://route01.kr/#organization" }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <!-- Supabase JS v2 — 인증·DB·구독 (2026-04-28 §44 도입, 2026-05-01 §48에서 단일 인증으로 승격) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="./nachim_v3.css?v=20260504-auth-brand-desc-v40">
+<link rel="stylesheet" href="./nachim_v3.css?v=20260504-seo-v41">
 </head>
 <body>
 
@@ -29,9 +118,6 @@
           <p class="auth-brand-kicker" id="auth-sub">AI Startup Advisory</p>
         </div>
         <h1 class="auth-brand-title" id="auth-heading">Finding your Route<br>from Zero to One</h1>
-
-        <!-- 서비스 개요 — 검수자/첫 방문자가 한눈에 파악 가능하도록 -->
-        <p class="auth-brand-desc"><span class="brand">Route01</span>은 한국 스타트업 창업자를 위한 AI 기반 자문 서비스입니다. 투자 유치, 비즈니스 전략, 마케팅, 재무, 인사, 법률까지 — 세계 최고 수준 멘토들의 사고 방식을 학습한 AI가 사용자의 사업 단계와 도메인에 맞춘 자문을 제공합니다. 회원 가입 후 바로 무료로 시작할 수 있으며, Pro 요금제(월 19,900원)로 무제한 이용이 가능합니다.</p>
 
         <!-- 셀링 포인트 -->
         <div class="auth-sellpoints">
@@ -876,6 +962,6 @@
 
 </div><!-- /#app -->
 
-<script src="./nachim_v3.js?v=20260504-auth-brand-desc-v40"></script>
+<script src="./nachim_v3.js?v=20260504-seo-v41"></script>
 </body>
 </html>

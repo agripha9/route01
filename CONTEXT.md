@@ -2383,3 +2383,73 @@ f9933c7 fix(pw-change): wrap modal in <form> + add autocomplete attrs
 - `privacy@route01.kr`: Cloudflare Email Routing에 별도 라우팅 규칙 추가 → agripha@gmail.com 전달 (리팡님 직접 콘솔 작업, 5분)
 - 베타 단계 문의 창구: `hello@route01.kr` 단독 사용 (현재 구조 유지)
 - Google Workspace 도입 시점: 베타 후반(~100명) / 사업자 등록 시점 / 첫 채용 시점 중 가장 빨리 오는 것을 트리거로. 비용 ₩7,800/월/유저(Business Starter). MX 변경 10분, Resend는 트랜잭션 메일 그대로 유지하거나 Workspace로 통합. — 메모리에 트랙 등록됨.
+
+### §49 후속 — 검수 사전 작업 + SEO 기반 (2026-05-04 동일 세션)
+
+**1. 검수 사전 — Auth/Landing 보강 (커밋 `75462d6`)**:
+- Google OAuth 검수 통과 가능성 높이기 위한 사전 작업
+- 첫 시도: `.auth-brand-desc` 단락 추가 → 리팡님 피드백 "셀링 포인트와 중복, 박스가 어색"
+- 결정: 셀링 포인트 3개 + 멘토 5명 칩 + footer 약관/연락처만으로도 "단순 로그인 게이트가 아님" 통과 가능 → 추가 단락 제거하고 footer에 hello@ 연락처만 유지
+
+**2. SEO 기반 작업 — 핵심 키워드 + 메타 풀스택**:
+
+타깃 키워드 5개:
+- "AI 스타트업 자문" (메인)
+- "Route01 / 루트제로원" (브랜드)
+- "스타트업 멘토링 AI"
+- "AI startup advisory" (영문 글로벌)
+- "창업 AI 자문"
+
+추가된 메타 인프라:
+- **`<title>`**: "Route01 — AI 스타트업 자문 서비스 | 루트제로원" (한·영 키워드 포함)
+- **`<meta description>`**: 핵심 가치 + 도메인 6개 + 가격 명시 (~150자)
+- **`<meta keywords>`**: 9개 키워드 (한·영 혼합)
+- **canonical URL**: `https://route01.kr/`
+- **Open Graph**: og:type, og:site_name, og:title, og:description, og:url, og:image, og:image:alt, og:locale (ko_KR), og:locale:alternate (en_US) — 카카오톡·페이스북·LinkedIn 공유 최적화
+- **Twitter Card**: summary 타입, title·description·image
+- **네이버 검증 태그**: 빈 placeholder (서치어드바이저 등록 시 코드 입력 위치)
+- **JSON-LD 구조화 데이터** (`@graph` 3개 객체):
+  - `Organization`: 회사명·로고·alternateName(루트제로원/Route Zero One)·이메일
+  - `WebSite`: 사이트 정의·발행자·언어
+  - `SoftwareApplication`: 앱 카테고리(BusinessApplication)·운영체제(Web)·설명·offers 2개(Free·Pro)·멘토 5명 명시
+
+terms.html / privacy.html SEO 보강:
+- title 강화 (브랜드 + "AI 스타트업 자문 서비스" 키워드 포함)
+- description 보강 (조항 핵심 키워드)
+- robots: index, follow
+- Open Graph 적용 (article 타입)
+
+**3. 새 파일**:
+- **`sitemap.xml`**: 3개 URL (/, /terms, /privacy), priority + changefreq + lastmod 명시
+- **`robots.txt`**: 모든 검색엔진 허용 + 네이버(Yeti)·다음(Daumoa) 명시 허용 + sitemap 위치 + AI 크롤러 차단 옵션 주석 (필요 시 활성화)
+
+**4. `_headers` 보강**:
+- sitemap.xml: max-age=3600 + Content-Type: application/xml
+- robots.txt: max-age=3600 + Content-Type: text/plain
+
+### 외부 작업 (리팡님 직접) — 검색엔진 등록
+
+검수 신청 전·정식 런칭 전:
+
+1. **Google Search Console** (https://search.google.com/search-console)
+   - 속성 추가 → 도메인 유형 → `route01.kr` 입력
+   - DNS TXT 레코드 추가 (Cloudflare DNS) — `google-site-verification=...` 값
+   - 검증 완료 후 sitemap 제출: `https://route01.kr/sitemap.xml`
+
+2. **네이버 서치어드바이저** (https://searchadvisor.naver.com)
+   - 사이트 등록 → `https://route01.kr` 추가
+   - 소유 확인: HTML 메타 태그 방식 → 발급된 `naver-site-verification` 코드를 index.html 의 `<meta name="naver-site-verification" content="">` 빈 칸에 입력
+   - 작업: HTML 한 줄 수정 → 커밋 → 검증 → sitemap 제출
+
+3. **다음 검색등록** (https://register.search.daum.net) — 선택
+   - 사이트 등록 신청
+   - 도메인 검증 후 sitemap 제출
+
+### §49 최종 커밋 정리 (캐시 버스터 v37 → v41)
+| 커밋 | 내용 | 캐시 버스터 |
+|---|---|---|
+| `1a37818` | 메인 — 약관/개인정보 보강 + 정적 페이지 + 마케팅 제거 + footer 변경 | v38 → v39 |
+| `f188e1a` | 핫픽스 — _redirects 200 rewrite 제거 | v39 (변경 없음) |
+| `4a50383` | 문서 — LEGAL_TRIGGERS.md + CONTEXT.md 포인터 | v39 (변경 없음) |
+| `75462d6` | 검수 사전 — auth-brand-desc 추가 (이후 제거) + footer hello@ 추가 | v39 → v40 |
+| (예정) | SEO 풀스택 + .auth-brand-desc 제거 + sitemap.xml + robots.txt | v40 → v41 |

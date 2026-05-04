@@ -1,0 +1,20 @@
+# Route01 robots.txt
+# 모든 검색엔진 허용 + sitemap 위치 명시
+
+User-agent: *
+Allow: /
+
+# 네이버·다음 명시 허용 (한국 검색 엔진)
+User-agent: Yeti
+Allow: /
+
+User-agent: Daumoa
+Allow: /
+
+# AI 크롤러는 차단 옵션 (필요 시 주석 해제)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: CCBot
+# Disallow: /
+
+Sitemap: https://route01.kr/sitemap.xml

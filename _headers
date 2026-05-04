@@ -31,3 +31,12 @@
 
 /*.woff2
   Cache-Control: public, max-age=31536000
+
+# SEO 파일 — 짧게 캐시 (자주 갱신될 수 있음)
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+  Content-Type: application/xml
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+  Content-Type: text/plain
