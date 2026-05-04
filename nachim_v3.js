@@ -289,7 +289,8 @@ function isAuthed(){
    향후 Supabase의 user_metadata.role='admin'으로 옮길 수 있음 — 지금은
    간단한 화이트리스트가 충분. */
 const R01_ADMIN_EMAILS = [
-  'agripha@gmail.com'
+  'agripha@gmail.com',
+  'agripha+test6@gmail.com'   /* 임시 — Pro 전환 검증용 테스트 계정. DB 정리 시 같이 제거. */
 ];
 
 function getCurrentUserEmail(){
