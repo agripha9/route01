@@ -2,7 +2,7 @@
 
 > **Claude에게**: 새 세션 시작 시 이 파일을 가장 먼저 읽고, 맥락을 파악한 뒤 작업하세요. 세션이 끝날 때(사용자가 "오늘 마무리" 또는 유사 표현) 이 파일을 업데이트하고 commit·push 하세요. 사용자에게 워크플로를 다시 설명하지 마세요 — 이미 알고 있습니다.
 
-최종 업데이트: 2026-04-27
+최종 업데이트: 2026-05-04 (§49 마감)
 
 > **참고**: 디자인·UI 관련 결정은 `DESIGN.md`(프로젝트 루트)를 source of truth로 삼으세요. CONTEXT.md는 세션 로그·로드맵·이슈 추적 중심, DESIGN.md는 색·타이포·레이아웃 사양.
 
@@ -2524,3 +2524,115 @@ terms.html / privacy.html SEO 보강:
 - SEO 인프라 (Open Graph + Twitter Card + JSON-LD + sitemap + robots.txt) — 카카오톡 공유 시 미리보기 정상화 부수 효과
 
 다음 세션은 결제 트랙 (§50). 결제 도입 후 베타 출시 가능 상태가 됨.
+
+---
+
+## §49 마감 — 진짜 종합 정리 (2026-05-04 EOD)
+
+### 세션 통계
+- **커밋 수**: 7 (1a37818 → 68f735c)
+- **파일 추가**: terms.html, privacy.html, sitemap.xml, robots.txt, LEGAL_TRIGGERS.md (5개)
+- **파일 수정**: index.html, nachim_v3.js, _redirects, _headers, CONTEXT.md (5개)
+- **JS 변화**: 7059 → 7048줄 (-11줄, 마케팅 체크박스 제거 + R01_TERMS 컨텐츠 보강이 상쇄)
+- **캐시 버스터**: v37 → v41 (4번 bump)
+
+### 코드 완결성 검증 (마감 시점)
+- ✅ JS 문법 (`node -c nachim_v3.js`)
+- ✅ HTML 태그 균형: index 539/539, terms 100/100, privacy 126/126
+- ✅ JSON-LD 파싱 정상 (@graph 3 entities)
+- ✅ sitemap.xml: 3 URLs
+- ✅ description ≤80자 (네이버 권장): index 61, terms 68, privacy 68
+- ✅ 캐시 버스터 일치 (CSS+JS 모두 v41)
+- ✅ 마케팅 동의 잔재 0건
+- ✅ Auth0 잔재는 의도된 cleanup 키와 §48 주석만 남음
+
+### 외부 작업 완료 현황 (리팡님 직접)
+
+| 외부 작업 | 상태 | 비고 |
+|---|---|---|
+| Cloudflare Pages 정적 페이지 배포 확인 | ✅ | route01.kr/terms · route01.kr/privacy 정상 |
+| Cloudflare Email Routing — privacy@ 추가 | ⏳ | 미완료, 5분 작업 (마감 후 진행 가능) |
+| Google Cloud Console — Branding URL 등록 | ✅ | 홈/약관/개인정보 URL 모두 저장 |
+| Google Cloud Console — Audience 모드 | ✅ | Testing 유지 (베타 운영) |
+| Google Search Console — 도메인 검증 | ✅ | route01.kr DNS TXT |
+| Google Search Console — 사이트맵 제출 | ✅ | sitemap.xml, 발견된 페이지 3 |
+| 네이버 서치어드바이저 — 사이트 등록 + 소유 확인 | ✅ | naver-site-verification 코드 박힘 |
+| 네이버 서치어드바이저 — 사이트맵 제출 | ✅ | sitemap.xml 등록 완료 |
+| 네이버 서치어드바이저 — URL 검사 (3개) | ✅ | / · /terms · /privacy 모두 통과 |
+| 네이버 서치어드바이저 — robots.txt 검증 | ✅ | URL 검사에서 동시 확인 |
+| 네이버 서치어드바이저 — 간단체크 종합 진단 | ✅ | 7개 항목 모두 ✅ (description 단축 후) |
+
+### 베타·정식 런칭 시 처리할 것 (이연)
+
+#### 결제 도입 (§50, 다음 세션)
+- **토스페이먼츠 결제 연동** — "방향 A — 백엔드 + 로그인 + 결제 통합"의 마지막 트랙
+- TEMP 마커 4곳 정리 (line 247, 344, 6450, 6484)
+- 약관 §6·§7 + 개인정보처리방침 §6에 토스페이먼츠 이미 명시됨 → 약관 추가 작업 불필요
+- 한 세션 통째 분량
+
+#### 디자인 리뉴얼 트랙 (Claude Designer 출시 시점)
+- 전체 UI/UX 리뉴얼
+- **답변 화면 렌더링 스타일** 포함 (표·폰트·영문 표기·**볼드 등) — 리팡님이 §49 진행 중 다시 강조
+- 마이페이지 + 비밀번호 변경 모달 디자인 리뉴얼 (§47부터 이연)
+- 별도 OG 이미지(1200x630) 생성 (현재 logo.png 임시 사용 중)
+- 한 세션에 묶어서 진행
+
+#### Google OAuth 검수 신청 (베타 후반 ~ 정식 런칭 전)
+- 사전 작업 완료: terms/privacy 정적 페이지 ✅, 도메인 검증 ✅, auth 화면에 충분한 서비스 설명 ✅
+- 남은 사전 작업: 사업자 등록 시점에 회사 정보 갱신, 필요 시 홈페이지 보강
+- 트리거: 베타 50명+ 또는 정식 런칭 시점
+- 신청 후 1~7일 검토
+
+#### 한국 검색 보강 (선택)
+- 네이버 검색 등록 (https://submit.naver.com) — 베타 후반에 신청 가치
+- 다음 검색등록 (https://register.search.daum.net)
+- 색인 데이터 누적 (1~7일 후 색인 상태 확인 가능)
+
+#### 인프라·이메일
+- **Google Workspace 도입** — 베타 후반(~100명) / 사업자 등록 / 첫 채용 중 가장 빠른 트리거. ₩7,800/월/유저 (Business Starter). MX 변경 10분.
+- **Newsletter / 마케팅 채널** — 채널 만들 때 마케팅 동의 체크박스 + DB 컬럼 + 동의 시각 기록 + 약관 갱신 일괄
+- **Naver Edge Function bridge** — 베타 후 수요 보고 결정
+- **Apple 로그인 활성화** — Apple Dev Program $99/yr, 글로벌 런칭 시점
+- **Kakao 비즈 앱 → 정식 사업자 인증 전환** — 사업자 등록 시점
+
+#### Microsoft Bing
+- Bing Webmaster Tools (https://www.bing.com/webmasters) 등록은 추후 검토
+- Search Console 데이터 import 기능이 있어 빠르게 등록 가능
+
+### LEGAL_TRIGGERS.md 활용 가이드
+
+이번 세션에서 신설한 운영 문서. 다음과 같은 변경이 발생하면 이 문서를 먼저 확인하고 어떤 약관 조항을 갱신해야 하는지 매핑:
+- 새 소셜 로그인 추가
+- 결제대행사 추가/변경
+- 가격·요금제 변경
+- 새 위탁사(분석·에러 트래킹·고객지원 도구) 도입
+- 새 기능 추가
+- 데이터 정책 변경
+- 사업자 등록 (개인 → 법인)
+- 보호책임자 변경
+- 인프라 변경
+
+15단계 갱신 체크리스트 + 시행일/공고일 매뉴얼(7일·30일 사전 고지) + 약관 변경 이력 append-only 로그 포함.
+
+### 다음 세션 첫 작업 — §50 토스페이먼츠 결제
+
+다음 세션 시작 시 Claude는:
+1. CONTEXT.md (이 파일) 읽기
+2. LEGAL_TRIGGERS.md 읽기 (결제 도입은 약관 갱신 트리거)
+3. `git log --oneline -10` 으로 최근 변경 확인
+4. 토스페이먼츠 통합 사양 + 백엔드 구조 (Edge Function for webhook 등) 설계부터 시작
+
+§47에서 결정된 "방향 A — 백엔드 + 로그인 + 결제 통합" 트랙의 마지막 부분. 결제 작동 후 베타 출시 가능 상태가 됨.
+
+### §49 최종 커밋 정리 (캐시 버스터 v37 → v41)
+| 커밋 | 내용 | 캐시 버스터 |
+|---|---|---|
+| `1a37818` | 메인 — 약관/개인정보 풀 보강 + 정적 페이지 + 마케팅 제거 | v38 → v39 |
+| `f188e1a` | 핫픽스 — _redirects 200 rewrite 제거 (ERR_TOO_MANY_REDIRECTS) | (변경 없음) |
+| `4a50383` | 문서 — LEGAL_TRIGGERS.md + CONTEXT.md 포인터 | (변경 없음) |
+| `75462d6` | 검수 사전 — auth-brand-desc 추가 (이후 제거) + footer hello@ 추가 | v39 → v40 |
+| `e980952` | SEO 풀스택 + auth-brand-desc 제거 + sitemap.xml + robots.txt | v40 → v41 |
+| `38932b2` | Naver site verification code 입력 | (변경 없음) |
+| `68f735c` | description ≤80자 단축 (네이버 SEO) | (변경 없음) |
+
+§47에서 부실하게 처리됐던 약관·개인정보처리방침을 한국 표준 + AI 자문 특수성 + 결제 도입 대비 풀 보강. Google·네이버 검색엔진 등록 + SEO 메타 풀스택 적용. Google OAuth 검수 통과 가능한 상태로 사이트 정비 완료. AI 자문 서비스로서 신뢰도와 법적 컴플라이언스 기반이 갖춰진 상태에서 결제 트랙(§50) 진입 준비 완료.
