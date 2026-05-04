@@ -2453,3 +2453,74 @@ terms.html / privacy.html SEO 보강:
 | `4a50383` | 문서 — LEGAL_TRIGGERS.md + CONTEXT.md 포인터 | v39 (변경 없음) |
 | `75462d6` | 검수 사전 — auth-brand-desc 추가 (이후 제거) + footer hello@ 추가 | v39 → v40 |
 | (예정) | SEO 풀스택 + .auth-brand-desc 제거 + sitemap.xml + robots.txt | v40 → v41 |
+
+### §49 진짜 최종 — 7 커밋, 캐시 버스터 v37 → v41 (2026-05-04 마감)
+
+| # | 커밋 | 내용 | 캐시 버스터 |
+|---|---|---|---|
+| 1 | `1a37818` | feat — 약관/개인정보 보강 + 정적 페이지 + 마케팅 제거 + footer 변경 | v38 → v39 |
+| 2 | `f188e1a` | fix — _redirects 200 rewrite 제거 (ERR_TOO_MANY_REDIRECTS) | (cf 자동) |
+| 3 | `4a50383` | docs — LEGAL_TRIGGERS.md + CONTEXT.md 포인터 | (cf 자동) |
+| 4 | `75462d6` | feat — auth-brand-desc 추가 + footer hello@ 추가 | v39 → v40 |
+| 5 | `e980952` | feat — SEO 풀스택 + auth-brand-desc 제거 + sitemap.xml + robots.txt | v40 → v41 |
+| 6 | `38932b2` | chore — 네이버 서치어드바이저 검증 코드 삽입 | v41 |
+| 7 | `68f735c` | fix — 메타 description 80자로 단축 (네이버 SEO 권고) | v41 |
+
+### §49 외부 작업 — 모두 완료된 것
+
+✅ **Cloudflare Pages 자동 배포** — route01.kr/terms, route01.kr/privacy 정상 서빙
+✅ **Google Cloud Console 브랜딩** — 홈페이지/개인정보처리방침/약관 URL 등록 완료. logo.png 업로드 필요 여부는 Branding 페이지에서 별도 확인 (App information 섹션). Testing 모드 유지.
+✅ **Google Search Console** — 도메인 속성 추가, DNS TXT 검증 완료. sitemap.xml 제출 → "성공", 발견된 페이지: 3.
+✅ **네이버 서치어드바이저** — 사이트 등록, HTML 메타 태그 검증 완료. sitemap 제출 등록일 26.05.04 17:57:32. URL 검사 3개 URL 모두 ✅ (description 단축 후). robots.txt ✅. 간단체크 7개 항목 ✅.
+
+### §49 외부 작업 — 남은 것 (간단)
+
+⏳ **privacy@ Cloudflare Email Routing** (5분):
+1. Cloudflare Dashboard → route01.kr → Email → Email Routing → Routing rules
+2. Create address → Custom address: `privacy` → Action: Send to → `agripha@gmail.com`
+3. 저장. 즉시 활성화.
+
+### §49 외부 작업 — 베타 후반/정식 런칭 시점
+
+⏳ **Google OAuth 검수 신청 (Production 전환)**: 베타 후반(~50명) 또는 사업자 등록 시점에 진행. 현재 Testing 모드로 100명까지 등록 가능.
+⏳ **네이버 검색 등록 (submit.naver.com)**: 일반 사이트 등록 신청. 베타 후반에 신청 가치.
+⏳ **다음 검색등록**: 선택, 한국 검색 점유율 낮아 우선순위 낮음.
+
+### §49 학습 — Cloudflare Pages 함정 / SEO 한국화 / 검수 정책
+
+1. **Cloudflare Pages `_redirects` 200 rewrite는 자동 정규화와 충돌**: `/foo` 요청 시 자동으로 `/foo.html` 서빙 (URL 유지) + `/foo.html` 직접 요청은 `/foo`로 301 정규화. 여기에 명시적 200 rewrite를 박으면 무한 루프. **정적 .html 파일만 두고 _redirects는 건드리지 않는 게 정답**.
+
+2. **네이버 description 80자 한도**: Google은 ~150자 허용하지만 네이버는 80자 권고. 검색 결과 노출 품질을 위해 한국어 사이트는 **description을 80자 이하로** 작성. og:description, twitter:description도 동일하게 통일.
+
+3. **Google OAuth 검수 통과 전엔 supabase.co가 표시됨**: Branding 정보(logo, terms, privacy URL) 저장 ≠ 검수 통과. Testing 모드든 Production 모드든 검수 미통과 시 동의 화면에 OAuth 클라이언트 호스팅 도메인(supabase.co)이 표시됨. 베타 동안은 Testing 모드 + 테스트 사용자 등록 운영이 가장 현실적.
+
+4. **승인된 도메인 두 개 유지 필수**: GCP Branding의 승인된 도메인 목록에 `route01.kr`(브랜드) + `<supabase-id>.supabase.co`(OAuth 콜백) 둘 다 있어야 정상 동작. supabase.co 제거 시 OAuth 흐름 깨짐.
+
+5. **Cloudflare가 robots.txt에 자동 헤더 삽입**: 우리가 작성한 룰 앞에 "As a condition of accessing this website, you agree..." 형식의 콘텐츠 신호 헤더를 자동 삽입. 검색엔진은 둘 다 정상 파싱하므로 우리 측 처리 불필요.
+
+### 다음 세션 우선순위 (§50 추천)
+
+**1순위 — 토스페이먼츠 결제 연동 + TEMP 코드 정리** (한 세션 통째)
+- "방향 A — 백엔드 + 로그인 + 결제 통합"의 마지막 결제 부분
+- §47/§48에서 결정된 트랙
+- TEMP 마커 4곳 정리 (line 247, 344, 6450, 6484)
+- 약관에 토스페이먼츠 이미 명시 (§6 요금제 및 결제, 개인정보처리방침 §6 위탁) — 약관 추가 작업 불필요
+- 외부 작업: 토스페이먼츠 가맹점 가입 (사업자등록증 필요할 수 있음 → 사업자 등록 트랙과 묶어 진행 가능성 검토)
+
+**그 외 트랙 (메모리 등록됨)**:
+- 디자인 리뉴얼 (Claude Designer 출시 시) — UI/UX + 답변 화면 렌더링(표·폰트·영문·**볼드 등) + 마이페이지/비밀번호 모달 일괄
+- Naver Edge Function bridge (베타 후)
+- Apple 로그인 활성화 (글로벌 런칭)
+- Newsletter 채널 + 마케팅 동의 재도입
+- Google Workspace 도입 (베타 후반 ~100명 / 사업자 등록 / 첫 채용 시점)
+- 카카오 비즈 앱 → 정식 사업자 인증 전환
+
+### §49 종합 평가
+
+§48 인증 트랙(Auth0→Supabase) 종결 직후, 베타 외부 공개를 위한 컴플라이언스/신뢰/검색 노출 기반을 한 번에 깔았다. 코드 변경은 적지만 의미 있는 변화:
+- AI 자문 서비스 약관 한국 표준 부합 (공정거래위원회 표준약관·개인정보보호법 제30조 표준 항목)
+- 사용자 신뢰 기반 (정적 페이지 + Google OAuth 브랜딩 + 검색엔진 등록)
+- 운영 매뉴얼 문서화 (LEGAL_TRIGGERS.md → 향후 서비스 확장 시 약관 누락 방지)
+- SEO 인프라 (Open Graph + Twitter Card + JSON-LD + sitemap + robots.txt) — 카카오톡 공유 시 미리보기 정상화 부수 효과
+
+다음 세션은 결제 트랙 (§50). 결제 도입 후 베타 출시 가능 상태가 됨.
