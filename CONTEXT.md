@@ -6,6 +6,8 @@
 
 > **참고**: 디자인·UI 관련 결정은 `DESIGN.md`(프로젝트 루트)를 source of truth로 삼으세요. CONTEXT.md는 세션 로그·로드맵·이슈 추적 중심, DESIGN.md는 색·타이포·레이아웃 사양.
 
+> **법무·약관 갱신**: 약관·개인정보처리방침 변경이 필요한 모든 작업은 `LEGAL_TRIGGERS.md`를 먼저 확인하세요. 코드/서비스/인프라 변경이 어떤 약관 조항에 영향을 주는지 매핑되어 있고, 갱신 체크리스트와 시행일 규정도 정리되어 있습니다.
+
 ---
 
 ## 1. 프로젝트 개요
@@ -2364,3 +2366,20 @@ f9933c7 fix(pw-change): wrap modal in <form> + add autocomplete attrs
 | (신규) | R01_TERMS 풀 보강 + terms.html·privacy.html 생성 + _redirects + 마케팅 체크박스 제거 + footer 링크 변경 | v38 → v39 |
 
 §48 인증 트랙 종결 후 첫 컨텐츠/페이지 트랙. AI 자문 서비스 신뢰도와 법적 컴플라이언스 기반을 깔고, 결제 트랙 진입 직전의 정리 단계.
+
+### §49 후속 — _redirects 핫픽스 + LEGAL_TRIGGERS.md (2026-05-04 동일 세션)
+
+**핫픽스 (커밋 `f188e1a`)**: route01.kr/terms 접근 시 `ERR_TOO_MANY_REDIRECTS` 발생.
+- 원인: Cloudflare Pages는 `/terms` 요청에 대해 자동으로 `/terms.html`을 서빙하고 (URL은 `/terms` 유지), `/terms.html` 직접 요청은 자동으로 `/terms`로 301 정규화함. 여기에 `_redirects`에 명시적 200 rewrite를 박으니 Cloudflare 자동 정규화와 우리 rewrite가 서로를 트리거하면서 무한 루프 발생.
+- 수정: `_redirects`에서 `/terms /terms.html 200` + `/privacy /privacy.html 200` 두 줄 제거. Cloudflare Pages 자동 처리에만 의존. 정적 .html 파일만으로 충분.
+
+**LEGAL_TRIGGERS.md 신규 (커밋 예정)**:
+- 리팡님 우려: 향후 서비스 추가/변경, 소셜 로그인 추가 등이 있을 때 약관·개인정보처리방침 어디를 갱신해야 하는지 잊을 수 있음
+- 대응: 코드/서비스/인프라 변경 → 약관 조항 매핑 트래킹 문서를 별도 파일로 신설
+- 내용: ① 동기화 원칙(약관은 정적 페이지·R01_TERMS·시행일 3곳 동시 갱신 필수), ② 8개 트리거 카테고리 매핑(소셜 로그인 / 결제 / 위탁사 / 기능 / 데이터 정책 / 사용자 정책 / 인프라·보안 / 연락처), ③ 시행일·공고일 갱신 매뉴얼(7일/30일 사전 고지), ④ 15단계 갱신 체크리스트, ⑤ 약관 변경 이력 append-only 로그, ⑥ 자주 잊는 함정 메모.
+- CONTEXT.md 상단에 포인터 추가 — Claude가 새 세션에서 자동 인지하도록.
+
+**이메일 운영 결정 사항 (작업 외 메모)**:
+- `privacy@route01.kr`: Cloudflare Email Routing에 별도 라우팅 규칙 추가 → agripha@gmail.com 전달 (리팡님 직접 콘솔 작업, 5분)
+- 베타 단계 문의 창구: `hello@route01.kr` 단독 사용 (현재 구조 유지)
+- Google Workspace 도입 시점: 베타 후반(~100명) / 사업자 등록 시점 / 첫 채용 시점 중 가장 빨리 오는 것을 트리거로. 비용 ₩7,800/월/유저(Business Starter). MX 변경 10분, Resend는 트랜잭션 메일 그대로 유지하거나 Workspace로 통합. — 메모리에 트랙 등록됨.
