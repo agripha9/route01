@@ -1,7 +1,7 @@
-# 정적 약관/개인정보처리방침 — 깔끔한 URL (확장자 없는 경로)
-# Google OAuth Branding 등 외부 등록 URL은 이 형태를 사용
-/terms      /terms.html      200
-/privacy    /privacy.html    200
+# Cloudflare Pages는 확장자 없는 경로(/terms, /privacy)에 대해 자동으로
+# 같은 이름의 .html 파일(/terms.html, /privacy.html)을 서빙합니다 (URL은 그대로 유지).
+# 별도 200 rewrite 규칙은 불필요하며 오히려 무한 리다이렉트 루프를 유발할 수 있음.
+# (2026-05-04 §49: 200 rewrite 시도 → ERR_TOO_MANY_REDIRECTS → 자동 처리에 의존하도록 롤백)
 
 # 과거에 공유된 /nachim_v3.html 및 /nachim_v3 링크의 하위 호환
 # (파일명이 index.html로 변경되었음 — 2026-04-24 URL 정리)
