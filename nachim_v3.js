@@ -424,7 +424,7 @@ async function handleAuthCallback(){
     /* URL hash 정리 후 안내 — 정리 먼저 해야 새로고침 시 같은 에러 반복 안 됨 */
     window.history.replaceState({}, document.title, window.location.pathname);
     try{ alert(userMsg); }catch(_){}
-    return; /* 후속 세션·Auth0 콜백 처리 스킵 — 인증 실패 상태 유지 → #auth 화면 노출 */
+    return; /* 후속 세션 처리 스킵 — 인증 실패 상태 유지 → #auth 화면 노출 */
   }
 
   /* 1) Supabase 세션 처리 (2026-04-28 §44 Step 2)
@@ -543,7 +543,7 @@ async function startAfterLogin(){
     try { launch(); return; } catch(e){ console.warn('[boot] launch error', e); }
   }
 
-  /* fallback: localStorage 캐시에 프로필이 있으면 (Auth0 Google 사용자 등) 그걸로 진입 */
+  /* fallback: localStorage 캐시에 프로필이 있으면 (Supabase 동기화 실패 시 안전망) 그걸로 진입 */
   try{
     const saved = localStorage.getItem('vd_profile');
     if(saved){

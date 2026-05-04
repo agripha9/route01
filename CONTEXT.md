@@ -2084,3 +2084,168 @@ f9933c7 fix(pw-change): wrap modal in <form> + add autocomplete attrs
 
 ### §47 진짜 진짜 최종 — 18 커밋, 캐시 버스터 v18 → v32
 점검 절차로 발견된 문제까지 정직하게 기록하고 마감. 비밀번호 변경 흐름의 가짜 작동은 다음 세션 첫 작업으로 잡힘.
+
+
+---
+
+## §48 — Auth0 → Supabase 단일 인증 통일 (2026-05-01)
+
+### 목표
+§47에서 결정된 "방향 A — 백엔드 + 로그인 + 결제 통합" 트랙의 인증 부분 완수. Auth0를 완전히 제거하고 Supabase로 단일화. 4커밋 단계별 푸시 + 마감 1커밋 = 총 **5커밋**, 캐시 버스터 **v33 → v37**.
+
+### 진행 단계 — Step 1~4
+
+#### Step 1 — `submitPwChange` Supabase 재작성 (커밋 `aca63c4`, v33)
+- **이전**: localStorage `r01_accs` + base64 비교 — 가짜 검증, 옛 시스템 잔재
+- **이후**: `signInWithPassword` 재인증 → `updateUser({password})`
+- 소셜 로그인 사용자는 `user.identities`에 `email` provider 없으면 정확히 차단 (이전엔 false negative 버그 — 정상 사용자에게도 "소셜 로그인 계정" 오류)
+- HTML에 hidden username field 추가 → Chrome 비밀번호 매니저가 어떤 계정 비밀번호인지 인식
+- 변경 중 버튼 비활성 + "변경 중..." 표시 (중복 클릭 방지)
+- Supabase 에러를 한국어 메시지로 매핑 (Invalid login credentials → "현재 비밀번호가 맞지 않습니다", rate limit → "요청이 너무 잦습니다" 등)
+
+#### Step 2 — Edge Function `delete-user` + 클라이언트 `submitWithdraw` (커밋 `3ea4e1f`, v34)
+- **새 파일**: `supabase/functions/delete-user/index.ts` (Deno/TypeScript)
+- 흐름: 클라이언트 JWT 검증 → service_role로 `auth.admin.deleteUser(user_id)` 호출
+- profiles/subscriptions/daily_usage 자동 삭제 (`001_initial_schema.sql`에 이미 박혀 있던 ON DELETE CASCADE 활용)
+- CORS는 route01.kr + localhost 개발 origin만 허용
+- service_role 키는 Edge Function 환경변수(`SUPABASE_SERVICE_ROLE_KEY`, Supabase 자동 주입)에만 존재 — 클라이언트 절대 노출 없음
+- **클라이언트**: `sb.functions.invoke('delete-user')` 호출 → 서버 확인 후에만 `signOut` + 캐시 정리 + UI 복귀
+- 친절한 에러 처리: 함수 미배포(404) 시 "탈퇴 처리 서비스 점검 중" 안내
+- **배포**: 리팡님이 Supabase Dashboard → Edge Functions → Via Editor로 직접 코드 붙여넣어 배포. Verify JWT 옵션 OFF (함수 자체가 JWT 검증).
+- **검증**: 테스트 계정 가입 → 탈퇴 → auth.users + profiles + subscriptions + daily_usage 모두 삭제 확인 (cascade 정상)
+
+#### Step 3 — 소셜 로그인 Supabase OAuth로 마이그레이션 (커밋 `aa8e2f7`, v35)
+- **`loginProvider`**: `c.loginWithRedirect({connection})` → `sb.auth.signInWithOAuth({provider, options:{redirectTo}})`
+- HTML 구 명칭 → Supabase provider 명칭 매핑 (`google-oauth2` → `google` 등)
+- **네이버**: Supabase 미지원 (OIDC discovery 없음) → "준비 중" 안내 모달, 별도 트랙(Edge Function bridge)으로 이연
+- **애플**: 코드 추가했으나 비활성 — Apple Developer Program $99/yr 가입 후 활성화 (글로벌 런칭 시점 ~1년 후)
+- **`sbUserToAuthShape` 보강**: `app_metadata.provider` 또는 `identities[0].provider`에서 정확히 추출 → `user.method`에 박음. 디스플레이 이름은 `full_name → name → nickname → preferred_username → email 앞부분 → 'Route01 사용자'` 체인.
+- **`handleAuthCallback`**: Auth0 `code+state` 분기를 무력화(주석 + URL 정리만), Step 4에서 일괄 제거
+- HTML: Apple 버튼 추가, Naver/Apple 모두 `auth-social-disabled` 클래스로 회색 처리, Google + 카카오는 1행으로 승격
+- CSS: `.auth-social-disabled` 회색 스타일 (`!important`로 아이콘/텍스트 색까지 덮어씀)
+- **개인정보처리방침**: Auth0(Okta) 항목을 Supabase + Google·Kakao 표기로 수정
+
+##### 외부 콘솔 작업 (Step 3 동반)
+순서대로 진행 — 약 3시간 소요(KOE205 디버깅 포함):
+
+1. **Supabase Dashboard** — Authentication → URL Configuration: Site URL/Redirect URLs 등록
+2. **Google Cloud Console** — 신규 발견: Auth0가 자체 데모 자격증명을 빌려주고 있어서 GCP 프로젝트 자체가 없었음. 새 프로젝트 `Route01` 생성 → 새 UI(Google Auth Platform):
+   - 데이터 액세스: scope 3개 추가 (`userinfo.email`, `userinfo.profile`, `openid`)
+   - 브랜딩: 앱 이름·지원 이메일·승인된 도메인(`route01.kr`)
+   - 대상: External + 테스트 사용자에 본인 이메일 추가 (Testing 모드 유지)
+   - 클라이언트: Web application + 자바스크립트 원본 + Redirect URI = Supabase 콜백 URL
+3. **Supabase Google Provider**: Client ID/Secret 입력 + 활성화
+4. **Kakao Developers** — 카카오는 UI/메뉴가 자주 바뀌어 헤맴. 결정적 함정 발견:
+   - Redirect URI는 `앱 → 플랫폼 키 → REST API 키 상세 페이지` 안에 있음 (Supabase 공식 문서가 카카오 UI 변경에 sync 안 된 상태)
+   - 새로 발견: 카카오는 OpenID Connect 활성화하고도 **Supabase가 강제로 보내는 scope 3종(`profile_nickname`, `profile_image`, `account_email`) 모두 동의항목 활성화 필요**
+   - **KOE205 디버깅 여정**:
+     - 1차 시도: `account_email`만 활성화 → 실패. 에러 메시지 `"설정하지 않은 동의 항목: profile_image"`로 진짜 원인 발견
+     - 2차 시도: 셋 다 활성화 → 통과. KOE205 사라짐
+     - 3차 시도: Supabase 콜백에서 `Error getting user email from external provider` → 사용자가 동의 화면에서 이메일 거부할 수 있는 게 원인
+     - 4차: 이메일을 **필수 동의**로 박음 (리팡님 직관, 옳음) → 카카오 로그인 작동
+   - GitHub Issue #29917, #36878 (Supabase 카카오 KOE205 알려진 버그)을 추적하며 워크어라운드 발견. 핵심: **카카오 동의항목 3종 모두 활성화** + **이메일 필수 동의** + **개인 개발자 비즈 앱** 권한.
+   - 카카오 비즈 앱 권한은 리팡님이 세션 중 직접 신청 → 즉시 승인되어 `account_email` 잠금 해제. (검수 1~2일 안 걸렸음)
+5. **Supabase Kakao Provider**: REST API 키(`68584bb...429f`) + 클라이언트 시크릿(`CCrbeB...gfPL`) 입력 + 활성화 + "Allow users without an email" 옵션은 OFF 유지 (이메일 필수 동의로 처리)
+
+##### 검증 결과
+- ✅ 카카오 신규 사용자: 동의 → 콜백 → 온보딩 진입까지 정상
+- ✅ Google: 기존 이메일/PW 계정과 account linking 자동 처리 (이메일 일치 시 동일 사용자로 통합)
+- ✅ Edge Function 회원 탈퇴 + cascade 삭제 정상
+- ✅ 비밀번호 변경 정상
+
+#### Step 4 — Auth0 잔재 일괄 정리 (커밋 `1af8b0e`, v36)
+**제거된 JS 함수 (10개+)**:
+- `getAuth0Config`, `setAuth0Config`, `auth0Domain`, `auth0ClientId`, `auth0Audience`, `ensureDefaultAuth0`
+- `getCreateAuth0Client`, `bridgeAuth0Global`, `loadScriptOnce`, `ensureAuth0Sdk`
+- `initAuth0`, `auth0Client`, `AUTH0_REDIRECT_URI`, `AUTH0_SDK_URLS`, `auth0SdkLoadPromise`
+- `openAuth0Settings`, `closeAuth0Settings`, `saveAuth0Settings`
+- `demoLogin` (이미 빈 stub)
+- 옛 `r01_accs` 시스템 6종: `_r01Accounts`, `_saveR01Accounts`, `_isSocialEmail`, `_checkSocialUsedEmail`, `_clearDupMsg`, `_showDupMsg`
+
+**수정된 JS 함수**:
+- `setAuthed`: r01_accs 쓰기 블록 제거 (sbUserToAuthShape가 이미 method 박아줌)
+- `startAfterLogin`: r01_accs 블록 제거
+- `openMyPage`: `sub.startsWith('google')` fallback 제거 (user.method 직접 사용)
+- `logout`: Auth0 round-trip 제거, `signOut + clearAuthed + clearUserScopedCache + showAuthGate`로 단일화
+- `handleAuthCallback`: Auth0 `code+state` 분기 완전 제거
+- DOMContentLoaded: `auth0-redirect-url` DOM 요소 참조 제거
+- 회원가입 이메일 입력 시 즉시 중복 체크 제거 (RLS로 클라이언트 사이드 체크 불가, signUp 시점 서버 검증으로 충분)
+- window/module export에서 4개 식별자 제거
+- `safeClick('auth0-modal', ...)` 제거
+
+**제거된 HTML/CSS/파일**:
+- `<script src="./vendor/auth0-spa-js.production.js">` 태그
+- `<div id="auth0-modal">` 설정 모달 블록
+- `#auth0-modal .auth0-*` CSS 규칙 (~17줄)
+- `vendor/auth0-spa-js.production.js` 파일 자체 (40KB SDK)
+
+**유지한 legacy 잔재 (의도)**:
+- `USER_SCOPED_LS_KEYS`에 `r01_accs`, `nachim_auth0` 키 → 옛 사용자가 처음 들어왔을 때 stale 캐시 정리용
+- `submitWithdraw`의 cleanup 키 목록에도 동일 키 포함
+
+**수치**: +40줄 / -403줄, 4 파일 변경. JS 7059 → 6802줄 (257줄 감소).
+
+### 세션 마감 정리 (커밋 마감, v37)
+점검 절차 표준 적용:
+- ✅ JS 문법 검증
+- ✅ HTML form/button 태그 짝 매칭 (3/3, 89/89)
+- ✅ HTML onclick → JS 함수 export 매칭 (누락 0건)
+- ✅ 제거된 식별자 미참조 회귀 (0건)
+- ✅ Auth0/r01_accs 잔재 — 의도된 legacy 주석/cleanup 키만 남음
+- ✅ CSS Auth0 클래스 잔재 0건
+
+옛 표현이 남은 주석 두 줄 다듬어 정리 (line 427, 546).
+
+### KOE205 디버깅에서 학습한 카카오 + Supabase 함정 (다음 카카오 운영자 또는 Naver bridge 작업 시 참고)
+
+**카카오 + Supabase 통합의 숨은 요구사항**:
+1. **Supabase는 카카오에 항상 3개 scope 강제**: `profile_nickname`, `profile_image`, `account_email`. 셋 중 하나라도 카카오 콘솔에서 "사용 안 함"이면 KOE205. `signInWithOAuth`의 `scopes` 옵션을 명시해도 Supabase가 강제 추가하는 알려진 버그 (GitHub #29917).
+2. **Redirect URI 위치**: 카카오 새 UI에서 OAuth Redirect URI는 `카카오 로그인 → 일반`이 아니라 `앱 → 플랫폼 키 → REST API 키 상세 페이지` 안에 있음. Supabase 공식 문서가 이 변경 반영 안 됨.
+3. **개인 개발자 비즈 앱**: 카카오는 일반 개인 개발자 앱에서는 `account_email` scope가 "권한 없음"으로 잠김. 비즈 앱 권한이 있어야 활성화 가능. 사업자 등록증 없이도 본인 인증으로 신청 가능, 즉시 승인되는 경우 있음 (리팡님 케이스).
+4. **이메일 필수 동의 vs 선택 동의**:
+   - 선택 동의 + Supabase "Allow users without an email" OFF → 사용자가 거부 시 `Error getting user email from external provider`
+   - 선택 동의 + "Allow users without an email" ON → placeholder 이메일로 가입 (`xxx@kakao` 같은 가짜)
+   - **필수 동의** → 거부 자체가 불가, 항상 진짜 이메일 받음 (운영 가장 깔끔)
+5. **이메일 없는 카카오 사용자 (전화번호 가입자)** 는 필수 동의 모드에서 카카오 로그인 자체 차단됨. 이런 사용자는 이메일/PW 또는 Google 가입으로 유도해야 함.
+
+### 외부 콘솔 변경 사항 (Step 3 부록 — 레퍼런스)
+- **Google Cloud Console** 프로젝트 `Route01` 신규 생성. OAuth Consent Screen Testing 모드. Test Users에 `agripha@gmail.com` 등록.
+  - GCP에서 발급한 자격증명: Client ID/Secret 발급. Authorized JavaScript origins = route01.kr·www.route01.kr. Redirect URI = Supabase 콜백.
+- **Kakao Developers** 앱 `Route01` (앱 ID 1445951). 비즈 앱 등록 완료. OpenID Connect ON. 동의항목: 닉네임(선택), 프로필사진(선택), 이메일(필수). REST API 키 = 클라이언트 ID 자리.
+- **Supabase Dashboard**: Site URL `https://route01.kr`, Redirect URLs `https://route01.kr/**`, `http://localhost:5500/**`. Google + Kakao Provider 활성화. Apple Provider OFF. Edge Function `delete-user` 배포 완료.
+
+### 다음 세션 우선순위 (§49 추천)
+
+**1순위 — 약관/개인정보처리방침 정적 페이지 + Google OAuth 브랜딩**
+- 분량: 1~2시간
+- 동기: Google OAuth 동의 화면에 supabase.co URL이 큰 글씨로 표시되어 사용자 신뢰 훼손. 베타 런칭 직전 반드시 처리.
+- 내용:
+  - `/terms`, `/privacy` 정적 페이지 추가 (R01_TERMS 모달 컨텐츠 재활용)
+  - Cloudflare Pages routing 추가
+  - Google Cloud Console에 로고 + privacy/terms URL 등록
+  - 도메인 검증 (Search Console)
+
+**2순위 — 마이페이지 + 비밀번호 변경 모달 디자인 리뉴얼**
+- §47에서 식별된 디자인 트랙. §48 검증 중에도 리팡님이 다시 언급
+- DESIGN.md에 사양 정리 후 작업
+
+**3순위 — 토스페이먼츠 결제 연동 + TEMP 코드 정리**
+- 4곳의 TEMP(결제 백엔드 도입 시 제거) 마커 (line 247, 344, 6450, 6484)
+- §47에서 결정된 "방향 A"의 결제 부분
+- 분량 큼 — 한 세션 전체
+
+**그 외 메모리 트랙**:
+- Naver Edge Function bridge (베타 후 수요 보고 결정)
+- Apple 로그인 활성화 (글로벌 런칭 시점)
+- 카카오 비즈 앱 → 정식 사업자 인증 전환 (사업자 등록 시)
+
+### §48 진짜 진짜 최종 — 5 커밋, 캐시 버스터 v33 → v37
+| 커밋 | 단계 | 캐시 버스터 |
+|---|---|---|
+| `aca63c4` | Step 1 — submitPwChange Supabase | v33 |
+| `3ea4e1f` | Step 2 — Edge Function + submitWithdraw | v34 |
+| `aa8e2f7` | Step 3 — Supabase OAuth + Apple 추가 + Naver 비활성 | v35 |
+| `1af8b0e` | Step 4 — Auth0 잔재 일괄 정리 | v36 |
+| (마감) | 세션 마감 정리 + CONTEXT.md §48 | v37 |
+
+§47에서 "다음 세션 첫 작업으로 잡혔던" `submitPwChange/forgotPw/submitWithdraw` Supabase 마이그레이션 완수. 동시에 §44 시점부터 일부 마이그레이션돼 있던 인증 시스템을 Supabase로 100% 통일. Auth0 SDK·모달·헬퍼·옛 r01_accs 시스템 모두 제거. 인증 트랙 종결.
