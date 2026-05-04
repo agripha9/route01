@@ -1,3 +1,8 @@
+# 정적 약관/개인정보처리방침 — 깔끔한 URL (확장자 없는 경로)
+# Google OAuth Branding 등 외부 등록 URL은 이 형태를 사용
+/terms      /terms.html      200
+/privacy    /privacy.html    200
+
 # 과거에 공유된 /nachim_v3.html 및 /nachim_v3 링크의 하위 호환
 # (파일명이 index.html로 변경되었음 — 2026-04-24 URL 정리)
 # 새 방문자는 route01.kr 루트(index.html)로 바로 접근하므로 별도 규칙 불필요.
